@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0f766e"/>
+  <g fill="#ffffff">
+    <path d="M180 96c-8 0-14 6-14 14v60l-38 38c-19 19-19 51 0 70l6 6-70 70c-11 11-11 29 0 40l16 16c11 11 29 11 40 0l70-70 6 6c19 19 51 19 70 0l38-38h60c8 0 14-6 14-14v-56c0-8-6-14-14-14h-56l-84-84v-56c0-8-6-14-14-14h-30z"/>
+  </g>
+  <text x="256" y="460" text-anchor="middle" font-family="Arial, sans-serif" font-size="56" font-weight="700" fill="#ffffff">HGP</text>
+</svg>
