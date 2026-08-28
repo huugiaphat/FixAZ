@@ -17,6 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { UploadAnh } from "@/components/upload-anh";
 import { formatVND } from "@/lib/format";
@@ -36,6 +37,7 @@ export function TabPhatSinh({ maDon, danhSach, bangGiaDichVu }: { maDon: string;
   const [vatTuList, setVatTuList] = useState<VatTu[]>([]);
   const [dsDangChon, setDsDangChon] = useState<HangMucPhatSinhDangChon[]>([]);
   const [dangThemNhieu, setDangThemNhieu] = useState(false);
+  const [loaiLoc, setLoaiLoc] = useState<"Dịch vụ" | "Vật tư">("Dịch vụ");
   const supabase = createClient();
 
   useEffect(() => {
@@ -48,10 +50,13 @@ export function TabPhatSinh({ maDon, danhSach, bangGiaDichVu }: { maDon: string;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const dsGoiY = [
-    ...vatTuList.map((v) => ({ ma: v.ma_vt, ten: v.ten, nhom: "Vật tư", gia: v.gia_ban, giaGoiY: formatVND(v.gia_ban) })),
-    ...bangGiaDichVu.map((d) => ({ ma: d.ma_dv, ten: d.ten_dich_vu, nhom: "Dịch vụ", gia: 0, giaGoiY: d.gia_tham_khao ?? "Chưa có giá tham khảo" })),
-  ];
+  useEffect(() => {
+    setDsDangChon([]);
+  }, [loaiLoc]);
+
+  const dsGoiY = loaiLoc === "Vật tư"
+    ? vatTuList.map((v) => ({ ma: v.ma_vt, ten: v.ten, gia: v.gia_ban, giaGoiY: formatVND(v.gia_ban) }))
+    : bangGiaDichVu.map((d) => ({ ma: d.ma_dv, ten: d.ten_dich_vu, gia: 0, giaGoiY: d.gia_tham_khao ?? "Chưa có giá tham khảo" }));
 
   function toggleChon(item: { ma: string; ten: string; gia: number }) {
     setDsDangChon((ds) => (ds.some((d) => d.ma === item.ma) ? ds.filter((d) => d.ma !== item.ma) : [...ds, { ma: item.ma, ten: item.ten, gia: item.gia }]));
@@ -174,21 +179,48 @@ export function TabPhatSinh({ maDon, danhSach, bangGiaDichVu }: { maDon: string;
       )}
 
       <Card>
-        <CardContent className="pt-6">
-          <p className="mb-3 font-medium">Ghi nhận phát sinh mới</p>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <CardContent className="space-y-6 pt-6">
+          <div className="space-y-4">
+            <p className="font-medium">Ghi nhận phát sinh mới</p>
             <div className="space-y-2">
-              <Label>Hạng mục phát sinh *</Label>
+              <Label htmlFor="nguyen_nhan">Nguyên nhân *</Label>
+              <Textarea id="nguyen_nhan" rows={2} {...register("nguyen_nhan")} />
+              {errors.nguyen_nhan ? <p className="text-sm text-destructive">{errors.nguyen_nhan.message}</p> : null}
+            </div>
+            <div className="space-y-2">
+              <Label>Ảnh minh chứng</Label>
+              <UploadAnh urls={anh} onChange={setAnh} thuMuc="phat-sinh" />
+            </div>
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox checked={watch("truong_hop_khan_cap") ?? false} onCheckedChange={(v) => setValue("truong_hop_khan_cap", v === true)} />
+              Trường hợp khẩn cấp an toàn (ngoại lệ nguyên tắc 2/3 — không cần chờ khách xác nhận trước khi làm)
+            </label>
+          </div>
+
+          <div className="space-y-4 border-t pt-6">
+            <p className="font-medium">Thêm từ danh sách có sẵn</p>
+            <div className="space-y-2">
+              <Label>Loại *</Label>
+              <Select value={loaiLoc} onValueChange={(v) => setLoaiLoc(v as "Dịch vụ" | "Vật tư")}>
+                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Dịch vụ">Dịch vụ</SelectItem>
+                  <SelectItem value="Vật tư">Vật tư</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Tên hạng mục</Label>
               <Popover open={openChon} onOpenChange={setOpenChon}>
                 <PopoverTrigger render={<Button type="button" variant="outline" className="w-full justify-between font-normal" />}>
-                  {dsDangChon.length > 0 ? `Đã chọn ${dsDangChon.length} hạng mục` : "Chọn từ vật tư/dịch vụ có sẵn (có thể chọn nhiều)"}
+                  {dsDangChon.length > 0 ? `Đã chọn ${dsDangChon.length} ${loaiLoc.toLowerCase()}` : `Chọn ${loaiLoc.toLowerCase()} (có thể chọn nhiều)`}
                   <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
                 </PopoverTrigger>
                 <PopoverContent className="w-96 p-0">
                   <Command>
-                    <CommandInput placeholder="Tìm vật tư/dịch vụ…" />
+                    <CommandInput placeholder={`Tìm ${loaiLoc.toLowerCase()}…`} />
                     <CommandList>
-                      <CommandEmpty>Không tìm thấy.</CommandEmpty>
+                      <CommandEmpty>Không có {loaiLoc.toLowerCase()} nào.</CommandEmpty>
                       <CommandGroup>
                         {dsGoiY.map((item) => {
                           const daChon = dsDangChon.some((d) => d.ma === item.ma);
@@ -196,7 +228,7 @@ export function TabPhatSinh({ maDon, danhSach, bangGiaDichVu }: { maDon: string;
                             <CommandItem key={item.ma} value={item.ten} data-checked={daChon} onSelect={() => toggleChon(item)}>
                               <div>
                                 <p>{item.ten}</p>
-                                <p className="text-xs text-muted-foreground">{item.nhom} · {item.giaGoiY}</p>
+                                <p className="text-xs text-muted-foreground">{item.giaGoiY}</p>
                               </div>
                             </CommandItem>
                           );
@@ -206,65 +238,50 @@ export function TabPhatSinh({ maDon, danhSach, bangGiaDichVu }: { maDon: string;
                   </Command>
                 </PopoverContent>
               </Popover>
+            </div>
 
-              {dsDangChon.length > 0 ? (
-                <div className="space-y-2 rounded-lg border p-3">
-                  {dsDangChon.map((d) => (
-                    <div key={d.ma} className="flex flex-wrap items-center gap-2 text-sm">
-                      <span className="flex-1 min-w-32 truncate">{d.ten}</span>
-                      <Label htmlFor={`gia_${d.ma}`} className="text-muted-foreground">Chi phí:</Label>
-                      <Input
-                        id={`gia_${d.ma}`}
-                        type="number"
-                        min={0}
-                        step={1000}
-                        value={d.gia}
-                        onChange={(e) => capNhatDongDangChon(d.ma, Number(e.target.value))}
-                        className="w-32"
-                      />
-                      <Button size="icon-sm" variant="ghost" onClick={() => setDsDangChon((ds) => ds.filter((x) => x.ma !== d.ma))}>
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <>
-                  <p className="text-xs text-muted-foreground">Hoặc nhập tay hạng mục khác bên dưới.</p>
-                  <Input id="hang_muc" placeholder="Tên hạng mục phát sinh (nhập tay)" {...register("hang_muc")} />
-                  {errors.hang_muc ? <p className="text-sm text-destructive">{errors.hang_muc.message}</p> : null}
-                </>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="nguyen_nhan">Nguyên nhân *</Label>
-              <Textarea id="nguyen_nhan" rows={2} {...register("nguyen_nhan")} />
-              {errors.nguyen_nhan ? <p className="text-sm text-destructive">{errors.nguyen_nhan.message}</p> : null}
-            </div>
-            {dsDangChon.length === 0 ? (
-              <div className="space-y-2">
-                <Label htmlFor="gia">Chi phí đề xuất *</Label>
-                <Input id="gia" type="number" min={0} step={1000} {...register("gia", { valueAsNumber: true })} />
-                {errors.gia ? <p className="text-sm text-destructive">{errors.gia.message}</p> : null}
+            {dsDangChon.length > 0 ? (
+              <div className="space-y-2 rounded-lg border p-3">
+                {dsDangChon.map((d) => (
+                  <div key={d.ma} className="flex flex-wrap items-center gap-2 text-sm">
+                    <span className="flex-1 min-w-32 truncate">{d.ten}</span>
+                    <Label htmlFor={`gia_${d.ma}`} className="text-muted-foreground">Chi phí:</Label>
+                    <Input
+                      id={`gia_${d.ma}`}
+                      type="number"
+                      min={0}
+                      step={1000}
+                      value={d.gia}
+                      onChange={(e) => capNhatDongDangChon(d.ma, Number(e.target.value))}
+                      className="w-32"
+                    />
+                    <Button size="icon-sm" variant="ghost" onClick={() => setDsDangChon((ds) => ds.filter((x) => x.ma !== d.ma))}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button type="button" disabled={dangThemNhieu} className="w-full" onClick={themNhieuPhatSinh}>
+                  {dangThemNhieu ? "Đang lưu…" : `Ghi nhận ${dsDangChon.length} phát sinh`}
+                </Button>
               </div>
             ) : null}
+          </div>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 border-t pt-6">
+            <p className="font-medium">Hoặc nhập hạng mục khác (tùy chỉnh)</p>
             <div className="space-y-2">
-              <Label>Ảnh minh chứng</Label>
-              <UploadAnh urls={anh} onChange={setAnh} thuMuc="phat-sinh" />
+              <Label htmlFor="hang_muc">Tên hạng mục *</Label>
+              <Input id="hang_muc" {...register("hang_muc")} />
+              {errors.hang_muc ? <p className="text-sm text-destructive">{errors.hang_muc.message}</p> : null}
             </div>
-            <label className="flex items-center gap-2 text-sm">
-              <Checkbox checked={watch("truong_hop_khan_cap") ?? false} onCheckedChange={(v) => setValue("truong_hop_khan_cap", v === true)} />
-              Trường hợp khẩn cấp an toàn (ngoại lệ nguyên tắc 2/3 — không cần chờ khách xác nhận trước khi làm)
-            </label>
-            {dsDangChon.length > 0 ? (
-              <Button type="button" disabled={dangThemNhieu} className="w-full" onClick={themNhieuPhatSinh}>
-                {dangThemNhieu ? "Đang lưu…" : `Ghi nhận ${dsDangChon.length} phát sinh`}
-              </Button>
-            ) : (
-              <Button type="submit" disabled={isSubmitting} className="w-full">
-                {isSubmitting ? "Đang lưu…" : "Ghi nhận phát sinh"}
-              </Button>
-            )}
+            <div className="space-y-2">
+              <Label htmlFor="gia">Chi phí đề xuất *</Label>
+              <Input id="gia" type="number" min={0} step={1000} {...register("gia", { valueAsNumber: true })} />
+              {errors.gia ? <p className="text-sm text-destructive">{errors.gia.message}</p> : null}
+            </div>
+            <Button type="submit" disabled={isSubmitting} className="w-full">
+              {isSubmitting ? "Đang lưu…" : "Ghi nhận phát sinh"}
+            </Button>
           </form>
         </CardContent>
       </Card>
