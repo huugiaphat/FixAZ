@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { NhanVien } from "@/types/database";
@@ -58,10 +59,8 @@ export function AppShell({ nhanVien, children }: { nhanVien: NhanVien; children:
     <div className="flex min-h-screen w-full">
       {/* Sidebar desktop */}
       <aside className="hidden md:flex md:w-64 md:flex-col md:border-r md:bg-muted/20 md:p-4">
-        <div className="flex items-center gap-2 px-2 pb-6">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-orange text-brand-orange-foreground text-sm font-bold">
-            HGP
-          </div>
+        <div className="flex items-center px-2 pb-6">
+          <Image src="/logo.png" alt="Hữu Gia Phát" width={500} height={500} className="h-12 w-12 object-contain" priority />
           <span className="font-semibold">Hữu Gia Phát</span>
         </div>
         <NavLinks pathname={pathname} items={items} />
@@ -84,9 +83,7 @@ export function AppShell({ nhanVien, children }: { nhanVien: NhanVien; children:
               </SheetTrigger>
               <SheetContent side="left" className="w-72 p-4">
                 <SheetTitle className="mb-4 flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-orange text-brand-orange-foreground text-xs font-bold">
-                    HGP
-                  </div>
+                  <Image src="/logo.png" alt="Hữu Gia Phát" width={500} height={500} className="h-9 w-9 object-contain" />
                   Hữu Gia Phát
                 </SheetTitle>
                 <NavLinks pathname={pathname} items={items} />

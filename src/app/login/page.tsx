@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { dangNhapBangSdt } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 
 export default function TrangDangNhap() {
   const router = useRouter();
@@ -36,10 +37,7 @@ export default function TrangDangNhap() {
     <main className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="items-center text-center gap-2">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-orange text-brand-orange-foreground text-xl font-bold">
-            HGP
-          </div>
-          <CardTitle className="text-xl">Hữu Gia Phát</CardTitle>
+          <Image src="/logo.png" alt="Hữu Gia Phát" width={500} height={500} className="h-28 w-28 object-contain" priority />
           <CardDescription>Quản lý dịch vụ sửa chữa điện nước</CardDescription>
         </CardHeader>
         <CardContent>
