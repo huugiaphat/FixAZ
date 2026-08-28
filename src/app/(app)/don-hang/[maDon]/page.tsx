@@ -145,7 +145,7 @@ export default async function ChiTietDonHang({
           <TabDieuPhoi maDon={maDon} danhSach={(dieuPhoi as DieuPhoi[]) ?? []} vaiTro={nv.vai_tro_app} maNvHienTai={nv.ma_nv} />
         </TabsContent>
         <TabsContent value="phat-sinh" className="pt-4">
-          <TabPhatSinh maDon={maDon} danhSach={(phatSinh as PhatSinh[]) ?? []} />
+          <TabPhatSinh maDon={maDon} danhSach={(phatSinh as PhatSinh[]) ?? []} bangGiaDichVu={(bangGia as BangGiaDichVu[]) ?? []} />
         </TabsContent>
         <TabsContent value="nghiem-thu" className="pt-4">
           <TabNghiemThu maDon={maDon} danhSach={(nghiemThu as NghiemThu[]) ?? []} />
