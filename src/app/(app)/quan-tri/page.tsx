@@ -5,6 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { FormNhanVienMoi } from "@/components/quan-tri/form-nhan-vien-moi";
+import { FormSuaNhanVien } from "@/components/quan-tri/form-sua-nhan-vien";
+import { NutXoaNhanVien } from "@/components/quan-tri/nut-xoa-nhan-vien";
 import { NutDoiTrangThaiNv } from "@/components/quan-tri/nut-doi-trang-thai-nv";
 import { FormBangGiaMoi } from "@/components/quan-tri/form-bang-gia-moi";
 import { FormDanhMucMoi } from "@/components/quan-tri/form-danh-muc-moi";
@@ -49,6 +51,7 @@ export default async function TrangQuanTri() {
                     <TableHead>Họ tên</TableHead>
                     <TableHead>Vai trò</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead>Số điện thoại</TableHead>
                     <TableHead>Kỹ năng / Khu vực</TableHead>
                     <TableHead>Trạng thái</TableHead>
                     <TableHead />
@@ -60,11 +63,18 @@ export default async function TrangQuanTri() {
                       <TableCell className="font-medium">{n.ho_ten}</TableCell>
                       <TableCell>{n.vai_tro_app}</TableCell>
                       <TableCell className="text-muted-foreground">{n.email}</TableCell>
+                      <TableCell className="text-muted-foreground">{n.sdt || "—"}</TableCell>
                       <TableCell className="text-muted-foreground">{[n.ky_nang, n.khu_vuc_phu_trach].filter(Boolean).join(" · ") || "—"}</TableCell>
                       <TableCell>
                         <Badge variant={n.trang_thai === "Đang làm" ? "secondary" : "outline"}>{n.trang_thai}</Badge>
                       </TableCell>
-                      <TableCell><NutDoiTrangThaiNv maNv={n.ma_nv} trangThai={n.trang_thai} /></TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <FormSuaNhanVien nhanVien={n} />
+                          <NutDoiTrangThaiNv maNv={n.ma_nv} trangThai={n.trang_thai} />
+                          <NutXoaNhanVien maNv={n.ma_nv} hoTen={n.ho_ten} />
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
