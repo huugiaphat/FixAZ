@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 export function FormNhanVienMoi() {
   const [open, setOpen] = useState(false);
-  const [ketQua, setKetQua] = useState<{ email: string; matKhau: string } | null>(null);
+  const [ketQua, setKetQua] = useState<{ sdt: string; matKhau: string } | null>(null);
   const router = useRouter();
   const {
     register,
@@ -33,7 +33,7 @@ export function FormNhanVienMoi() {
       toast.error(`Không tạo được nhân viên: ${ketQuaTao.loi}`);
       return;
     }
-    setKetQua({ email: values.email, matKhau: ketQuaTao.matKhauTam! });
+    setKetQua({ sdt: values.sdt, matKhau: ketQuaTao.matKhauTam! });
     reset({ vai_tro_app: "Thợ" });
     router.refresh();
   }
@@ -58,7 +58,7 @@ export function FormNhanVienMoi() {
               Gửi thông tin đăng nhập tạm thời này cho nhân viên qua kênh riêng tư (không gửi qua nơi công khai). Nhân viên nên đổi mật khẩu sau lần đăng nhập đầu.
             </p>
             <div className="space-y-2 rounded-lg border bg-muted/40 p-3 text-sm">
-              <p><span className="text-muted-foreground">Email:</span> <span className="font-medium">{ketQua.email}</span></p>
+              <p><span className="text-muted-foreground">Số điện thoại đăng nhập:</span> <span className="font-medium">{ketQua.sdt}</span></p>
               <p className="flex items-center gap-2">
                 <span className="text-muted-foreground">Mật khẩu tạm:</span>
                 <span className="font-mono font-medium">{ketQua.matKhau}</span>
@@ -109,8 +109,9 @@ export function FormNhanVienMoi() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="sdt">Số điện thoại</Label>
-                  <Input id="sdt" {...register("sdt")} />
+                  <Label htmlFor="sdt">Số điện thoại *</Label>
+                  <Input id="sdt" inputMode="tel" {...register("sdt")} />
+                  {errors.sdt ? <p className="text-sm text-destructive">{errors.sdt.message}</p> : null}
                 </div>
                 <div className="space-y-2">
                   <Label>Kỹ năng</Label>

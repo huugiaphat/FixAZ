@@ -1,5 +1,12 @@
 // Định dạng tiền tệ/ngày giờ theo chuẩn Việt Nam (Mục 9: "680.000 đ").
 
+// Chuẩn hoá số điện thoại về dạng chỉ gồm chữ số — dùng khi lưu SĐT
+// nhân viên và khi tra cứu lúc đăng nhập, để "091 234 5678" và
+// "0912345678" được coi là cùng 1 số.
+export function chuanHoaSdt(value: string): string {
+  return value.replace(/\D/g, "");
+}
+
 const vndFormatter = new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 0 });
 
 export function formatVND(value: number | null | undefined): string {

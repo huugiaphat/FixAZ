@@ -8,7 +8,7 @@ export const nhanVienSchema = z.object({
   email: z.string().trim().email("Email không hợp lệ"),
   chuc_vu: z.string().trim().min(1, "Vui lòng nhập/chọn chức vụ"),
   vai_tro_app: z.enum(VAI_TRO),
-  sdt: z.string().trim().optional(),
+  sdt: z.string().trim().min(9, "Số điện thoại không hợp lệ").max(15),
   ky_nang: z.enum(KY_NANG).optional(),
   khu_vuc_phu_trach: z.string().trim().optional(),
 });

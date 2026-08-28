@@ -2,6 +2,7 @@
 
 import { requireNhanVien } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { chuanHoaSdt } from "@/lib/format";
 import type { VaiTro, DichVu, TrangThaiNhanVien } from "@/types/database";
 
 interface TaoNhanVienInput {
@@ -9,7 +10,7 @@ interface TaoNhanVienInput {
   email: string;
   chuc_vu: string;
   vai_tro_app: VaiTro;
-  sdt?: string;
+  sdt: string;
   ky_nang?: DichVu;
   khu_vuc_phu_trach?: string;
 }
@@ -41,7 +42,7 @@ export async function taoNhanVien(input: TaoNhanVienInput): Promise<{ ok: boolea
     email: input.email,
     chuc_vu: input.chuc_vu,
     vai_tro_app: input.vai_tro_app,
-    sdt: input.sdt || null,
+    sdt: chuanHoaSdt(input.sdt),
     ky_nang: input.ky_nang || null,
     khu_vuc_phu_trach: input.khu_vuc_phu_trach || null,
     trang_thai: "Đang làm" satisfies TrangThaiNhanVien,
@@ -49,7 +50,10 @@ export async function taoNhanVien(input: TaoNhanVienInput): Promise<{ ok: boolea
 
   if (errNv) {
     await admin.auth.admin.deleteUser(authUser.user.id);
-    return { ok: false, loi: errNv.message };
+    const loi = errNv.code === "23505" && errNv.message.includes("nhan_vien_sdt_unique")
+      ? "Số điện thoại này đã được dùng cho 1 nhân viên khác."
+      : errNv.message;
+    return { ok: false, loi };
   }
 
   return { ok: true, matKhauTam };

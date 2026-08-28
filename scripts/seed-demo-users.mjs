@@ -31,11 +31,11 @@ const admin = createClient(url, serviceKey, { auth: { autoRefreshToken: false, p
 const MAT_KHAU_DEMO = "HgpDemo@123";
 
 const TAI_KHOAN_DEMO = [
-  { email: "quanly@demo.huugiaphat.vn", ho_ten: "Nguyễn Văn Quản", chuc_vu: "Giám đốc", vai_tro_app: "Quản lý" },
-  { email: "dieuphoi@demo.huugiaphat.vn", ho_ten: "Trần Thị Điều", chuc_vu: "Điều phối viên", vai_tro_app: "CSKH-Điều phối" },
-  { email: "tho@demo.huugiaphat.vn", ho_ten: "Lê Văn Thợ", chuc_vu: "Thợ chính", vai_tro_app: "Thợ", ky_nang: "Điện & Nước" },
-  { email: "ketoan@demo.huugiaphat.vn", ho_ten: "Phạm Thị Kế", chuc_vu: "Kế toán/Đối soát", vai_tro_app: "Kế toán" },
-  { email: "kho@demo.huugiaphat.vn", ho_ten: "Hoàng Văn Kho", chuc_vu: "Kho/Mua hàng", vai_tro_app: "Kho" },
+  { email: "quanly@demo.huugiaphat.vn", sdt: "0901000001", ho_ten: "Nguyễn Văn Quản", chuc_vu: "Giám đốc", vai_tro_app: "Quản lý" },
+  { email: "dieuphoi@demo.huugiaphat.vn", sdt: "0901000002", ho_ten: "Trần Thị Điều", chuc_vu: "Điều phối viên", vai_tro_app: "CSKH-Điều phối" },
+  { email: "tho@demo.huugiaphat.vn", sdt: "0901000003", ho_ten: "Lê Văn Thợ", chuc_vu: "Thợ chính", vai_tro_app: "Thợ", ky_nang: "Điện & Nước" },
+  { email: "ketoan@demo.huugiaphat.vn", sdt: "0901000004", ho_ten: "Phạm Thị Kế", chuc_vu: "Kế toán/Đối soát", vai_tro_app: "Kế toán" },
+  { email: "kho@demo.huugiaphat.vn", sdt: "0901000005", ho_ten: "Hoàng Văn Kho", chuc_vu: "Kho/Mua hàng", vai_tro_app: "Kho" },
 ];
 
 for (const tk of TAI_KHOAN_DEMO) {
@@ -66,6 +66,7 @@ for (const tk of TAI_KHOAN_DEMO) {
       chuc_vu: tk.chuc_vu,
       vai_tro_app: tk.vai_tro_app,
       email: tk.email,
+      sdt: tk.sdt,
       ky_nang: tk.ky_nang ?? null,
       trang_thai: "Đang làm",
     },
@@ -75,4 +76,4 @@ for (const tk of TAI_KHOAN_DEMO) {
   else console.log(`✓ Đã liên kết hồ sơ nhân_vien: ${tk.email} (${tk.vai_tro_app})`);
 }
 
-console.log(`\nHoàn tất. Mật khẩu demo cho cả 5 tài khoản: ${MAT_KHAU_DEMO}`);
+console.log(`\nHoàn tất. Đăng nhập bằng SĐT (090100000<1-5>), mật khẩu demo cho cả 5 tài khoản: ${MAT_KHAU_DEMO}`);

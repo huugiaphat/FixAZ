@@ -1,4 +1,4 @@
--- FILE GỘP TỰ ĐỘNG từ supabase/migrations/0001..0014 theo đúng thứ tự — dán 1 lần vào SQL Editor rồi Run.
+-- FILE GỘP TỰ ĐỘNG từ supabase/migrations/0001..0015 theo đúng thứ tự — dán 1 lần vào SQL Editor rồi Run.
 
 -- =====================================================================
 -- 0001: Extensions & Enum types
@@ -1469,3 +1469,11 @@ alter view v_don_hang set (security_invoker = true);
 alter view v_vat_tu set (security_invoker = true);
 alter view v_kpi_nhan_vien set (security_invoker = true);
 alter view v_tong_hop_dashboard set (security_invoker = true);
+
+-- =====================================================================
+-- 0015: Số điện thoại nhân viên phải duy nhất — dùng để đăng nhập
+-- thay cho email (Postgres UNIQUE cho phép nhiều dòng NULL, không cần
+-- backfill dữ liệu cũ).
+-- =====================================================================
+
+alter table nhan_vien add constraint nhan_vien_sdt_unique unique (sdt);

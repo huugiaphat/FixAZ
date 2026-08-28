@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { dangNhapBangSdt } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 export default function TrangDangNhap() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [sdt, setSdt] = useState("");
   const [matKhau, setMatKhau] = useState("");
   const [loi, setLoi] = useState<string | undefined>();
   const [dangXuLy, setDangXuLy] = useState(false);
@@ -20,11 +20,10 @@ export default function TrangDangNhap() {
     setDangXuLy(true);
     setLoi(undefined);
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password: matKhau });
+    const ketQua = await dangNhapBangSdt(sdt, matKhau);
 
-    if (error) {
-      setLoi("Email hoặc mật khẩu không đúng.");
+    if (!ketQua.ok) {
+      setLoi(ketQua.loi);
       setDangXuLy(false);
       return;
     }
@@ -46,15 +45,16 @@ export default function TrangDangNhap() {
         <CardContent>
           <form onSubmit={xuLyDangNhap} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email nhân viên</Label>
+              <Label htmlFor="sdt">Số điện thoại</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="ten@huugiaphat.vn"
+                id="sdt"
+                type="tel"
+                inputMode="tel"
+                placeholder="09xxxxxxxx"
                 required
                 autoComplete="username"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={sdt}
+                onChange={(e) => setSdt(e.target.value)}
               />
             </div>
             <div className="space-y-2">
