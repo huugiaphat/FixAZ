@@ -1,0 +1,15 @@
+name: Cron thông báo tự động
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Gọi endpoint kiểm tra thông báo
+        run: |
+          curl -sf -X GET "https://huu-gia-phat-app.vercel.app/api/notifications/check" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
