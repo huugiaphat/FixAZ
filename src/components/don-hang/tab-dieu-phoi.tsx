@@ -139,7 +139,7 @@ export function TabDieuPhoi({
                 <SelectContent>
                   {thoList.map((t) => (
                     <SelectItem key={t.ma_nv} value={t.ma_nv}>
-                      {t.ho_ten} — {t.ky_nang ?? "?"} — {t.khu_vuc_phu_trach ?? "?"}
+                      {t.ho_ten} — {t.ky_nang.length ? t.ky_nang.join(", ") : "?"} — {t.khu_vuc_phu_trach ?? "?"}
                     </SelectItem>
                   ))}
                 </SelectContent>

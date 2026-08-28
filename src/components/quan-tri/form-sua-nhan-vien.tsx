@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { NhanVien } from "@/types/database";
 
 export function FormSuaNhanVien({ nhanVien }: { nhanVien: NhanVien }) {
@@ -32,7 +33,7 @@ export function FormSuaNhanVien({ nhanVien }: { nhanVien: NhanVien }) {
       chuc_vu: nhanVien.chuc_vu,
       vai_tro_app: nhanVien.vai_tro_app,
       sdt: nhanVien.sdt ?? "",
-      ky_nang: nhanVien.ky_nang ?? undefined,
+      ky_nang: nhanVien.ky_nang ?? [],
       khu_vuc_phu_trach: nhanVien.khu_vuc_phu_trach ?? "",
     },
   });
@@ -86,22 +87,29 @@ export function FormSuaNhanVien({ nhanVien }: { nhanVien: NhanVien }) {
               </Select>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="sua_sdt">Số điện thoại *</Label>
-              <Input id="sua_sdt" inputMode="tel" {...register("sdt")} />
-              {errors.sdt ? <p className="text-sm text-destructive">{errors.sdt.message}</p> : null}
-            </div>
-            <div className="space-y-2">
-              <Label>Kỹ năng</Label>
-              <Select value={watch("ky_nang")} onValueChange={(v) => setValue("ky_nang", v as NhanVienFormValues["ky_nang"])}>
-                <SelectTrigger className="w-full"><SelectValue placeholder="Điện/Nước" /></SelectTrigger>
-                <SelectContent>
-                  {KY_NANG.map((k) => (
-                    <SelectItem key={k} value={k}>{k}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <div className="space-y-2">
+            <Label htmlFor="sua_sdt">Số điện thoại *</Label>
+            <Input id="sua_sdt" inputMode="tel" {...register("sdt")} />
+            {errors.sdt ? <p className="text-sm text-destructive">{errors.sdt.message}</p> : null}
+          </div>
+          <div className="space-y-2">
+            <Label>Kỹ năng</Label>
+            <div className="grid grid-cols-2 gap-2 rounded-lg border p-3">
+              {KY_NANG.map((k) => {
+                const daChon = (watch("ky_nang") ?? []).includes(k);
+                return (
+                  <label key={k} className="flex items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={daChon}
+                      onCheckedChange={(checked) => {
+                        const hienTai = watch("ky_nang") ?? [];
+                        setValue("ky_nang", checked ? [...hienTai, k] : hienTai.filter((x) => x !== k));
+                      }}
+                    />
+                    {k}
+                  </label>
+                );
+              })}
             </div>
           </div>
           <div className="space-y-2">

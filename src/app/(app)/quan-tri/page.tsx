@@ -65,7 +65,7 @@ export default async function TrangQuanTri() {
                       <TableCell>{n.vai_tro_app}</TableCell>
                       <TableCell className="text-muted-foreground">{n.email}</TableCell>
                       <TableCell className="text-muted-foreground">{n.sdt || "—"}</TableCell>
-                      <TableCell className="text-muted-foreground">{[n.ky_nang, n.khu_vuc_phu_trach].filter(Boolean).join(" · ") || "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{[...n.ky_nang, n.khu_vuc_phu_trach].filter(Boolean).join(" · ") || "—"}</TableCell>
                       <TableCell>
                         <Badge variant={n.trang_thai === "Đang làm" ? "secondary" : "outline"}>{n.trang_thai}</Badge>
                       </TableCell>

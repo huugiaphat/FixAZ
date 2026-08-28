@@ -7,6 +7,7 @@ export type VaiTro = "Quản lý" | "CSKH-Điều phối" | "Thợ" | "Kế toá
 export type TrangThaiNhanVien = "Đang làm" | "Nghỉ phép" | "Đã nghỉ việc";
 export type NguonKhachHang = "Điện thoại/Hotline" | "Zalo/Facebook" | "App/Website" | "Khách quen giới thiệu";
 export type DichVu = "Điện" | "Nước" | "Điện & Nước";
+export type KyNangNhanVien = "Tổng hợp" | "Điện nước" | "Hàn" | "Xây" | "Sơn" | "Học việc";
 export type NhomDichVu = "Điện" | "Nước";
 export type UuTien = "P1-Khẩn cấp" | "P2-Trong ngày" | "P3-Đặt lịch";
 export type TrangThaiDon =
@@ -43,7 +44,7 @@ export interface NhanVien {
   vai_tro_app: VaiTro;
   email: string;
   sdt: string | null;
-  ky_nang: DichVu | null;
+  ky_nang: KyNangNhanVien[];
   khu_vuc_phu_trach: string | null;
   trang_thai: TrangThaiNhanVien;
   ngay_vao_lam: string | null;

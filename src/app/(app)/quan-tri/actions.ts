@@ -3,7 +3,7 @@
 import { requireNhanVien } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { chuanHoaSdt } from "@/lib/format";
-import type { VaiTro, DichVu, TrangThaiNhanVien } from "@/types/database";
+import type { VaiTro, KyNangNhanVien, TrangThaiNhanVien } from "@/types/database";
 
 function sinhMatKhauTam(): string {
   return `Hgp${Math.random().toString(36).slice(2, 8)}!${Math.floor(Math.random() * 100)}`;
@@ -15,7 +15,7 @@ interface TaoNhanVienInput {
   chuc_vu: string;
   vai_tro_app: VaiTro;
   sdt: string;
-  ky_nang?: DichVu;
+  ky_nang?: KyNangNhanVien[];
   khu_vuc_phu_trach?: string;
 }
 
@@ -47,7 +47,7 @@ export async function taoNhanVien(input: TaoNhanVienInput): Promise<{ ok: boolea
     chuc_vu: input.chuc_vu,
     vai_tro_app: input.vai_tro_app,
     sdt: chuanHoaSdt(input.sdt),
-    ky_nang: input.ky_nang || null,
+    ky_nang: input.ky_nang ?? [],
     khu_vuc_phu_trach: input.khu_vuc_phu_trach || null,
     trang_thai: "Đang làm" satisfies TrangThaiNhanVien,
   });
@@ -69,7 +69,7 @@ interface SuaNhanVienInput {
   chuc_vu: string;
   vai_tro_app: VaiTro;
   sdt: string;
-  ky_nang?: DichVu;
+  ky_nang?: KyNangNhanVien[];
   khu_vuc_phu_trach?: string;
 }
 
@@ -102,7 +102,7 @@ export async function suaNhanVien(maNv: string, input: SuaNhanVienInput): Promis
       chuc_vu: input.chuc_vu,
       vai_tro_app: input.vai_tro_app,
       sdt: chuanHoaSdt(input.sdt),
-      ky_nang: input.ky_nang || null,
+      ky_nang: input.ky_nang ?? [],
       khu_vuc_phu_trach: input.khu_vuc_phu_trach || null,
     })
     .eq("ma_nv", maNv);

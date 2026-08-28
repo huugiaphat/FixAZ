@@ -33,7 +33,7 @@ const MAT_KHAU_DEMO = "HgpDemo@123";
 const TAI_KHOAN_DEMO = [
   { email: "quanly@demo.huugiaphat.vn", sdt: "0901000001", ho_ten: "Nguyễn Văn Quản", chuc_vu: "Giám đốc", vai_tro_app: "Quản lý" },
   { email: "dieuphoi@demo.huugiaphat.vn", sdt: "0901000002", ho_ten: "Trần Thị Điều", chuc_vu: "Điều phối viên", vai_tro_app: "CSKH-Điều phối" },
-  { email: "tho@demo.huugiaphat.vn", sdt: "0901000003", ho_ten: "Lê Văn Thợ", chuc_vu: "Thợ chính", vai_tro_app: "Thợ", ky_nang: "Điện & Nước" },
+  { email: "tho@demo.huugiaphat.vn", sdt: "0901000003", ho_ten: "Lê Văn Thợ", chuc_vu: "Thợ chính", vai_tro_app: "Thợ", ky_nang: ["Tổng hợp", "Điện nước"] },
   { email: "ketoan@demo.huugiaphat.vn", sdt: "0901000004", ho_ten: "Phạm Thị Kế", chuc_vu: "Kế toán/Đối soát", vai_tro_app: "Kế toán" },
   { email: "kho@demo.huugiaphat.vn", sdt: "0901000005", ho_ten: "Hoàng Văn Kho", chuc_vu: "Kho/Mua hàng", vai_tro_app: "Kho" },
 ];
@@ -67,7 +67,7 @@ for (const tk of TAI_KHOAN_DEMO) {
       vai_tro_app: tk.vai_tro_app,
       email: tk.email,
       sdt: tk.sdt,
-      ky_nang: tk.ky_nang ?? null,
+      ky_nang: tk.ky_nang ?? [],
       trang_thai: "Đang làm",
     },
     { onConflict: "email" },
