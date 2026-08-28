@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
+import { Trash2, ChevronsUpDown, X } from "lucide-react";
 import { chiTietDonSchema, type ChiTietDonFormValues, type ChiTietDonFormInput } from "@/lib/schemas/chi-tiet-don";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,18 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { formatVND } from "@/lib/format";
-import type { ChiTietDonTinhToan, BangGiaDichVu, VaiTro } from "@/types/database";
+import type { ChiTietDonTinhToan, BangGiaDichVu, VaiTro, VatTu } from "@/types/database";
+
+interface HangMucDangChon {
+  ma: string;
+  ten: string;
+  don_vi_tinh: string;
+  so_luong: number;
+  gia_ban: number;
+}
 
 export function TabChiTietDon({
   maDon,
@@ -31,6 +41,10 @@ export function TabChiTietDon({
   const router = useRouter();
   const supabase = createClient();
   const [dangXoa, setDangXoa] = useState<string | null>(null);
+  const [openChon, setOpenChon] = useState(false);
+  const [vatTuList, setVatTuList] = useState<VatTu[]>([]);
+  const [dsDangChon, setDsDangChon] = useState<HangMucDangChon[]>([]);
+  const [dangThemNhieu, setDangThemNhieu] = useState(false);
 
   const {
     register,
@@ -46,13 +60,61 @@ export function TabChiTietDon({
 
   const duocSua = ["Quản lý", "CSKH-Điều phối"].includes(vaiTro);
   const tongCong = danhSach.reduce((s, c) => s + c.thanh_tien, 0);
+  const loaiDangChon = watch("loai");
 
-  function chonTuBangGia(maDv: string | null) {
-    const dv = bangGiaDichVu.find((d) => d.ma_dv === maDv);
-    if (!dv) return;
-    setValue("ten_hang_muc", dv.ten_dich_vu);
-    setValue("don_vi_tinh", dv.don_vi_tinh);
-    setValue("ma_dv_vt", dv.ma_dv);
+  useEffect(() => {
+    if (loaiDangChon !== "Vật tư" || vatTuList.length > 0) return;
+    supabase
+      .from("vat_tu")
+      .select("*")
+      .eq("dang_hoat_dong", true)
+      .order("ten")
+      .then(({ data }) => setVatTuList((data as VatTu[]) ?? []));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaiDangChon]);
+
+  useEffect(() => {
+    setDsDangChon([]);
+  }, [loaiDangChon]);
+
+  const dsGoiY = loaiDangChon === "Vật tư"
+    ? vatTuList.map((v) => ({ ma: v.ma_vt, ten: v.ten, don_vi_tinh: v.don_vi_tinh, gia_ban: v.gia_ban, giaGoiY: formatVND(v.gia_ban) }))
+    : bangGiaDichVu.map((d) => ({ ma: d.ma_dv, ten: d.ten_dich_vu, don_vi_tinh: d.don_vi_tinh, gia_ban: 0, giaGoiY: d.gia_tham_khao ?? "Chưa có giá tham khảo" }));
+
+  function toggleChon(item: { ma: string; ten: string; don_vi_tinh: string; gia_ban: number }) {
+    setDsDangChon((ds) =>
+      ds.some((d) => d.ma === item.ma)
+        ? ds.filter((d) => d.ma !== item.ma)
+        : [...ds, { ...item, so_luong: 1 }],
+    );
+  }
+
+  function capNhatDongDangChon(ma: string, patch: Partial<HangMucDangChon>) {
+    setDsDangChon((ds) => ds.map((d) => (d.ma === ma ? { ...d, ...patch } : d)));
+  }
+
+  async function themNhieuHangMuc() {
+    if (dsDangChon.length === 0) return;
+    setDangThemNhieu(true);
+    const { error } = await supabase.from("chi_tiet_don").insert(
+      dsDangChon.map((d) => ({
+        ma_don: maDon,
+        loai: loaiDangChon,
+        ten_hang_muc: d.ten,
+        don_vi_tinh: d.don_vi_tinh,
+        so_luong: d.so_luong,
+        gia_ban: d.gia_ban,
+        ma_dv_vt: d.ma,
+      })),
+    );
+    setDangThemNhieu(false);
+    if (error) {
+      toast.error(`Không thêm được: ${error.message}`);
+      return;
+    }
+    toast.success(`Đã thêm ${dsDangChon.length} hạng mục`);
+    setDsDangChon([]);
+    router.refresh();
   }
 
   async function onSubmit(values: ChiTietDonFormValues) {
@@ -122,34 +184,87 @@ export function TabChiTietDon({
 
       {duocSua ? (
         <Card>
-          <CardContent className="pt-6">
-            <p className="mb-3 font-medium">Thêm hạng mục</p>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Loại *</Label>
-                  <Select value={watch("loai")} onValueChange={(v) => setValue("loai", v as ChiTietDonFormValues["loai"])}>
-                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Dịch vụ">Dịch vụ</SelectItem>
-                      <SelectItem value="Vật tư">Vật tư</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                {watch("loai") === "Dịch vụ" && bangGiaDichVu.length > 0 ? (
-                  <div className="space-y-2">
-                    <Label>Chọn nhanh từ bảng giá</Label>
-                    <Select onValueChange={chonTuBangGia}>
-                      <SelectTrigger className="w-full"><SelectValue placeholder="Tùy chọn" /></SelectTrigger>
-                      <SelectContent>
-                        {bangGiaDichVu.map((dv) => (
-                          <SelectItem key={dv.ma_dv} value={dv.ma_dv}>{dv.ten_dich_vu}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                ) : null}
+          <CardContent className="space-y-6 pt-6">
+            <div className="space-y-4">
+              <p className="font-medium">Thêm từ danh sách có sẵn</p>
+              <div className="space-y-2">
+                <Label>Loại *</Label>
+                <Select value={watch("loai")} onValueChange={(v) => setValue("loai", v as ChiTietDonFormValues["loai"])}>
+                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Dịch vụ">Dịch vụ</SelectItem>
+                    <SelectItem value="Vật tư">Vật tư</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+              <div className="space-y-2">
+                <Label>Tên hạng mục</Label>
+                <Popover open={openChon} onOpenChange={setOpenChon}>
+                  <PopoverTrigger render={<Button variant="outline" className="w-full justify-between font-normal" />}>
+                    {dsDangChon.length > 0 ? `Đã chọn ${dsDangChon.length} ${loaiDangChon.toLowerCase()}` : `Chọn ${loaiDangChon.toLowerCase()} (có thể chọn nhiều)`}
+                    <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-96 p-0">
+                    <Command>
+                      <CommandInput placeholder={`Tìm ${loaiDangChon.toLowerCase()}…`} />
+                      <CommandList>
+                        <CommandEmpty>Không có {loaiDangChon.toLowerCase()} nào.</CommandEmpty>
+                        <CommandGroup>
+                          {dsGoiY.map((item) => {
+                            const daChon = dsDangChon.some((d) => d.ma === item.ma);
+                            return (
+                              <CommandItem key={item.ma} value={item.ten} data-checked={daChon} onSelect={() => toggleChon(item)}>
+                                <div>
+                                  <p>{item.ten}</p>
+                                  <p className="text-xs text-muted-foreground">{item.don_vi_tinh} · {item.giaGoiY}</p>
+                                </div>
+                              </CommandItem>
+                            );
+                          })}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {dsDangChon.length > 0 ? (
+                <div className="space-y-2 rounded-lg border p-3">
+                  {dsDangChon.map((d) => (
+                    <div key={d.ma} className="flex flex-wrap items-center gap-2 text-sm">
+                      <span className="flex-1 min-w-32 truncate">{d.ten}</span>
+                      <Input
+                        type="number"
+                        min={0}
+                        step="any"
+                        value={d.so_luong}
+                        onChange={(e) => capNhatDongDangChon(d.ma, { so_luong: Number(e.target.value) })}
+                        className="w-20"
+                      />
+                      <span className="text-muted-foreground">{d.don_vi_tinh}</span>
+                      <Input
+                        type="number"
+                        min={0}
+                        step={1000}
+                        value={d.gia_ban}
+                        onChange={(e) => capNhatDongDangChon(d.ma, { gia_ban: Number(e.target.value) })}
+                        className="w-28"
+                      />
+                      <Button size="icon-sm" variant="ghost" onClick={() => setDsDangChon((ds) => ds.filter((x) => x.ma !== d.ma))}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button className="w-full" disabled={dangThemNhieu} onClick={themNhieuHangMuc}>
+                    {dangThemNhieu ? "Đang thêm…" : `Thêm ${dsDangChon.length} hạng mục`}
+                  </Button>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="border-t pt-6">
+            <p className="mb-3 font-medium">Hoặc nhập hạng mục khác (tùy chỉnh)</p>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="ten_hang_muc">Tên hạng mục *</Label>
                 <Input id="ten_hang_muc" {...register("ten_hang_muc")} />
@@ -174,6 +289,7 @@ export function TabChiTietDon({
                 {isSubmitting ? "Đang lưu…" : "Thêm hạng mục"}
               </Button>
             </form>
+            </div>
           </CardContent>
         </Card>
       ) : null}
