@@ -36,7 +36,7 @@ export default function TrangDangNhap() {
     <main className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="items-center text-center gap-2">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground text-xl font-bold">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-orange text-brand-orange-foreground text-xl font-bold">
             HGP
           </div>
           <CardTitle className="text-xl">Hữu Gia Phát</CardTitle>

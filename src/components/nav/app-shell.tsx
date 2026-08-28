@@ -59,7 +59,7 @@ export function AppShell({ nhanVien, children }: { nhanVien: NhanVien; children:
       {/* Sidebar desktop */}
       <aside className="hidden md:flex md:w-64 md:flex-col md:border-r md:bg-muted/20 md:p-4">
         <div className="flex items-center gap-2 px-2 pb-6">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-bold">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-orange text-brand-orange-foreground text-sm font-bold">
             HGP
           </div>
           <span className="font-semibold">Hữu Gia Phát</span>
@@ -84,7 +84,7 @@ export function AppShell({ nhanVien, children }: { nhanVien: NhanVien; children:
               </SheetTrigger>
               <SheetContent side="left" className="w-72 p-4">
                 <SheetTitle className="mb-4 flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-xs font-bold">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-orange text-brand-orange-foreground text-xs font-bold">
                     HGP
                   </div>
                   Hữu Gia Phát
