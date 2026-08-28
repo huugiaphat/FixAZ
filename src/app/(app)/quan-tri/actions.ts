@@ -5,6 +5,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { chuanHoaSdt } from "@/lib/format";
 import type { VaiTro, DichVu, TrangThaiNhanVien } from "@/types/database";
 
+function sinhMatKhauTam(): string {
+  return `Hgp${Math.random().toString(36).slice(2, 8)}!${Math.floor(Math.random() * 100)}`;
+}
+
 interface TaoNhanVienInput {
   ho_ten: string;
   email: string;
@@ -25,7 +29,7 @@ export async function taoNhanVien(input: TaoNhanVienInput): Promise<{ ok: boolea
   void nv;
 
   const admin = createAdminClient();
-  const matKhauTam = `Hgp${Math.random().toString(36).slice(2, 8)}!${Math.floor(Math.random() * 100)}`;
+  const matKhauTam = sinhMatKhauTam();
 
   const { data: authUser, error: errAuth } = await admin.auth.admin.createUser({
     email: input.email,
@@ -137,4 +141,22 @@ export async function xoaNhanVien(maNv: string): Promise<{ ok: boolean; loi?: st
   if (nv.auth_user_id) await admin.auth.admin.deleteUser(nv.auth_user_id);
 
   return { ok: true };
+}
+
+// Quản lý đặt lại mật khẩu giúp nhân viên quên mật khẩu — không có
+// luồng tự khôi phục (app không dùng email cho luồng nghiệp vụ, chỉ
+// đăng nhập bằng SĐT), nên đây là cách duy nhất để lấy lại quyền
+// truy cập, cùng cơ chế với lúc tạo tài khoản mới.
+export async function datLaiMatKhau(maNv: string): Promise<{ ok: boolean; matKhauTam?: string; loi?: string }> {
+  await requireNhanVien(["Quản lý"]);
+
+  const admin = createAdminClient();
+  const { data: nv } = await admin.from("nhan_vien").select("auth_user_id").eq("ma_nv", maNv).single();
+  if (!nv?.auth_user_id) return { ok: false, loi: "Không tìm thấy tài khoản đăng nhập của nhân viên này." };
+
+  const matKhauTam = sinhMatKhauTam();
+  const { error } = await admin.auth.admin.updateUserById(nv.auth_user_id, { password: matKhauTam });
+  if (error) return { ok: false, loi: error.message };
+
+  return { ok: true, matKhauTam };
 }

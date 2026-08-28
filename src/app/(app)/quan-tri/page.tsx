@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { FormNhanVienMoi } from "@/components/quan-tri/form-nhan-vien-moi";
 import { FormSuaNhanVien } from "@/components/quan-tri/form-sua-nhan-vien";
 import { NutXoaNhanVien } from "@/components/quan-tri/nut-xoa-nhan-vien";
+import { NutDatLaiMatKhau } from "@/components/quan-tri/nut-dat-lai-mat-khau";
 import { NutDoiTrangThaiNv } from "@/components/quan-tri/nut-doi-trang-thai-nv";
 import { FormBangGiaMoi } from "@/components/quan-tri/form-bang-gia-moi";
 import { FormDanhMucMoi } from "@/components/quan-tri/form-danh-muc-moi";
@@ -71,6 +72,7 @@ export default async function TrangQuanTri() {
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <FormSuaNhanVien nhanVien={n} />
+                          <NutDatLaiMatKhau maNv={n.ma_nv} hoTen={n.ho_ten} sdt={n.sdt} />
                           <NutDoiTrangThaiNv maNv={n.ma_nv} trangThai={n.trang_thai} />
                           <NutXoaNhanVien maNv={n.ma_nv} hoTen={n.ho_ten} />
                         </div>

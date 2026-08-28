@@ -72,6 +72,9 @@ export default function TrangDangNhap() {
             <Button type="submit" className="w-full h-11 text-base" disabled={dangXuLy}>
               {dangXuLy ? "Đang đăng nhập…" : "Đăng nhập"}
             </Button>
+            <p className="text-center text-sm text-muted-foreground">
+              Quên mật khẩu? Liên hệ Quản lý để được đặt lại.
+            </p>
           </form>
         </CardContent>
       </Card>
