@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const DICH_VU = ["Điện", "Nước", "Điện & Nước"] as const;
+export const DICH_VU = ["Nhà cửa", "Điện", "Nước", "Tổng hợp", "Thiết bị", "Khác"] as const;
 export const UU_TIEN = ["P1-Khẩn cấp", "P2-Trong ngày", "P3-Đặt lịch"] as const;
 
 export const donHangSchema = z.object({

@@ -4,8 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2, Zap, Droplets } from "lucide-react";
-import { yeuCauDichVuSchema, DICH_VU_YEU_CAU, type YeuCauDichVuFormValues } from "@/lib/schemas/yeu-cau-dich-vu";
+import { CheckCircle2 } from "lucide-react";
+import { yeuCauDichVuSchema, DICH_VU_YEU_CAU, ICON_DICH_VU, type YeuCauDichVuFormValues } from "@/lib/schemas/yeu-cau-dich-vu";
 import { guiYeuCauDichVu } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,14 +91,17 @@ export default function TrangYeuCauDichVu() {
               <Select value={watch("dich_vu")} onValueChange={(v) => setValue("dich_vu", v as YeuCauDichVuFormValues["dich_vu"])}>
                 <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {DICH_VU_YEU_CAU.map((dv) => (
-                    <SelectItem key={dv} value={dv}>
-                      <span className="flex items-center gap-2">
-                        {dv === "Nước" ? <Droplets className="h-4 w-4" /> : <Zap className="h-4 w-4" />}
-                        {dv}
-                      </span>
-                    </SelectItem>
-                  ))}
+                  {DICH_VU_YEU_CAU.map((dv) => {
+                    const Icon = ICON_DICH_VU[dv];
+                    return (
+                      <SelectItem key={dv} value={dv}>
+                        <span className="flex items-center gap-2">
+                          <Icon className="h-4 w-4" />
+                          {dv}
+                        </span>
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>

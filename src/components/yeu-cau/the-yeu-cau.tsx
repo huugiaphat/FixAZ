@@ -4,12 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Zap, Droplets, Wrench } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChonDonHang } from "@/components/don-hang/chon-don-hang";
+import { ICON_DICH_VU } from "@/lib/schemas/yeu-cau-dich-vu";
 import { formatDateTime } from "@/lib/format";
 import type { YeuCauDichVu } from "@/types/database";
 
@@ -19,8 +19,6 @@ const MAU_TRANG_THAI: Record<string, string> = {
   "Đã tạo đơn": "bg-emerald-100 text-emerald-700 hover:bg-emerald-100",
   "Đã hủy": "bg-slate-100 text-slate-500 hover:bg-slate-100",
 };
-
-const ICON_DICH_VU = { "Điện": Zap, "Nước": Droplets, "Điện & Nước": Wrench };
 
 export function TheYeuCau({ yeuCau }: { yeuCau: YeuCauDichVu }) {
   const router = useRouter();

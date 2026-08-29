@@ -6,7 +6,7 @@
 export type VaiTro = "Quản lý" | "CSKH-Điều phối" | "Thợ" | "Kế toán" | "Kho";
 export type TrangThaiNhanVien = "Đang làm" | "Nghỉ phép" | "Đã nghỉ việc";
 export type NguonKhachHang = "Điện thoại/Hotline" | "Zalo/Facebook" | "App/Website" | "Khách quen giới thiệu";
-export type DichVu = "Điện" | "Nước" | "Điện & Nước";
+export type DichVu = "Nhà cửa" | "Điện" | "Nước" | "Tổng hợp" | "Thiết bị" | "Khác";
 export type KyNangNhanVien = "Tổng hợp" | "Điện nước" | "Hàn" | "Xây" | "Sơn" | "Học việc";
 export type NhomDichVu = "Điện" | "Nước";
 export type UuTien = "P1-Khẩn cấp" | "P2-Trong ngày" | "P3-Đặt lịch";
