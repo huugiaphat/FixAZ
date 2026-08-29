@@ -9,9 +9,17 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import type { KhachHang } from "@/types/database";
 
-export function ChonKhachHang({ value, onChange }: { value?: string; onChange: (maKh: string, ten: string) => void }) {
+export function ChonKhachHang({
+  value,
+  onChange,
+  tuKhoaGoiY,
+}: {
+  value?: string;
+  onChange: (maKh: string, ten: string) => void;
+  tuKhoaGoiY?: string;
+}) {
   const [open, setOpen] = useState(false);
-  const [tuKhoa, setTuKhoa] = useState("");
+  const [tuKhoa, setTuKhoa] = useState(tuKhoaGoiY ?? "");
   const [ketQua, setKetQua] = useState<KhachHang[]>([]);
   const [daChon, setDaChon] = useState<KhachHang | null>(null);
 

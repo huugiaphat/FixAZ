@@ -16,9 +16,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ChonKhachHang } from "@/components/khach-hang/chon-khach-hang";
 import { UploadAnh } from "@/components/upload-anh";
 
-export function FormDonHangMoi() {
+export function FormDonHangMoi({
+  tuYeuCau,
+}: {
+  tuYeuCau?: { ma_yc: string; ho_ten?: string; sdt?: string; dich_vu?: string; yeu_cau?: string };
+}) {
   const router = useRouter();
   const [anhHienTrang, setAnhHienTrang] = useState<string[]>([]);
+  const dichVuGoiY = DICH_VU.find((d) => d === tuYeuCau?.dich_vu);
   const {
     register,
     handleSubmit,
@@ -27,7 +32,11 @@ export function FormDonHangMoi() {
     formState: { errors, isSubmitting },
   } = useForm<DonHangFormValues>({
     resolver: zodResolver(donHangSchema),
-    defaultValues: { uu_tien: "P2-Trong ngày" },
+    defaultValues: {
+      uu_tien: "P2-Trong ngày",
+      dich_vu: dichVuGoiY,
+      mo_ta_su_co: tuYeuCau?.yeu_cau ?? "",
+    },
   });
 
   async function onSubmit(values: DonHangFormValues) {
@@ -42,6 +51,14 @@ export function FormDonHangMoi() {
       toast.error(`Không tạo được đơn hàng: ${error.message}`);
       return;
     }
+
+    if (tuYeuCau) {
+      await supabase
+        .from("yeu_cau_dich_vu")
+        .update({ trang_thai: "Đã tạo đơn", ma_don: data.ma_don })
+        .eq("ma_yc", tuYeuCau.ma_yc);
+    }
+
     toast.success(`Đã tạo đơn ${data.ma_don}`);
     router.push(`/don-hang/${data.ma_don}`);
     router.refresh();
@@ -49,11 +66,22 @@ export function FormDonHangMoi() {
 
   return (
     <Card>
-      <CardContent className="pt-6">
+      <CardContent className="pt-6 space-y-4">
+        {tuYeuCau ? (
+          <p className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
+            Tạo đơn từ yêu cầu <span className="font-medium text-foreground">{tuYeuCau.ma_yc}</span>
+            {tuYeuCau.ho_ten ? <> — {tuYeuCau.ho_ten}</> : null}
+            {tuYeuCau.sdt ? <> · {tuYeuCau.sdt}</> : null}
+          </p>
+        ) : null}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label>Khách hàng *</Label>
-            <ChonKhachHang value={watch("ma_kh")} onChange={(maKh) => setValue("ma_kh", maKh, { shouldValidate: true })} />
+            <ChonKhachHang
+              value={watch("ma_kh")}
+              onChange={(maKh) => setValue("ma_kh", maKh, { shouldValidate: true })}
+              tuKhoaGoiY={tuYeuCau?.sdt || tuYeuCau?.ho_ten}
+            />
             {errors.ma_kh ? <p className="text-sm text-destructive">{errors.ma_kh.message}</p> : null}
           </div>
 

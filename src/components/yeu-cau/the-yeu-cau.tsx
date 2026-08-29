@@ -8,7 +8,6 @@ import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChonDonHang } from "@/components/don-hang/chon-don-hang";
 import { ICON_DICH_VU } from "@/lib/schemas/yeu-cau-dich-vu";
 import { formatDateTime } from "@/lib/format";
 import type { YeuCauDichVu } from "@/types/database";
@@ -23,8 +22,15 @@ const MAU_TRANG_THAI: Record<string, string> = {
 export function TheYeuCau({ yeuCau }: { yeuCau: YeuCauDichVu }) {
   const router = useRouter();
   const [dangXuLy, setDangXuLy] = useState(false);
-  const [chonDon, setChonDon] = useState(false);
   const IconDichVu = ICON_DICH_VU[yeuCau.dich_vu];
+
+  const urlTaoDon = `/don-hang/moi?${new URLSearchParams({
+    ma_yc: yeuCau.ma_yc,
+    ho_ten: yeuCau.ho_ten,
+    sdt: yeuCau.sdt,
+    dich_vu: yeuCau.dich_vu,
+    yeu_cau: yeuCau.yeu_cau,
+  }).toString()}`;
 
   const daXongViec = yeuCau.trang_thai === "Đã tạo đơn" || yeuCau.trang_thai === "Đã hủy";
 
@@ -38,7 +44,6 @@ export function TheYeuCau({ yeuCau }: { yeuCau: YeuCauDichVu }) {
       return;
     }
     toast.success("Đã cập nhật yêu cầu");
-    setChonDon(false);
     router.refresh();
   }
 
@@ -69,15 +74,9 @@ export function TheYeuCau({ yeuCau }: { yeuCau: YeuCauDichVu }) {
                 Đánh dấu đã liên hệ
               </Button>
             ) : null}
-            {chonDon ? (
-              <div className="w-full max-w-xs">
-                <ChonDonHang onChange={(maDon) => capNhat({ ma_don: maDon, trang_thai: "Đã tạo đơn" })} placeholder="Tìm đơn hàng đã tạo…" />
-              </div>
-            ) : (
-              <Button size="sm" disabled={dangXuLy} onClick={() => setChonDon(true)}>
-                Liên kết đơn hàng đã tạo
-              </Button>
-            )}
+            <Button size="sm" render={<Link href={urlTaoDon} />}>
+              Tạo đơn hàng
+            </Button>
             <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" disabled={dangXuLy} onClick={() => capNhat({ trang_thai: "Đã hủy" })}>
               Hủy yêu cầu
             </Button>
