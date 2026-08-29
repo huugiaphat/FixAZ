@@ -14,10 +14,17 @@ export function formatVND(value: number | null | undefined): string {
   return `${vndFormatter.format(value)} đ`;
 }
 
+// Luôn ghim múi giờ Việt Nam thay vì để Intl tự lấy theo máy đang chạy
+// (server Vercel chạy giờ UTC, trình duyệt người dùng chạy giờ VN) —
+// thiếu dòng này khiến Server Component/Client Component format ra 2
+// chuỗi giờ khác nhau cho cùng 1 thời điểm, gây lỗi hydration mismatch
+// (React #418) và hiển thị sai giờ trên các trang server-render thuần.
+const MUI_GIO_VN = "Asia/Ho_Chi_Minh";
+
 export function formatDate(value: string | Date | null | undefined): string {
   if (!value) return "—";
   const date = typeof value === "string" ? new Date(value) : value;
-  return new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
+  return new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: MUI_GIO_VN }).format(date);
 }
 
 export function formatDateTime(value: string | Date | null | undefined): string {
@@ -29,6 +36,7 @@ export function formatDateTime(value: string | Date | null | undefined): string 
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: MUI_GIO_VN,
   }).format(date);
 }
 
