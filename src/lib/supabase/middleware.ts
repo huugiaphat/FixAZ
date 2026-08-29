@@ -36,7 +36,13 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/manifest.json") ||
     request.nextUrl.pathname.startsWith("/sw.js") ||
     request.nextUrl.pathname.startsWith("/icons") ||
-    request.nextUrl.pathname.startsWith("/api/notifications/check");
+    request.nextUrl.pathname.startsWith("/api/notifications/check") ||
+    // Trang khách quét mã QR gửi yêu cầu dịch vụ — cố ý không cần đăng
+    // nhập (xem src/app/yeu-cau/actions.ts, dùng service role để ghi).
+    // Khớp CHÍNH XÁC "/yeu-cau" — không dùng startsWith vì sẽ vô tình
+    // khớp luôn "/yeu-cau-dich-vu" (trang quản trị nội bộ, vẫn phải
+    // đăng nhập).
+    request.nextUrl.pathname === "/yeu-cau";
 
   if (!user && !isAuthRoute && !isPublicAsset) {
     const url = request.nextUrl.clone();

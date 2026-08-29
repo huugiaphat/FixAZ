@@ -64,7 +64,7 @@ export function NotificationBell({ maNv }: { maNv: string }) {
           danhSach.map((t) => (
             <Link
               key={t.id}
-              href={t.ma_don ? `/don-hang/${t.ma_don}` : t.ma_vt ? "/kho-vat-tu" : "#"}
+              href={t.ma_don ? `/don-hang/${t.ma_don}` : t.ma_yc ? "/yeu-cau-dich-vu" : t.ma_vt ? "/kho-vat-tu" : "#"}
               onClick={() => !t.da_doc && danhDauDaDoc(t.id)}
               className={`block border-b px-3 py-2.5 text-sm last:border-0 hover:bg-muted ${!t.da_doc ? "bg-primary/5" : ""}`}
             >

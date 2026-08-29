@@ -29,12 +29,14 @@ export type TrangThaiBaoHanh = "Mới tạo" | "Đang xử lý" | "Đã đóng";
 export type XepLoaiKpi = "A" | "B" | "C" | "D" | "E";
 export type MucDoKhieuNai = "Thấp" | "Trung bình" | "Cao-Khẩn cấp";
 export type TrangThaiKhieuNai = "Mới" | "Đang xử lý" | "Đã xử lý";
+export type TrangThaiYeuCau = "Mới" | "Đã liên hệ" | "Đã tạo đơn" | "Đã hủy";
 export type LoaiThongBao =
   | "Nhắc xác nhận phát sinh"
   | "Nhắc nộp tiền mặt"
   | "Cảnh báo đơn trễ hẹn"
   | "Nhắc chăm sóc sau sửa"
-  | "Cảnh báo tồn kho thấp";
+  | "Cảnh báo tồn kho thấp"
+  | "Yêu cầu dịch vụ mới";
 
 export interface NhanVien {
   ma_nv: string;
@@ -271,9 +273,22 @@ export interface ThongBao {
   noi_dung: string | null;
   ma_don: string | null;
   ma_vt: string | null;
+  ma_yc: string | null;
   nguoi_nhan: string;
   da_doc: boolean;
   da_gui_push: boolean;
+  created_at: string;
+}
+
+export interface YeuCauDichVu {
+  ma_yc: string;
+  ho_ten: string;
+  dia_chi: string;
+  sdt: string;
+  dich_vu: DichVu;
+  yeu_cau: string;
+  trang_thai: TrangThaiYeuCau;
+  ma_don: string | null;
   created_at: string;
 }
 

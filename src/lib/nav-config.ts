@@ -11,6 +11,7 @@ import {
   Award,
   MessageCircleWarning,
   Settings,
+  Inbox,
   type LucideIcon,
 } from "lucide-react";
 
@@ -28,6 +29,7 @@ export const DANH_SACH_DIEU_HUONG: MucDieuHuong[] = [
   { href: "/khach-hang", nhan: "Khách hàng", icon: Users, vaiTro: ["Quản lý", "CSKH-Điều phối", "Kế toán"] },
   { href: "/don-hang", nhan: "Đơn hàng", icon: ClipboardList, vaiTro: ["Quản lý", "CSKH-Điều phối", "Thợ", "Kế toán"], uuTienMobile: true },
   { href: "/dieu-phoi", nhan: "Điều phối", icon: Route, vaiTro: ["Quản lý", "CSKH-Điều phối"] },
+  { href: "/yeu-cau-dich-vu", nhan: "Yêu cầu dịch vụ", icon: Inbox, vaiTro: ["Quản lý", "CSKH-Điều phối"] },
   { href: "/nghiem-thu", nhan: "Nghiệm thu", icon: ClipboardCheck, vaiTro: ["Thợ"], uuTienMobile: true },
   { href: "/thu-tien", nhan: "Thu tiền", icon: Wallet, vaiTro: ["Quản lý", "Kế toán", "Thợ"], uuTienMobile: true },
   { href: "/kho-vat-tu", nhan: "Kho vật tư", icon: Warehouse, vaiTro: ["Quản lý", "Kho"] },
