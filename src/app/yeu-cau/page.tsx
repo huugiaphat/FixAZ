@@ -57,7 +57,7 @@ export default function TrangYeuCauDichVu() {
       <Card className="w-full max-w-sm">
         <CardHeader className="items-center text-center gap-2">
           <Image src="/logo.png" alt="Hữu Gia Phát" width={500} height={500} className="h-24 w-24 object-contain" priority />
-          <CardDescription>Yêu cầu dịch vụ sửa chữa điện nước</CardDescription>
+          <CardDescription>Kính chào quý khách! Chúng tôi chuyên sửa chữa nhà cửa, điện nước,. Mời quý khách lựa chọn dịch vụ phù hợp!</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
