@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -16,10 +16,28 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChonDonHang } from "@/components/don-hang/chon-don-hang";
+import type { NhanVien } from "@/types/database";
 
-export function FormThuChiMoi() {
+function ngayHomNay(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+export function FormThuChiMoi({ maNvHienTai }: { maNvHienTai: string }) {
   const [open, setOpen] = useState(false);
+  const [nhanVienList, setNhanVienList] = useState<NhanVien[]>([]);
   const router = useRouter();
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase
+      .from("nhan_vien")
+      .select("*")
+      .eq("trang_thai", "Đang làm")
+      .order("ho_ten")
+      .then(({ data }) => setNhanVienList((data as NhanVien[]) ?? []));
+  }, []);
+
   const {
     register,
     handleSubmit,
@@ -29,13 +47,17 @@ export function FormThuChiMoi() {
     formState: { errors, isSubmitting },
   } = useForm<ThuChiFormValues>({
     resolver: zodResolver(thuChiSchema),
-    defaultValues: { loai: "Thu", phuong_thuc: "Tiền mặt" },
+    defaultValues: { loai: "Thu", phuong_thuc: "Tiền mặt", nguoi_tao: maNvHienTai, ngay: ngayHomNay() },
   });
 
   const loai = watch("loai");
 
   async function onSubmit(values: ThuChiFormValues) {
     const supabase = createClient();
+    const [nam, thang, ngay] = values.ngay.split("-").map(Number);
+    const gioHienTai = new Date();
+    const ngayThucTe = new Date(nam, thang - 1, ngay, gioHienTai.getHours(), gioHienTai.getMinutes(), gioHienTai.getSeconds());
+
     const { error } = await supabase.from("thu_chi").insert({
       loai: values.loai,
       ma_don: values.ma_don || null,
@@ -44,6 +66,8 @@ export function FormThuChiMoi() {
       noi_dung_chi: values.loai === "Chi" ? values.noi_dung_chi : null,
       so_tien: values.so_tien,
       phuong_thuc: values.phuong_thuc,
+      nguoi_tao: values.nguoi_tao,
+      ngay: ngayThucTe.toISOString(),
       ghi_chu: values.ghi_chu || null,
     });
     if (error) {
@@ -51,7 +75,7 @@ export function FormThuChiMoi() {
       return;
     }
     toast.success(`Đã ghi nhận khoản ${values.loai.toLowerCase()}`);
-    reset({ loai: "Thu", phuong_thuc: "Tiền mặt" });
+    reset({ loai: "Thu", phuong_thuc: "Tiền mặt", nguoi_tao: maNvHienTai, ngay: ngayHomNay() });
     setOpen(false);
     router.refresh();
   }
@@ -148,6 +172,31 @@ export function FormThuChiMoi() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Người thu chi *</Label>
+              <Select value={watch("nguoi_tao")} onValueChange={(v) => setValue("nguoi_tao", v ?? "", { shouldValidate: true })}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Chọn người thu chi" />
+                </SelectTrigger>
+                <SelectContent>
+                  {nhanVienList.map((n) => (
+                    <SelectItem key={n.ma_nv} value={n.ma_nv}>
+                      {n.ho_ten}
+                      {n.ma_nv === maNvHienTai ? " (Tôi)" : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.nguoi_tao ? <p className="text-sm text-destructive">{errors.nguoi_tao.message}</p> : null}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ngay">Ngày thu chi *</Label>
+              <Input id="ngay" type="date" {...register("ngay")} />
+              {errors.ngay ? <p className="text-sm text-destructive">{errors.ngay.message}</p> : null}
             </div>
           </div>
 

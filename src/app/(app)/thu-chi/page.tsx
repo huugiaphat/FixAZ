@@ -8,20 +8,20 @@ import { Badge } from "@/components/ui/badge";
 import { formatVND, formatDateTime } from "@/lib/format";
 import type { ThuChi } from "@/types/database";
 
-type ThuChiVoiDon = ThuChi & { don_hang: { mo_ta_su_co: string } | null };
+type ThuChiVoiDon = ThuChi & { don_hang: { mo_ta_su_co: string } | null; nhan_vien: { ho_ten: string } | null };
 
 export default async function TrangThuChi({
   searchParams,
 }: {
   searchParams: Promise<{ tu?: string; den?: string; loai?: string }>;
 }) {
-  await requireNhanVien(["Quản lý", "Kế toán"]);
+  const nv = await requireNhanVien(["Quản lý", "Kế toán"]);
   const { tu, den, loai } = await searchParams;
   const supabase = await createClient();
 
   let query = supabase
     .from("thu_chi")
-    .select("*, don_hang(mo_ta_su_co)")
+    .select("*, don_hang(mo_ta_su_co), nhan_vien(ho_ten)")
     .order("ngay", { ascending: false })
     .limit(200);
   if (tu) query = query.gte("ngay", tu);
@@ -38,7 +38,7 @@ export default async function TrangThuChi({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Sổ thu chi</h1>
-        <FormThuChiMoi />
+        <FormThuChiMoi maNvHienTai={nv.ma_nv} />
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -81,6 +81,7 @@ export default async function TrangThuChi({
                   <TableHead>Nội dung</TableHead>
                   <TableHead>Số tiền</TableHead>
                   <TableHead>Phương thức</TableHead>
+                  <TableHead>Người thu chi</TableHead>
                   <TableHead>Ngày</TableHead>
                 </TableRow>
               </TableHeader>
@@ -103,6 +104,7 @@ export default async function TrangThuChi({
                       {tc.loai === "Thu" ? "+" : "-"}{formatVND(tc.so_tien)}
                     </TableCell>
                     <TableCell className="text-muted-foreground">{tc.phuong_thuc}</TableCell>
+                    <TableCell className="text-muted-foreground">{tc.nhan_vien?.ho_ten ?? tc.nguoi_tao}</TableCell>
                     <TableCell className="text-muted-foreground">{formatDateTime(tc.ngay)}</TableCell>
                   </TableRow>
                 ))}

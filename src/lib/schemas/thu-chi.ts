@@ -28,6 +28,8 @@ export const thuChiSchema = z
     noi_dung_chi: z.enum(NOI_DUNG_CHI).optional(),
     so_tien: z.number().positive("Số tiền phải lớn hơn 0"),
     phuong_thuc: z.enum(PHUONG_THUC_THU),
+    nguoi_tao: z.string().min(1, "Chọn người thu chi"),
+    ngay: z.string().min(1, "Chọn ngày thu chi"),
     ghi_chu: z.string().trim().optional(),
   })
   .superRefine((v, ctx) => {
