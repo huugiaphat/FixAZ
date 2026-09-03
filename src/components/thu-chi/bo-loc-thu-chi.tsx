@@ -50,6 +50,7 @@ export function BoLocThuChi({
           defaultValue={tenCongTrinh}
           placeholder="Tìm theo tên công trình…"
           className="w-52"
+          autoComplete="off"
         />
       </div>
       <div className="space-y-1.5">
