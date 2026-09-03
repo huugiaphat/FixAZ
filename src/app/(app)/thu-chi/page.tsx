@@ -80,7 +80,7 @@ export default async function TrangThuChi({
           <Label>Loại</Label>
           <Select name="loai" defaultValue={loai ?? "tat-ca"}>
             <SelectTrigger className="w-36">
-              <SelectValue />
+              <SelectValue>{(v: string) => (v === "Thu" || v === "Chi" ? v : "Tất cả")}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="tat-ca">Tất cả</SelectItem>
