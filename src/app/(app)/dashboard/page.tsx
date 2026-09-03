@@ -14,8 +14,10 @@ import {
   hieuSuatTheoTho,
   demTheoThanhToan,
   phanBoDanhGia,
+  chiTietTheoNoiDungChi,
+  chiTietTheoNoiDungThu,
 } from "@/lib/dashboard-analytics";
-import type { TongHopDashboard, ThuChiTongHop, DonHangTinhToan, NghiemThu, NhanVien } from "@/types/database";
+import type { TongHopDashboard, ThuChiTongHop, DonHangTinhToan, NghiemThu, NhanVien, ThuChi } from "@/types/database";
 import { UserPlus, ClipboardList, ClipboardCheck, Wallet, Coins, CalendarDays, CalendarRange } from "lucide-react";
 
 const MAU_THANH_TRANG_THAI: Record<string, string> = {
@@ -45,17 +47,20 @@ export default async function TrangDashboard() {
   await requireNhanVien(["Quản lý"]);
   const supabase = await createClient();
 
-  const [{ data: tongHop }, { data: khMoiThang }, { data: thuChi }, { data: allDon }, { data: allNghiemThu }, { data: allNv }] =
+  const dauThang = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+
+  const [{ data: tongHop }, { data: khMoiThang }, { data: thuChi }, { data: allDon }, { data: allNghiemThu }, { data: allNv }, { data: thuChiThang }] =
     await Promise.all([
       supabase.from("v_tong_hop_dashboard").select("*").single(),
       supabase
         .from("khach_hang")
         .select("ma_kh", { count: "exact", head: true })
-        .gte("ngay_tao", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
+        .gte("ngay_tao", dauThang),
       supabase.from("v_thu_chi_tong_hop").select("*").single(),
       supabase.from("v_don_hang").select("*").order("ngay_tiep_nhan", { ascending: false }).limit(1000),
       supabase.from("nghiem_thu").select("ma_don, diem_danh_gia"),
       supabase.from("nhan_vien").select("ma_nv, ho_ten"),
+      supabase.from("thu_chi").select("loai, noi_dung_thu, noi_dung_chi, so_tien").gte("ngay", dauThang),
     ]);
 
   const d = tongHop as TongHopDashboard | null;
@@ -64,6 +69,7 @@ export default async function TrangDashboard() {
   const donList = (allDon as DonHangTinhToan[]) ?? [];
   const nghiemThuList = (allNghiemThu as Pick<NghiemThu, "ma_don" | "diem_danh_gia">[]) ?? [];
   const nvMap = new Map(((allNv as Pick<NhanVien, "ma_nv" | "ho_ten">[]) ?? []).map((n) => [n.ma_nv, n.ho_ten]));
+  const thuChiThangList = (thuChiThang as Pick<ThuChi, "loai" | "noi_dung_thu" | "noi_dung_chi" | "so_tien">[]) ?? [];
 
   if (!d) {
     return <p className="text-sm text-muted-foreground">Chưa có dữ liệu để hiển thị.</p>;
@@ -78,6 +84,8 @@ export default async function TrangDashboard() {
   const thanhToan = demTheoThanhToan(donList);
   const tongDonThanhToan = Object.values(thanhToan).reduce((s, v) => s + v, 0);
   const danhGia = phanBoDanhGia(nghiemThuList as NghiemThu[]);
+  const chiTietChi = chiTietTheoNoiDungChi(thuChiThangList);
+  const chiTietThu = chiTietTheoNoiDungThu(thuChiThangList);
 
   return (
     <div className="space-y-8">
@@ -126,6 +134,26 @@ export default async function TrangDashboard() {
           </div>
         </section>
       ) : null}
+
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Chi tiết thu chi</h2>
+        <div className="grid gap-3 lg:grid-cols-2">
+          <Card>
+            <CardContent className="space-y-1 pt-6">
+              <p className="font-medium">Chi tiết chi</p>
+              <p className="mb-3 text-xs text-muted-foreground">Theo nội dung chi — tháng này</p>
+              <ThanhNgang items={chiTietChi.map((t) => ({ nhan: t.nhan, giaTri: t.soTien, hienThi: formatVND(t.soTien) }))} mauMacDinh="bg-destructive" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="space-y-1 pt-6">
+              <p className="font-medium">Chi tiết thu</p>
+              <p className="mb-3 text-xs text-muted-foreground">Theo nội dung thu — tháng này</p>
+              <ThanhNgang items={chiTietThu.map((t) => ({ nhan: t.nhan, giaTri: t.soTien, hienThi: formatVND(t.soTien) }))} mauMacDinh="bg-emerald-500" />
+            </CardContent>
+          </Card>
+        </div>
+      </section>
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Doanh thu</h2>

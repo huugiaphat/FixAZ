@@ -1,4 +1,4 @@
-import type { DonHangTinhToan, NghiemThu, TrangThaiDon, UuTien, DichVu } from "@/types/database";
+import type { DonHangTinhToan, NghiemThu, ThuChi, TrangThaiDon, UuTien, DichVu } from "@/types/database";
 
 const TRANG_THAI_DA_TINH_TIEN = new Set<TrangThaiDon>(["Đã nghiệm thu - chờ thu tiền", "Đã đóng"]);
 
@@ -131,4 +131,31 @@ export function phanBoDanhGia(nghiemThuList: NghiemThu[]): DemTheoNhan[] {
     dem[nt.diem_danh_gia - 1] += 1;
   }
   return [5, 4, 3, 2, 1].map((sao) => ({ nhan: `${sao} ★`, soLuong: dem[sao - 1] }));
+}
+
+export interface DiemNoiDung {
+  nhan: string;
+  soTien: number;
+}
+
+type ThuChiRutGon = Pick<ThuChi, "loai" | "noi_dung_thu" | "noi_dung_chi" | "so_tien">;
+
+/** Chi tiết chi theo từng "nội dung chi" (Vật tư, Công cụ, Lương...). */
+export function chiTietTheoNoiDungChi(danhSach: ThuChiRutGon[]): DiemNoiDung[] {
+  const map = new Map<string, number>();
+  for (const tc of danhSach) {
+    if (tc.loai !== "Chi" || !tc.noi_dung_chi) continue;
+    map.set(tc.noi_dung_chi, (map.get(tc.noi_dung_chi) ?? 0) + tc.so_tien);
+  }
+  return [...map.entries()].sort((a, b) => b[1] - a[1]).map(([nhan, soTien]) => ({ nhan, soTien }));
+}
+
+/** Chi tiết thu theo từng "nội dung thu" (Tạm ứng, Thanh toán, Thu khác, Sửa nhanh). */
+export function chiTietTheoNoiDungThu(danhSach: ThuChiRutGon[]): DiemNoiDung[] {
+  const map = new Map<string, number>();
+  for (const tc of danhSach) {
+    if (tc.loai !== "Thu" || !tc.noi_dung_thu) continue;
+    map.set(tc.noi_dung_thu, (map.get(tc.noi_dung_thu) ?? 0) + tc.so_tien);
+  }
+  return [...map.entries()].sort((a, b) => b[1] - a[1]).map(([nhan, soTien]) => ({ nhan, soTien }));
 }
