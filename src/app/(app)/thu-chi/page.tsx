@@ -1,13 +1,10 @@
 import { requireNhanVien } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { FormThuChiMoi } from "@/components/thu-chi/form-thu-chi-moi";
+import { BoLocThuChi } from "@/components/thu-chi/bo-loc-thu-chi";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { formatVND, formatDateTime } from "@/lib/format";
 import type { ThuChi } from "@/types/database";
 
@@ -67,30 +64,7 @@ export default async function TrangThuChi({
         </Card>
       </div>
 
-      <form className="flex flex-wrap items-end gap-3">
-        <div className="space-y-1.5">
-          <Label htmlFor="tu">Từ ngày</Label>
-          <Input id="tu" name="tu" type="date" defaultValue={tu} className="w-40" />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="den">Đến ngày</Label>
-          <Input id="den" name="den" type="date" defaultValue={den} className="w-40" />
-        </div>
-        <div className="space-y-1.5">
-          <Label>Loại</Label>
-          <Select name="loai" defaultValue={loai ?? "tat-ca"}>
-            <SelectTrigger className="w-36">
-              <SelectValue>{(v: string) => (v === "Thu" || v === "Chi" ? v : "Tất cả")}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="tat-ca">Tất cả</SelectItem>
-              <SelectItem value="Thu">Thu</SelectItem>
-              <SelectItem value="Chi">Chi</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <Button type="submit" variant="outline">Lọc</Button>
-      </form>
+      <BoLocThuChi tu={tu} den={den} loai={loai} />
 
       {error ? (
         <p className="text-sm text-destructive">Lỗi tải dữ liệu: {error.message}</p>
