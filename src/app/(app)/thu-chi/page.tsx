@@ -13,23 +13,29 @@ type ThuChiVoiDon = ThuChi & { don_hang: { mo_ta_su_co: string } | null; nhan_vi
 export default async function TrangThuChi({
   searchParams,
 }: {
-  searchParams: Promise<{ tu?: string; den?: string; loai?: string }>;
+  searchParams: Promise<{ tu?: string; den?: string; loai?: string; ten_cong_trinh?: string; noi_dung?: string }>;
 }) {
   const nv = await requireNhanVien(["Quản lý", "Kế toán"]);
-  const { tu, den, loai } = await searchParams;
+  const { tu, den, loai, ten_cong_trinh: tenCongTrinh, noi_dung: noiDung } = await searchParams;
   const supabase = await createClient();
 
   let query = supabase
     .from("thu_chi")
     .select("*, don_hang(mo_ta_su_co), nhan_vien(ho_ten)")
     .order("ngay", { ascending: false })
-    .limit(200);
+    .limit(1000);
   if (tu) query = query.gte("ngay", tu);
   if (den) query = query.lte("ngay", `${den}T23:59:59`);
   if (loai === "Thu" || loai === "Chi") query = query.eq("loai", loai);
+  if (noiDung && noiDung !== "tat-ca") query = query.or(`noi_dung_thu.eq.${noiDung},noi_dung_chi.eq.${noiDung}`);
 
   const { data, error } = await query;
-  const danhSach = (data as ThuChiVoiDon[]) ?? [];
+  let danhSach = (data as ThuChiVoiDon[]) ?? [];
+
+  if (tenCongTrinh) {
+    const tuKhoa = tenCongTrinh.toLowerCase();
+    danhSach = danhSach.filter((tc) => (tc.don_hang?.mo_ta_su_co ?? tc.ten_cong_trinh ?? "").toLowerCase().includes(tuKhoa));
+  }
 
   const laTienMat = (tc: ThuChiVoiDon) => tc.phuong_thuc === "Tiền mặt";
 
@@ -82,7 +88,7 @@ export default async function TrangThuChi({
         </Card>
       </div>
 
-      <BoLocThuChi tu={tu} den={den} loai={loai} />
+      <BoLocThuChi tu={tu} den={den} loai={loai} tenCongTrinh={tenCongTrinh} noiDung={noiDung} />
 
       {error ? (
         <p className="text-sm text-destructive">Lỗi tải dữ liệu: {error.message}</p>
