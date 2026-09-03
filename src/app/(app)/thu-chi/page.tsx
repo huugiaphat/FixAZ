@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { formatVND, formatDateTime } from "@/lib/format";
+import { NOI_DUNG_THU, NOI_DUNG_CHI } from "@/lib/schemas/thu-chi";
 import type { ThuChi } from "@/types/database";
 
 type ThuChiVoiDon = ThuChi & { don_hang: { mo_ta_su_co: string } | null; nhan_vien: { ho_ten: string } | null };
@@ -27,7 +28,14 @@ export default async function TrangThuChi({
   if (tu) query = query.gte("ngay", tu);
   if (den) query = query.lte("ngay", `${den}T23:59:59`);
   if (loai === "Thu" || loai === "Chi") query = query.eq("loai", loai);
-  if (noiDung && noiDung !== "tat-ca") query = query.or(`noi_dung_thu.eq.${noiDung},noi_dung_chi.eq.${noiDung}`);
+  // noi_dung_thu/noi_dung_chi là 2 cột enum khác kiểu — không thể gộp
+  // .or() trên cả 2 vì Postgres sẽ cố ép giá trị sang CẢ 2 kiểu enum,
+  // lỗi ngay ở kiểu không khớp dù không rơi vào nhánh đó. Phải xác định
+  // đúng cột trước rồi lọc riêng.
+  if (noiDung && noiDung !== "tat-ca") {
+    if ((NOI_DUNG_THU as readonly string[]).includes(noiDung)) query = query.eq("noi_dung_thu", noiDung);
+    else if ((NOI_DUNG_CHI as readonly string[]).includes(noiDung)) query = query.eq("noi_dung_chi", noiDung);
+  }
 
   const { data, error } = await query;
   let danhSach = (data as ThuChiVoiDon[]) ?? [];
