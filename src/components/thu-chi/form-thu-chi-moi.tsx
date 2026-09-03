@@ -180,7 +180,13 @@ export function FormThuChiMoi({ maNvHienTai }: { maNvHienTai: string }) {
               <Label>Người thu chi *</Label>
               <Select value={watch("nguoi_tao")} onValueChange={(v) => setValue("nguoi_tao", v ?? "", { shouldValidate: true })}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Chọn người thu chi" />
+                  <SelectValue placeholder="Chọn người thu chi">
+                    {(v: string) => {
+                      const n = nhanVienList.find((x) => x.ma_nv === v);
+                      if (!n) return v;
+                      return n.ma_nv === maNvHienTai ? `${n.ho_ten} (Tôi)` : n.ho_ten;
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {nhanVienList.map((n) => (
