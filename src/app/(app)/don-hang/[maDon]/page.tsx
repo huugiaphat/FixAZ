@@ -123,13 +123,19 @@ export default async function ChiTietDonHang({
 
       <Tabs defaultValue={tabMacDinh}>
         <TabsList className="flex-wrap h-auto">
-          <TabsTrigger value="chi-tiet-don">Chi tiết đơn</TabsTrigger>
-          <TabsTrigger value="bao-gia">Báo giá</TabsTrigger>
           <TabsTrigger value="dieu-phoi">Điều phối</TabsTrigger>
+          <TabsTrigger value="bao-gia">BG tạm tính</TabsTrigger>
+          <TabsTrigger value="chi-tiet-don">Chi tiết BG</TabsTrigger>
           <TabsTrigger value="phat-sinh">Phát sinh</TabsTrigger>
           <TabsTrigger value="nghiem-thu">Nghiệm thu</TabsTrigger>
           <TabsTrigger value="thu-tien">Thu tiền</TabsTrigger>
         </TabsList>
+        <TabsContent value="dieu-phoi" className="pt-4">
+          <TabDieuPhoi maDon={maDon} danhSach={(dieuPhoi as DieuPhoi[]) ?? []} vaiTro={nv.vai_tro_app} maNvHienTai={nv.ma_nv} />
+        </TabsContent>
+        <TabsContent value="bao-gia" className="pt-4">
+          <TabBaoGia maDon={maDon} danhSach={(baoGia as BaoGia[]) ?? []} vaiTro={nv.vai_tro_app} />
+        </TabsContent>
         <TabsContent value="chi-tiet-don" className="pt-4">
           <TabChiTietDon
             maDon={maDon}
@@ -137,12 +143,6 @@ export default async function ChiTietDonHang({
             bangGiaDichVu={(bangGia as BangGiaDichVu[]) ?? []}
             vaiTro={nv.vai_tro_app}
           />
-        </TabsContent>
-        <TabsContent value="bao-gia" className="pt-4">
-          <TabBaoGia maDon={maDon} danhSach={(baoGia as BaoGia[]) ?? []} vaiTro={nv.vai_tro_app} />
-        </TabsContent>
-        <TabsContent value="dieu-phoi" className="pt-4">
-          <TabDieuPhoi maDon={maDon} danhSach={(dieuPhoi as DieuPhoi[]) ?? []} vaiTro={nv.vai_tro_app} maNvHienTai={nv.ma_nv} />
         </TabsContent>
         <TabsContent value="phat-sinh" className="pt-4">
           <TabPhatSinh maDon={maDon} danhSach={(phatSinh as PhatSinh[]) ?? []} bangGiaDichVu={(bangGia as BangGiaDichVu[]) ?? []} />
