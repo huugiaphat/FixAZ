@@ -31,8 +31,17 @@ export default async function TrangThuChi({
   const { data, error } = await query;
   const danhSach = (data as ThuChiVoiDon[]) ?? [];
 
+  const laTienMat = (tc: ThuChiVoiDon) => tc.phuong_thuc === "Tiền mặt";
+
   const tongThu = danhSach.filter((tc) => tc.loai === "Thu").reduce((s, tc) => s + tc.so_tien, 0);
   const tongChi = danhSach.filter((tc) => tc.loai === "Chi").reduce((s, tc) => s + tc.so_tien, 0);
+
+  const tongThuTienMat = danhSach.filter((tc) => tc.loai === "Thu" && laTienMat(tc)).reduce((s, tc) => s + tc.so_tien, 0);
+  const tongThuTaiKhoan = tongThu - tongThuTienMat;
+  const tongChiTienMat = danhSach.filter((tc) => tc.loai === "Chi" && laTienMat(tc)).reduce((s, tc) => s + tc.so_tien, 0);
+  const tongChiTaiKhoan = tongChi - tongChiTienMat;
+  const soDuTienMat = tongThuTienMat - tongChiTienMat;
+  const soDuTaiKhoan = tongThuTaiKhoan - tongChiTaiKhoan;
 
   return (
     <div className="space-y-4">
@@ -46,19 +55,28 @@ export default async function TrangThuChi({
           <CardContent className="py-4">
             <p className="text-sm text-muted-foreground">Tổng thu (đang lọc)</p>
             <p className="text-xl font-semibold text-emerald-600">{formatVND(tongThu)}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Tiền mặt {formatVND(tongThuTienMat)} · Tài khoản {formatVND(tongThuTaiKhoan)}
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="py-4">
             <p className="text-sm text-muted-foreground">Tổng chi (đang lọc)</p>
             <p className="text-xl font-semibold text-destructive">{formatVND(tongChi)}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Tiền mặt {formatVND(tongChiTienMat)} · Tài khoản {formatVND(tongChiTaiKhoan)}
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="py-4">
-            <p className="text-sm text-muted-foreground">Chênh lệch</p>
+            <p className="text-sm text-muted-foreground">Số dư</p>
             <p className={`text-xl font-semibold ${tongThu - tongChi >= 0 ? "text-emerald-600" : "text-destructive"}`}>
               {formatVND(tongThu - tongChi)}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Tiền mặt {formatVND(soDuTienMat)} · Tài khoản {formatVND(soDuTaiKhoan)}
             </p>
           </CardContent>
         </Card>
