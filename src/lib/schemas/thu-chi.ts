@@ -3,6 +3,12 @@ import { PHUONG_THUC_THU } from "./thu-tien";
 
 export const NOI_DUNG_THU = ["Tạm ứng", "Thanh toán", "Thu khác", "Sửa nhanh"] as const;
 
+// Sổ thu chi không cho chọn "QR-Ví điện tử" khi nhập tay — công ty chỉ
+// dùng Tiền mặt/Chuyển khoản cho các khoản thu chi nội bộ. Giá trị này
+// vẫn tồn tại trong enum DB vì thu_tien (thu tiền khách) vẫn dùng được,
+// và các dòng tự động đồng bộ từ đó vào thu_chi vẫn giữ nguyên giá trị.
+export const PHUONG_THUC_THU_CHI = PHUONG_THUC_THU.filter((p) => p !== "QR-Ví điện tử");
+
 // "Thanh toán" bị loại khỏi danh sách nhập tay — kể từ migration 0020,
 // mọi khoản thu ở tab "Thu tiền" của đơn hàng tự động đổ vào đây qua
 // trigger, nhập tay thêm sẽ bị đếm trùng.

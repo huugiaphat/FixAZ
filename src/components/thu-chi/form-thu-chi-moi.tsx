@@ -6,8 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
-import { PHUONG_THUC_THU } from "@/lib/schemas/thu-tien";
-import { thuChiSchema, NOI_DUNG_THU_NHAP_TAY, NOI_DUNG_CHI, type ThuChiFormValues } from "@/lib/schemas/thu-chi";
+import { thuChiSchema, NOI_DUNG_THU_NHAP_TAY, NOI_DUNG_CHI, PHUONG_THUC_THU_CHI, type ThuChiFormValues } from "@/lib/schemas/thu-chi";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -167,7 +166,7 @@ export function FormThuChiMoi({ maNvHienTai }: { maNvHienTai: string }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {PHUONG_THUC_THU.map((p) => (
+                  {PHUONG_THUC_THU_CHI.map((p) => (
                     <SelectItem key={p} value={p}>{p}</SelectItem>
                   ))}
                 </SelectContent>
