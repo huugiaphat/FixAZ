@@ -47,7 +47,7 @@ export default async function TrangDashboard() {
       <div>
         <h1 className="text-2xl font-semibold">Dashboard</h1>
         <p className="text-sm text-muted-foreground">
-          Số liệu tháng {new Date().getMonth() + 1}/{new Date().getFullYear()} — Mục 8 tài liệu yêu cầu. Ngưỡng màu bên dưới là gợi ý minh họa, công ty có thể yêu cầu tinh chỉnh khi có số liệu chính thức.
+          Số liệu tháng {new Date().getMonth() + 1}/{new Date().getFullYear()}
         </p>
       </div>
 
