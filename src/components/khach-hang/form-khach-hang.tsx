@@ -15,7 +15,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export function FormKhachHangMoi() {
+export function FormKhachHangMoi({
+  defaultValues,
+  label = "Thêm khách hàng",
+  size,
+}: {
+  defaultValues?: Partial<KhachHangFormValues>;
+  label?: string;
+  size?: "default" | "sm";
+} = {}) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const {
@@ -25,7 +33,7 @@ export function FormKhachHangMoi() {
     watch,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<KhachHangFormValues>({ resolver: zodResolver(khachHangSchema) });
+  } = useForm<KhachHangFormValues>({ resolver: zodResolver(khachHangSchema), defaultValues });
 
   async function onSubmit(values: KhachHangFormValues) {
     const supabase = createClient();
@@ -35,15 +43,15 @@ export function FormKhachHangMoi() {
       return;
     }
     toast.success("Đã tạo khách hàng mới");
-    reset();
+    reset(defaultValues);
     setOpen(false);
     router.refresh();
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button className="gap-2" />}>
-        <Plus className="h-4 w-4" /> Thêm khách hàng
+      <DialogTrigger render={<Button className="gap-2" size={size} />}>
+        <Plus className="h-4 w-4" /> {label}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

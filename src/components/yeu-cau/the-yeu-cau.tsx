@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { FormKhachHangMoi } from "@/components/khach-hang/form-khach-hang";
 import { ICON_DICH_VU } from "@/lib/schemas/yeu-cau-dich-vu";
 import { formatDateTime } from "@/lib/format";
 import type { YeuCauDichVu } from "@/types/database";
@@ -74,6 +75,11 @@ export function TheYeuCau({ yeuCau }: { yeuCau: YeuCauDichVu }) {
                 Đánh dấu đã liên hệ
               </Button>
             ) : null}
+            <FormKhachHangMoi
+              defaultValues={{ ho_ten: yeuCau.ho_ten, sdt: yeuCau.sdt, dia_chi: yeuCau.dia_chi, nguon: "App/Website" }}
+              label="Tạo khách hàng"
+              size="sm"
+            />
             <Button size="sm" render={<Link href={urlTaoDon} />}>
               Tạo đơn hàng
             </Button>
