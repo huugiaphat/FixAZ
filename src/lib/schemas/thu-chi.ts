@@ -2,6 +2,11 @@ import { z } from "zod";
 import { PHUONG_THUC_THU } from "./thu-tien";
 
 export const NOI_DUNG_THU = ["Tạm ứng", "Thanh toán", "Thu khác", "Sửa nhanh"] as const;
+
+// "Thanh toán" bị loại khỏi danh sách nhập tay — kể từ migration 0020,
+// mọi khoản thu ở tab "Thu tiền" của đơn hàng tự động đổ vào đây qua
+// trigger, nhập tay thêm sẽ bị đếm trùng.
+export const NOI_DUNG_THU_NHAP_TAY = NOI_DUNG_THU.filter((n) => n !== "Thanh toán");
 export const NOI_DUNG_CHI = [
   "Vật tư",
   "Công cụ",

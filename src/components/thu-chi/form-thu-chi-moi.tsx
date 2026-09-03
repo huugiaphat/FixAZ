@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { PHUONG_THUC_THU } from "@/lib/schemas/thu-tien";
-import { thuChiSchema, NOI_DUNG_THU, NOI_DUNG_CHI, type ThuChiFormValues } from "@/lib/schemas/thu-chi";
+import { thuChiSchema, NOI_DUNG_THU_NHAP_TAY, NOI_DUNG_CHI, type ThuChiFormValues } from "@/lib/schemas/thu-chi";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,16 +99,21 @@ export function FormThuChiMoi() {
           <div className="space-y-2">
             <Label>Nội dung {loai === "Thu" ? "thu" : "chi"} *</Label>
             {loai === "Thu" ? (
-              <Select value={watch("noi_dung_thu")} onValueChange={(v) => setValue("noi_dung_thu", v as ThuChiFormValues["noi_dung_thu"], { shouldValidate: true })}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Chọn nội dung thu" />
-                </SelectTrigger>
-                <SelectContent>
-                  {NOI_DUNG_THU.map((n) => (
-                    <SelectItem key={n} value={n}>{n}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <>
+                <Select value={watch("noi_dung_thu")} onValueChange={(v) => setValue("noi_dung_thu", v as ThuChiFormValues["noi_dung_thu"], { shouldValidate: true })}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Chọn nội dung thu" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {NOI_DUNG_THU_NHAP_TAY.map((n) => (
+                      <SelectItem key={n} value={n}>{n}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Tiền thu từ đơn hàng (mục &quot;Thanh toán&quot;) tự động ghi nhận từ tab Thu tiền của đơn — không cần nhập lại ở đây.
+                </p>
+              </>
             ) : (
               <Select value={watch("noi_dung_chi")} onValueChange={(v) => setValue("noi_dung_chi", v as ThuChiFormValues["noi_dung_chi"], { shouldValidate: true })}>
                 <SelectTrigger className="w-full">

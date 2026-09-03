@@ -204,6 +204,7 @@ export interface ThuChi {
   ngay: string;
   nguoi_tao: string;
   created_at: string;
+  ma_thu: string | null;
 }
 
 export interface VatTu {
