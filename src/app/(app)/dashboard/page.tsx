@@ -2,7 +2,7 @@ import { requireNhanVien } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { formatVND } from "@/lib/format";
-import type { TongHopDashboard } from "@/types/database";
+import type { TongHopDashboard, ThuChiTongHop } from "@/types/database";
 import {
   UserPlus,
   ClipboardList,
@@ -16,22 +16,27 @@ import {
   TrendingUp,
   RotateCcw,
   PiggyBank,
+  Coins,
+  CalendarDays,
+  CalendarRange,
 } from "lucide-react";
 
 export default async function TrangDashboard() {
   await requireNhanVien(["Quản lý"]);
   const supabase = await createClient();
 
-  const [{ data: tongHop }, { data: khMoiThang }] = await Promise.all([
+  const [{ data: tongHop }, { data: khMoiThang }, { data: thuChi }] = await Promise.all([
     supabase.from("v_tong_hop_dashboard").select("*").single(),
     supabase
       .from("khach_hang")
       .select("ma_kh", { count: "exact", head: true })
       .gte("ngay_tao", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
+    supabase.from("v_thu_chi_tong_hop").select("*").single(),
   ]);
 
   const d = tongHop as TongHopDashboard | null;
   const soKhachMoi = khMoiThang as unknown as { count: number } | null;
+  const tc = thuChi as ThuChiTongHop | null;
 
   if (!d) {
     return <p className="text-sm text-muted-foreground">Chưa có dữ liệu để hiển thị.</p>;
@@ -114,6 +119,35 @@ export default async function TrangDashboard() {
           />
         </div>
       </section>
+
+      {tc ? (
+        <section className="space-y-3">
+          <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Thu chi</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            <StatCard
+              icon={CalendarDays}
+              nhan="Thu chi hôm nay"
+              giaTri={formatVND(tc.thu_hom_nay - tc.chi_hom_nay)}
+              mucCanhBao={tc.thu_hom_nay - tc.chi_hom_nay >= 0 ? "xanh" : "do"}
+              ghiChu={`Thu ${formatVND(tc.thu_hom_nay)} · Chi ${formatVND(tc.chi_hom_nay)}`}
+            />
+            <StatCard
+              icon={CalendarRange}
+              nhan="Thu chi tháng này"
+              giaTri={formatVND(tc.thu_thang_nay - tc.chi_thang_nay)}
+              mucCanhBao={tc.thu_thang_nay - tc.chi_thang_nay >= 0 ? "xanh" : "do"}
+              ghiChu={`Thu ${formatVND(tc.thu_thang_nay)} · Chi ${formatVND(tc.chi_thang_nay)}`}
+            />
+            <StatCard
+              icon={Coins}
+              nhan="Thu chi năm nay"
+              giaTri={formatVND(tc.thu_nam_nay - tc.chi_nam_nay)}
+              mucCanhBao={tc.thu_nam_nay - tc.chi_nam_nay >= 0 ? "xanh" : "do"}
+              ghiChu={`Thu ${formatVND(tc.thu_nam_nay)} · Chi ${formatVND(tc.chi_nam_nay)}`}
+            />
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }

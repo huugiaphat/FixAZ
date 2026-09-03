@@ -37,6 +37,18 @@ export type LoaiThongBao =
   | "Nhắc chăm sóc sau sửa"
   | "Cảnh báo tồn kho thấp"
   | "Yêu cầu dịch vụ mới";
+export type LoaiThuChi = "Thu" | "Chi";
+export type NoiDungThu = "Tạm ứng" | "Thanh toán" | "Thu khác" | "Sửa nhanh";
+export type NoiDungChi =
+  | "Vật tư"
+  | "Công cụ"
+  | "Lương"
+  | "Ứng lương"
+  | "Ăn uống"
+  | "Ca máy"
+  | "Xe chở"
+  | "Chi phí quản lý"
+  | "Chi khác";
 
 export interface NhanVien {
   ma_nv: string;
@@ -179,6 +191,21 @@ export interface ThuTien {
   created_at: string;
 }
 
+export interface ThuChi {
+  ma_tc: string;
+  loai: LoaiThuChi;
+  ma_don: string | null;
+  ten_cong_trinh: string | null;
+  noi_dung_thu: NoiDungThu | null;
+  noi_dung_chi: NoiDungChi | null;
+  so_tien: number;
+  phuong_thuc: PhuongThucThu;
+  ghi_chu: string | null;
+  ngay: string;
+  nguoi_tao: string;
+  created_at: string;
+}
+
 export interface VatTu {
   ma_vt: string;
   ten: string;
@@ -305,6 +332,16 @@ export interface TongHopDashboard {
   ty_le_chuyen_doi: number;
   ty_le_sua_lai: number;
   bien_loi_nhuan: number;
+}
+
+export interface ThuChiTongHop {
+  id: number;
+  thu_hom_nay: number;
+  chi_hom_nay: number;
+  thu_thang_nay: number;
+  chi_thang_nay: number;
+  thu_nam_nay: number;
+  chi_nam_nay: number;
 }
 
 export interface CauHinhHeThong {
