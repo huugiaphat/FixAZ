@@ -49,6 +49,8 @@ export default async function ChiTietDonHang({
     ]);
 
   const khachHang = kh as KhachHang | null;
+  const laThoPhuTrach =
+    donHang.tho_phu_trach === nv.ma_nv || (dieuPhoi as DieuPhoi[] | null)?.some((dp) => dp.tho === nv.ma_nv) === true;
 
   return (
     <div className="space-y-4">
@@ -142,6 +144,7 @@ export default async function ChiTietDonHang({
             danhSach={(chiTietDon as ChiTietDonTinhToan[]) ?? []}
             bangGiaDichVu={(bangGia as BangGiaDichVu[]) ?? []}
             vaiTro={nv.vai_tro_app}
+            laThoPhuTrach={laThoPhuTrach}
           />
         </TabsContent>
         <TabsContent value="phat-sinh" className="pt-4">

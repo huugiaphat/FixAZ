@@ -32,11 +32,14 @@ export function TabChiTietDon({
   danhSach,
   bangGiaDichVu,
   vaiTro,
+  laThoPhuTrach,
 }: {
   maDon: string;
   danhSach: ChiTietDonTinhToan[];
   bangGiaDichVu: BangGiaDichVu[];
   vaiTro: VaiTro;
+  /** Thợ đang được điều phối/phụ trách đơn này — cho phép tự thêm hạng mục */
+  laThoPhuTrach?: boolean;
 }) {
   const router = useRouter();
   const supabase = createClient();
@@ -58,7 +61,8 @@ export function TabChiTietDon({
     defaultValues: { loai: "Dịch vụ", so_luong: 1, gia_ban: 0 },
   });
 
-  const duocSua = ["Quản lý", "CSKH-Điều phối"].includes(vaiTro);
+  const duocXoa = ["Quản lý", "CSKH-Điều phối"].includes(vaiTro);
+  const duocTao = duocXoa || (vaiTro === "Thợ" && laThoPhuTrach);
   const tongCong = danhSach.reduce((s, c) => s + c.thanh_tien, 0);
   const loaiDangChon = watch("loai");
 
@@ -151,7 +155,7 @@ export function TabChiTietDon({
                   <TableHead>SL</TableHead>
                   <TableHead>Đơn giá</TableHead>
                   <TableHead>Thành tiền</TableHead>
-                  {duocSua ? <TableHead /> : null}
+                  {duocXoa ? <TableHead /> : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -162,7 +166,7 @@ export function TabChiTietDon({
                     <TableCell>{c.so_luong} {c.don_vi_tinh}</TableCell>
                     <TableCell>{formatVND(c.gia_ban)}</TableCell>
                     <TableCell className="font-medium">{formatVND(c.thanh_tien)}</TableCell>
-                    {duocSua ? (
+                    {duocXoa ? (
                       <TableCell>
                         <Button size="icon-sm" variant="ghost" disabled={dangXoa === c.ma_dong} onClick={() => xoa(c.ma_dong)}>
                           <Trash2 className="h-4 w-4 text-destructive" />
@@ -174,7 +178,7 @@ export function TabChiTietDon({
                 <TableRow>
                   <TableCell colSpan={4} className="text-right font-medium">Tổng cộng</TableCell>
                   <TableCell className="font-semibold">{formatVND(tongCong)}</TableCell>
-                  {duocSua ? <TableCell /> : null}
+                  {duocXoa ? <TableCell /> : null}
                 </TableRow>
               </TableBody>
             </Table>
@@ -182,7 +186,7 @@ export function TabChiTietDon({
         </Card>
       )}
 
-      {duocSua ? (
+      {duocTao ? (
         <Card>
           <CardContent className="space-y-6 pt-6">
             <div className="space-y-4">
