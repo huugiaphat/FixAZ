@@ -84,7 +84,7 @@ export default async function TrangDashboard() {
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Công Trình</h2>
-        <Card>
+        <Card className="max-w-xl">
           <CardContent className="pt-6">
             <p className="mb-3 text-xs text-muted-foreground">Khách mới · CT mới · CT hoàn thành — 3 tháng gần nhất</p>
             <BieuDoCotNhom
@@ -126,7 +126,7 @@ export default async function TrangDashboard() {
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Chi tiết thu chi</h2>
-        <div className="grid gap-3 lg:grid-cols-2">
+        <div className="grid gap-3 lg:grid-cols-2 lg:max-w-xl">
           <Card>
             <CardContent className="space-y-1 pt-6">
               <p className="font-medium">Chi tiết chi</p>
@@ -146,7 +146,7 @@ export default async function TrangDashboard() {
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Doanh thu</h2>
-        <div className="grid gap-3 lg:grid-cols-2">
+        <div className="grid gap-3 lg:grid-cols-2 lg:max-w-xl">
           <Card>
             <CardContent className="space-y-1 pt-6">
               <p className="font-medium">Doanh thu theo tháng</p>
@@ -189,7 +189,7 @@ export default async function TrangDashboard() {
         {hieuSuatTho.length === 0 ? (
           <p className="text-sm text-muted-foreground">Chưa có đơn hoàn thành để tính hiệu suất.</p>
         ) : (
-          <Card className="max-w-2xl overflow-hidden py-0">
+          <Card className="max-w-xl overflow-hidden py-0">
             <CardContent className="overflow-x-auto p-0">
               <Table>
                 <TableHeader>
