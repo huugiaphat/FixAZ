@@ -40,21 +40,26 @@ export function ChuyenTrangThaiDon({ maDon, trangThai, vaiTro }: { maDon: string
 
   async function chuyen(trangThaiMoi: TrangThaiDon, lyDo?: string, xacNhanKhanCap?: boolean) {
     setDangXuLy(true);
-    const supabase = createClient();
-    const { error } = await supabase.rpc("f_chuyen_trang_thai_don", {
-      p_ma_don: maDon,
-      p_trang_thai_moi: trangThaiMoi,
-      p_ly_do_huy: lyDo ?? null,
-      p_xac_nhan_khan_cap: xacNhanKhanCap ?? false,
-    });
-    setDangXuLy(false);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.rpc("f_chuyen_trang_thai_don", {
+        p_ma_don: maDon,
+        p_trang_thai_moi: trangThaiMoi,
+        p_ly_do_huy: lyDo ?? null,
+        p_xac_nhan_khan_cap: xacNhanKhanCap ?? false,
+      });
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      toast.success(`Đã chuyển sang "${trangThaiMoi}"`);
+      setOpenHuy(false);
+      router.refresh();
+    } catch {
+      toast.error("Không kết nối được máy chủ, vui lòng thử lại.");
+    } finally {
+      setDangXuLy(false);
     }
-    toast.success(`Đã chuyển sang "${trangThaiMoi}"`);
-    setOpenHuy(false);
-    router.refresh();
   }
 
   if (trangThai === "Đã đóng" || trangThai === "Đã hủy") return null;
@@ -63,7 +68,7 @@ export function ChuyenTrangThaiDon({ maDon, trangThai, vaiTro }: { maDon: string
     <div className="flex flex-wrap gap-2">
       {buocTiepTheo ? (
         <Button disabled={dangXuLy} onClick={() => chuyen(buocTiepTheo)}>
-          Chuyển sang &quot;{buocTiepTheo}&quot;
+          {dangXuLy ? "Đang xử lý…" : <>Chuyển sang &quot;{buocTiepTheo}&quot;</>}
         </Button>
       ) : null}
 
