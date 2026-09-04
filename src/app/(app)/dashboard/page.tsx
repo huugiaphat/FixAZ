@@ -1,12 +1,14 @@
 import { requireNhanVien } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { StatCard } from "@/components/dashboard/stat-card";
-import { ThanhNgang } from "@/components/dashboard/thanh-ngang";
+import { BieuDoCotNhom } from "@/components/dashboard/bieu-do-cot-nhom";
+import { DanhSachGiaTri } from "@/components/dashboard/danh-sach-gia-tri";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatVND } from "@/lib/format";
 import {
+  congTrinhTheoThang,
   doanhThuTheoThang,
   doanhThuTheoDichVu,
   demTheoTrangThai,
@@ -17,25 +19,9 @@ import {
   chiTietTheoNoiDungChi,
   chiTietTheoNoiDungThu,
 } from "@/lib/dashboard-analytics";
-import type { TongHopDashboard, ThuChiTongHop, DonHangTinhToan, NghiemThu, NhanVien, ThuChi } from "@/types/database";
-import { UserPlus, ClipboardList, ClipboardCheck, Wallet, Coins, CalendarDays, CalendarRange } from "lucide-react";
+import type { ThuChiTongHop, DonHangTinhToan, NghiemThu, NhanVien, ThuChi } from "@/types/database";
+import { CalendarDays, CalendarRange, Coins } from "lucide-react";
 
-const MAU_THANH_TRANG_THAI: Record<string, string> = {
-  "Mới tiếp nhận": "bg-slate-400",
-  "Đã điều phối": "bg-blue-500",
-  "Đang khảo sát": "bg-indigo-500",
-  "Chờ duyệt báo giá": "bg-amber-500",
-  "Đang thi công": "bg-orange-500",
-  "Chờ nghiệm thu": "bg-purple-500",
-  "Đã nghiệm thu - chờ thu tiền": "bg-cyan-500",
-  "Đã đóng": "bg-emerald-500",
-  "Đã hủy": "bg-red-500",
-};
-const MAU_THANH_UU_TIEN: Record<string, string> = {
-  "P1-Khẩn cấp": "bg-red-500",
-  "P2-Trong ngày": "bg-amber-500",
-  "P3-Đặt lịch": "bg-slate-400",
-};
 const MAU_PILL_THANH_TOAN: Record<string, string> = {
   "Đã thu đủ": "bg-emerald-100 text-emerald-700 hover:bg-emerald-100",
   "Thu một phần": "bg-amber-100 text-amber-700 hover:bg-amber-100",
@@ -43,19 +29,23 @@ const MAU_PILL_THANH_TOAN: Record<string, string> = {
   "Chưa đến bước thanh toán": "bg-slate-100 text-slate-600 hover:bg-slate-100",
 };
 
+const CHUOI_CONG_TRINH = [
+  { nhan: "Khách mới", mau: "bg-blue-500" },
+  { nhan: "CT mới", mau: "bg-orange-500" },
+  { nhan: "CT hoàn thành", mau: "bg-slate-400" },
+];
+
 export default async function TrangDashboard() {
   await requireNhanVien(["Quản lý"]);
   const supabase = await createClient();
 
-  const dauThang = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+  const now = new Date();
+  const dauThang = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const baThangTruoc = new Date(now.getFullYear(), now.getMonth() - 2, 1).toISOString();
 
-  const [{ data: tongHop }, { data: khMoiThang }, { data: thuChi }, { data: allDon }, { data: allNghiemThu }, { data: allNv }, { data: thuChiThang }] =
+  const [{ data: khachHang3Thang }, { data: thuChi }, { data: allDon }, { data: allNghiemThu }, { data: allNv }, { data: thuChiThang }] =
     await Promise.all([
-      supabase.from("v_tong_hop_dashboard").select("*").single(),
-      supabase
-        .from("khach_hang")
-        .select("ma_kh", { count: "exact", head: true })
-        .gte("ngay_tao", dauThang),
+      supabase.from("khach_hang").select("ngay_tao").gte("ngay_tao", baThangTruoc),
       supabase.from("v_thu_chi_tong_hop").select("*").single(),
       supabase.from("v_don_hang").select("*").order("ngay_tiep_nhan", { ascending: false }).limit(1000),
       supabase.from("nghiem_thu").select("ma_don, diem_danh_gia"),
@@ -63,18 +53,14 @@ export default async function TrangDashboard() {
       supabase.from("thu_chi").select("loai, noi_dung_thu, noi_dung_chi, so_tien").gte("ngay", dauThang),
     ]);
 
-  const d = tongHop as TongHopDashboard | null;
-  const soKhachMoi = khMoiThang as unknown as { count: number } | null;
+  const khachHangList = (khachHang3Thang as { ngay_tao: string }[]) ?? [];
   const tc = thuChi as ThuChiTongHop | null;
   const donList = (allDon as DonHangTinhToan[]) ?? [];
   const nghiemThuList = (allNghiemThu as Pick<NghiemThu, "ma_don" | "diem_danh_gia">[]) ?? [];
   const nvMap = new Map(((allNv as Pick<NhanVien, "ma_nv" | "ho_ten">[]) ?? []).map((n) => [n.ma_nv, n.ho_ten]));
   const thuChiThangList = (thuChiThang as Pick<ThuChi, "loai" | "noi_dung_thu" | "noi_dung_chi" | "so_tien">[]) ?? [];
 
-  if (!d) {
-    return <p className="text-sm text-muted-foreground">Chưa có dữ liệu để hiển thị.</p>;
-  }
-
+  const theoCongTrinh = congTrinhTheoThang(khachHangList, donList, 3);
   const theoThang = doanhThuTheoThang(donList, 6);
   const theoDichVu = doanhThuTheoDichVu(donList);
   const theoTrangThai = demTheoTrangThai(donList);
@@ -92,24 +78,27 @@ export default async function TrangDashboard() {
       <div>
         <h1 className="text-2xl font-semibold">Dashboard</h1>
         <p className="text-sm text-muted-foreground">
-          Số liệu tháng {new Date().getMonth() + 1}/{new Date().getFullYear()}
+          Số liệu tháng {now.getMonth() + 1}/{now.getFullYear()}
         </p>
       </div>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Kinh doanh</h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          <StatCard icon={UserPlus} nhan="Khách hàng mới (tháng)" giaTri={String(soKhachMoi?.count ?? 0)} />
-          <StatCard icon={ClipboardList} nhan="Đơn tạo mới (tháng)" giaTri={String(d.don_moi_thang)} />
-          <StatCard icon={ClipboardCheck} nhan="Đơn hoàn thành (tháng)" giaTri={String(d.don_hoan_thanh_thang)} />
-          <StatCard icon={Wallet} nhan="Doanh thu (tháng)" giaTri={formatVND(d.doanh_thu_thang)} />
-        </div>
+        <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Công Trình</h2>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="mb-3 text-xs text-muted-foreground">Khách mới · CT mới · CT hoàn thành — 3 tháng gần nhất</p>
+            <BieuDoCotNhom
+              diem={theoCongTrinh.map((t) => ({ nhan: t.nhan, giaTri: [t.khachMoi, t.ctMoi, t.ctHoanThanh] }))}
+              chuoi={CHUOI_CONG_TRINH}
+            />
+          </CardContent>
+        </Card>
       </section>
 
       {tc ? (
         <section className="space-y-3">
           <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Thu chi</h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:max-w-xl">
             <StatCard
               icon={CalendarDays}
               nhan="Thu chi hôm nay"
@@ -141,15 +130,15 @@ export default async function TrangDashboard() {
           <Card>
             <CardContent className="space-y-1 pt-6">
               <p className="font-medium">Chi tiết chi</p>
-              <p className="mb-3 text-xs text-muted-foreground">Theo nội dung chi — tháng này</p>
-              <ThanhNgang items={chiTietChi.map((t) => ({ nhan: t.nhan, giaTri: t.soTien, hienThi: formatVND(t.soTien) }))} mauMacDinh="bg-destructive" />
+              <p className="mb-1 text-xs text-muted-foreground">Theo nội dung chi — tháng này</p>
+              <DanhSachGiaTri items={chiTietChi.map((t) => ({ nhan: t.nhan, hienThi: formatVND(t.soTien) }))} />
             </CardContent>
           </Card>
           <Card>
             <CardContent className="space-y-1 pt-6">
               <p className="font-medium">Chi tiết thu</p>
-              <p className="mb-3 text-xs text-muted-foreground">Theo nội dung thu — tháng này</p>
-              <ThanhNgang items={chiTietThu.map((t) => ({ nhan: t.nhan, giaTri: t.soTien, hienThi: formatVND(t.soTien) }))} mauMacDinh="bg-emerald-500" />
+              <p className="mb-1 text-xs text-muted-foreground">Theo nội dung thu — tháng này</p>
+              <DanhSachGiaTri items={chiTietThu.map((t) => ({ nhan: t.nhan, hienThi: formatVND(t.soTien) }))} />
             </CardContent>
           </Card>
         </div>
@@ -161,15 +150,15 @@ export default async function TrangDashboard() {
           <Card>
             <CardContent className="space-y-1 pt-6">
               <p className="font-medium">Doanh thu theo tháng</p>
-              <p className="mb-3 text-xs text-muted-foreground">6 tháng gần nhất — tính theo ngày đóng đơn</p>
-              <ThanhNgang items={theoThang.map((t) => ({ nhan: t.nhan, giaTri: t.doanhThu, hienThi: formatVND(t.doanhThu) }))} />
+              <p className="mb-1 text-xs text-muted-foreground">6 tháng gần nhất — tính theo ngày đóng đơn</p>
+              <DanhSachGiaTri items={theoThang.map((t) => ({ nhan: t.nhan, hienThi: formatVND(t.doanhThu) }))} />
             </CardContent>
           </Card>
           <Card>
             <CardContent className="space-y-1 pt-6">
               <p className="font-medium">Doanh thu theo loại dịch vụ</p>
-              <p className="mb-3 text-xs text-muted-foreground">Trên các đơn đã đóng</p>
-              <ThanhNgang items={theoDichVu.map((t) => ({ nhan: t.nhan, giaTri: t.doanhThu, hienThi: formatVND(t.doanhThu) }))} />
+              <p className="mb-1 text-xs text-muted-foreground">Trên các đơn đã đóng</p>
+              <DanhSachGiaTri items={theoDichVu.map((t) => ({ nhan: t.nhan, hienThi: formatVND(t.doanhThu) }))} />
             </CardContent>
           </Card>
         </div>
@@ -181,29 +170,15 @@ export default async function TrangDashboard() {
           <Card>
             <CardContent className="space-y-1 pt-6">
               <p className="font-medium">Đơn theo trạng thái</p>
-              <p className="mb-3 text-xs text-muted-foreground">Toàn bộ {donList.length} đơn trong hệ thống</p>
-              <ThanhNgang
-                items={theoTrangThai.map((t) => ({
-                  nhan: t.nhan,
-                  giaTri: t.soLuong,
-                  hienThi: `${t.soLuong} đơn`,
-                  mauThanh: MAU_THANH_TRANG_THAI[t.nhan],
-                }))}
-              />
+              <p className="mb-1 text-xs text-muted-foreground">Toàn bộ {donList.length} đơn trong hệ thống</p>
+              <DanhSachGiaTri items={theoTrangThai.map((t) => ({ nhan: t.nhan, hienThi: `${t.soLuong} đơn` }))} />
             </CardContent>
           </Card>
           <Card>
             <CardContent className="space-y-1 pt-6">
               <p className="font-medium">Đơn theo mức ưu tiên</p>
-              <p className="mb-3 text-xs text-muted-foreground">Toàn bộ {donList.length} đơn trong hệ thống</p>
-              <ThanhNgang
-                items={theoUuTien.map((t) => ({
-                  nhan: t.nhan,
-                  giaTri: t.soLuong,
-                  hienThi: `${t.soLuong} đơn`,
-                  mauThanh: MAU_THANH_UU_TIEN[t.nhan],
-                }))}
-              />
+              <p className="mb-1 text-xs text-muted-foreground">Toàn bộ {donList.length} đơn trong hệ thống</p>
+              <DanhSachGiaTri items={theoUuTien.map((t) => ({ nhan: t.nhan, hienThi: `${t.soLuong} đơn` }))} />
             </CardContent>
           </Card>
         </div>
@@ -214,7 +189,7 @@ export default async function TrangDashboard() {
         {hieuSuatTho.length === 0 ? (
           <p className="text-sm text-muted-foreground">Chưa có đơn hoàn thành để tính hiệu suất.</p>
         ) : (
-          <Card className="overflow-hidden py-0">
+          <Card className="max-w-2xl overflow-hidden py-0">
             <CardContent className="overflow-x-auto p-0">
               <Table>
                 <TableHeader>
@@ -267,8 +242,8 @@ export default async function TrangDashboard() {
           <Card>
             <CardContent className="space-y-1 pt-6">
               <p className="font-medium">Phân bố đánh giá</p>
-              <p className="mb-3 text-xs text-muted-foreground">Trên các lượt nghiệm thu có chấm điểm</p>
-              <ThanhNgang items={danhGia.map((d2) => ({ nhan: d2.nhan, giaTri: d2.soLuong, hienThi: `${d2.soLuong}` }))} />
+              <p className="mb-1 text-xs text-muted-foreground">Trên các lượt nghiệm thu có chấm điểm</p>
+              <DanhSachGiaTri items={danhGia.map((d2) => ({ nhan: d2.nhan, hienThi: `${d2.soLuong}` }))} />
             </CardContent>
           </Card>
         </div>

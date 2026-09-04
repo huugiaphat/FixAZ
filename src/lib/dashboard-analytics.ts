@@ -26,6 +26,45 @@ export function doanhThuTheoThang(danhSach: DonHangTinhToan[], soThang: number):
   return thang;
 }
 
+export interface DiemCongTrinh {
+  nhan: string;
+  khachMoi: number;
+  ctMoi: number;
+  ctHoanThanh: number;
+}
+
+/** Khách mới / CT mới (đơn tạo mới) / CT hoàn thành ("Đã đóng"), N tháng gần nhất. */
+export function congTrinhTheoThang(
+  khachHangList: { ngay_tao: string }[],
+  donList: DonHangTinhToan[],
+  soThang: number,
+): DiemCongTrinh[] {
+  const now = new Date();
+  const thang: DiemCongTrinh[] = [];
+  for (let i = soThang - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    thang.push({ nhan: `Th.${String(d.getMonth() + 1).padStart(2, "0")}`, khachMoi: 0, ctMoi: 0, ctHoanThanh: 0 });
+  }
+  const chiSoThang = (ngayStr: string) => {
+    const ngay = new Date(ngayStr);
+    const soThangCach = (now.getFullYear() - ngay.getFullYear()) * 12 + (now.getMonth() - ngay.getMonth());
+    return soThang - 1 - soThangCach;
+  };
+  for (const kh of khachHangList) {
+    const idx = chiSoThang(kh.ngay_tao);
+    if (idx >= 0 && idx < thang.length) thang[idx].khachMoi += 1;
+  }
+  for (const don of donList) {
+    const idxMoi = chiSoThang(don.ngay_tiep_nhan);
+    if (idxMoi >= 0 && idxMoi < thang.length) thang[idxMoi].ctMoi += 1;
+    if (don.trang_thai === "Đã đóng" && don.ngay_dong_don) {
+      const idxDong = chiSoThang(don.ngay_dong_don);
+      if (idxDong >= 0 && idxDong < thang.length) thang[idxDong].ctHoanThanh += 1;
+    }
+  }
+  return thang;
+}
+
 export interface DiemDichVu {
   nhan: string;
   doanhThu: number;
