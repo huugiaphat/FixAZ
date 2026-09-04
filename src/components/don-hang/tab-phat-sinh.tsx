@@ -21,7 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { UploadAnh } from "@/components/upload-anh";
 import { formatVND } from "@/lib/format";
-import type { PhatSinh, BangGiaDichVu, VatTu } from "@/types/database";
+import type { PhatSinh, BangGiaDichVu, VatTu, VaiTro } from "@/types/database";
 
 interface HangMucPhatSinhDangChon {
   ma: string;
@@ -29,8 +29,21 @@ interface HangMucPhatSinhDangChon {
   gia: number;
 }
 
-export function TabPhatSinh({ maDon, danhSach, bangGiaDichVu }: { maDon: string; danhSach: PhatSinh[]; bangGiaDichVu: BangGiaDichVu[] }) {
+export function TabPhatSinh({
+  maDon,
+  danhSach,
+  bangGiaDichVu,
+  vaiTro,
+  laThoPhuTrach,
+}: {
+  maDon: string;
+  danhSach: PhatSinh[];
+  bangGiaDichVu: BangGiaDichVu[];
+  vaiTro: VaiTro;
+  laThoPhuTrach: boolean;
+}) {
   const router = useRouter();
+  const duocTao = ["Quản lý", "CSKH-Điều phối"].includes(vaiTro) || (vaiTro === "Thợ" && laThoPhuTrach);
   const [anh, setAnh] = useState<string[]>([]);
   const [dangXacNhan, setDangXacNhan] = useState<string | null>(null);
   const [openChon, setOpenChon] = useState(false);
@@ -167,7 +180,7 @@ export function TabPhatSinh({ maDon, danhSach, bangGiaDichVu }: { maDon: string;
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground">{ps.nguyen_nhan}</p>
-                {!ps.khach_xac_nhan ? (
+                {!ps.khach_xac_nhan && duocTao ? (
                   <Button size="sm" className="mt-1" disabled={dangXacNhan === ps.ma_ps} onClick={() => xacNhanKhach(ps.ma_ps)}>
                     Ghi nhận khách đã đồng ý
                   </Button>
@@ -178,6 +191,7 @@ export function TabPhatSinh({ maDon, danhSach, bangGiaDichVu }: { maDon: string;
         </div>
       )}
 
+      {duocTao ? (
       <Card>
         <CardContent className="space-y-6 pt-6">
           <div className="space-y-4">
@@ -285,6 +299,7 @@ export function TabPhatSinh({ maDon, danhSach, bangGiaDichVu }: { maDon: string;
           </form>
         </CardContent>
       </Card>
+      ) : null}
     </div>
   );
 }

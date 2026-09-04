@@ -5,7 +5,7 @@ import { TheBaoHanh } from "@/components/bao-hanh/the-bao-hanh";
 import type { BaoHanh } from "@/types/database";
 
 export default async function TrangBaoHanh() {
-  await requireNhanVien(["Quản lý", "CSKH-Điều phối"]);
+  const nv = await requireNhanVien(["Quản lý", "CSKH-Điều phối", "Kiểm soát"]);
   const supabase = await createClient();
   const { data, error } = await supabase.from("bao_hanh").select("*").order("created_at", { ascending: false });
   const danhSach = (data as BaoHanh[]) ?? [];
@@ -14,7 +14,7 @@ export default async function TrangBaoHanh() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Bảo hành</h1>
-        <FormBaoHanhMoi />
+        {nv.vai_tro_app !== "Kiểm soát" ? <FormBaoHanhMoi /> : null}
       </div>
 
       {error ? (
@@ -24,7 +24,7 @@ export default async function TrangBaoHanh() {
       ) : (
         <div className="space-y-2">
           {danhSach.map((bh) => (
-            <TheBaoHanh key={bh.ma_bh} baoHanh={bh} />
+            <TheBaoHanh key={bh.ma_bh} baoHanh={bh} vaiTro={nv.vai_tro_app} />
           ))}
         </div>
       )}

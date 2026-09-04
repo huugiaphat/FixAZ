@@ -9,7 +9,7 @@ import { formatDate, formatDateTime } from "@/lib/format";
 import type { DonHang, DieuPhoi, NhanVien } from "@/types/database";
 
 export default async function TrangDieuPhoi() {
-  await requireNhanVien(["Quản lý", "CSKH-Điều phối"]);
+  await requireNhanVien(["Quản lý", "CSKH-Điều phối", "Kiểm soát"]);
   const supabase = await createClient();
 
   const [{ data: chuaDieuPhoi }, { data: dangXuLy }] = await Promise.all([

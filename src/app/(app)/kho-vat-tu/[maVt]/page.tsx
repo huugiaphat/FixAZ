@@ -8,7 +8,7 @@ import { formatVND, formatDateTime } from "@/lib/format";
 import type { VatTuTinhToan, XuatNhapKho } from "@/types/database";
 
 export default async function ChiTietVatTu({ params }: { params: Promise<{ maVt: string }> }) {
-  await requireNhanVien(["Quản lý", "Kho"]);
+  await requireNhanVien(["Quản lý", "Kho", "Kiểm soát"]);
   const { maVt } = await params;
   const supabase = await createClient();
 

@@ -29,7 +29,17 @@ const CO_THE_HUY: TrangThaiDon[] = [
   "Đang thi công", "Chờ nghiệm thu", "Đã nghiệm thu - chờ thu tiền",
 ];
 
-export function ChuyenTrangThaiDon({ maDon, trangThai, vaiTro }: { maDon: string; trangThai: TrangThaiDon; vaiTro: VaiTro }) {
+export function ChuyenTrangThaiDon({
+  maDon,
+  trangThai,
+  vaiTro,
+  laThoPhuTrach,
+}: {
+  maDon: string;
+  trangThai: TrangThaiDon;
+  vaiTro: VaiTro;
+  laThoPhuTrach: boolean;
+}) {
   const router = useRouter();
   const [dangXuLy, setDangXuLy] = useState(false);
   const [openHuy, setOpenHuy] = useState(false);
@@ -37,6 +47,8 @@ export function ChuyenTrangThaiDon({ maDon, trangThai, vaiTro }: { maDon: string
 
   const buocTiepTheo = BUOC_TIEP_THEO[trangThai];
   const chiQuanLySua = ["Quản lý", "CSKH-Điều phối"].includes(vaiTro);
+  // Khớp đúng điều kiện p_don_update (0012) — ai thực sự được phép đổi trạng thái.
+  const coQuyenChuyen = chiQuanLySua || (vaiTro === "Thợ" && laThoPhuTrach);
 
   async function chuyen(trangThaiMoi: TrangThaiDon, lyDo?: string, xacNhanKhanCap?: boolean) {
     setDangXuLy(true);
@@ -66,7 +78,7 @@ export function ChuyenTrangThaiDon({ maDon, trangThai, vaiTro }: { maDon: string
 
   return (
     <div className="flex flex-wrap gap-2">
-      {buocTiepTheo ? (
+      {buocTiepTheo && coQuyenChuyen ? (
         <Button disabled={dangXuLy} onClick={() => chuyen(buocTiepTheo)}>
           {dangXuLy ? "Đang xử lý…" : <>Chuyển sang &quot;{buocTiepTheo}&quot;</>}
         </Button>

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const VAI_TRO = ["Quản lý", "CSKH-Điều phối", "Thợ", "Kế toán", "Kho"] as const;
+export const VAI_TRO = ["Quản lý", "CSKH-Điều phối", "Thợ", "Kế toán", "Kho", "Kiểm soát"] as const;
 export const KY_NANG = ["Tổng hợp", "Điện nước", "Hàn", "Xây", "Sơn", "Học việc"] as const;
 
 export const nhanVienSchema = z.object({

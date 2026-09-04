@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatDate, formatVND } from "@/lib/format";
-import type { BaoHanh } from "@/types/database";
+import type { BaoHanh, VaiTro } from "@/types/database";
 
 const MAU_TRANG_THAI: Record<string, string> = {
   "Mới tạo": "bg-slate-100 text-slate-700 hover:bg-slate-100",
@@ -19,8 +19,9 @@ const MAU_TRANG_THAI: Record<string, string> = {
   "Đã đóng": "bg-emerald-100 text-emerald-700 hover:bg-emerald-100",
 };
 
-export function TheBaoHanh({ baoHanh }: { baoHanh: BaoHanh }) {
+export function TheBaoHanh({ baoHanh, vaiTro }: { baoHanh: BaoHanh; vaiTro: VaiTro }) {
   const router = useRouter();
+  const duocXuLy = ["Quản lý", "CSKH-Điều phối"].includes(vaiTro);
   const [dangSua, setDangSua] = useState(false);
   const [dangLuu, setDangLuu] = useState(false);
   const [ketQua, setKetQua] = useState(baoHanh.ket_qua ?? "");
@@ -65,9 +66,11 @@ export function TheBaoHanh({ baoHanh }: { baoHanh: BaoHanh }) {
             {baoHanh.nguyen_nhan ? <p>Phân loại: <span className="font-medium">{baoHanh.nguyen_nhan}</span></p> : null}
             {baoHanh.ket_qua ? <p>Kết quả: {baoHanh.ket_qua}</p> : null}
             {baoHanh.chi_phi ? <p>Chi phí: {formatVND(baoHanh.chi_phi)}</p> : null}
-            <Button size="sm" variant="outline" className="mt-1" onClick={() => setDangSua(true)}>
-              Cập nhật xử lý
-            </Button>
+            {duocXuLy ? (
+              <Button size="sm" variant="outline" className="mt-1" onClick={() => setDangSua(true)}>
+                Cập nhật xử lý
+              </Button>
+            ) : null}
           </div>
         ) : (
           <div className="space-y-3 pt-2">

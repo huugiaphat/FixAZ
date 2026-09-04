@@ -14,7 +14,8 @@ import { FormDanhMucMoi } from "@/components/quan-tri/form-danh-muc-moi";
 import type { NhanVien, BangGiaDichVu, DanhMuc } from "@/types/database";
 
 export default async function TrangQuanTri() {
-  await requireNhanVien(["Quản lý"]);
+  const nv = await requireNhanVien(["Quản lý", "Kiểm soát"]);
+  const duocSua = nv.vai_tro_app === "Quản lý";
   const supabase = await createClient();
 
   const [{ data: nvList }, { data: bgList }, { data: dmList }] = await Promise.all([
@@ -41,9 +42,11 @@ export default async function TrangQuanTri() {
         </TabsList>
 
         <TabsContent value="nhan-vien" className="space-y-4 pt-4">
-          <div className="flex justify-end">
-            <FormNhanVienMoi />
-          </div>
+          {duocSua ? (
+            <div className="flex justify-end">
+              <FormNhanVienMoi />
+            </div>
+          ) : null}
           <Card className="overflow-hidden py-0">
             <CardContent className="overflow-x-auto p-0">
               <Table>
@@ -55,7 +58,7 @@ export default async function TrangQuanTri() {
                     <TableHead>Số điện thoại</TableHead>
                     <TableHead>Kỹ năng / Khu vực</TableHead>
                     <TableHead>Trạng thái</TableHead>
-                    <TableHead />
+                    {duocSua ? <TableHead /> : null}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -69,14 +72,16 @@ export default async function TrangQuanTri() {
                       <TableCell>
                         <Badge variant={n.trang_thai === "Đang làm" ? "secondary" : "outline"}>{n.trang_thai}</Badge>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <FormSuaNhanVien nhanVien={n} />
-                          <NutDatLaiMatKhau maNv={n.ma_nv} hoTen={n.ho_ten} sdt={n.sdt} />
-                          <NutDoiTrangThaiNv maNv={n.ma_nv} trangThai={n.trang_thai} />
-                          <NutXoaNhanVien maNv={n.ma_nv} hoTen={n.ho_ten} />
-                        </div>
-                      </TableCell>
+                      {duocSua ? (
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <FormSuaNhanVien nhanVien={n} />
+                            <NutDatLaiMatKhau maNv={n.ma_nv} hoTen={n.ho_ten} sdt={n.sdt} />
+                            <NutDoiTrangThaiNv maNv={n.ma_nv} trangThai={n.trang_thai} />
+                            <NutXoaNhanVien maNv={n.ma_nv} hoTen={n.ho_ten} />
+                          </div>
+                        </TableCell>
+                      ) : null}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -86,9 +91,11 @@ export default async function TrangQuanTri() {
         </TabsContent>
 
         <TabsContent value="bang-gia" className="space-y-4 pt-4">
-          <div className="flex justify-end">
-            <FormBangGiaMoi />
-          </div>
+          {duocSua ? (
+            <div className="flex justify-end">
+              <FormBangGiaMoi />
+            </div>
+          ) : null}
           <Card className="overflow-hidden py-0">
             <CardContent className="overflow-x-auto p-0">
               <Table>
@@ -119,9 +126,11 @@ export default async function TrangQuanTri() {
         </TabsContent>
 
         <TabsContent value="danh-muc" className="space-y-4 pt-4">
-          <div className="flex justify-end">
-            <FormDanhMucMoi loaiGoiY={cacLoaiDanhMuc} />
-          </div>
+          {duocSua ? (
+            <div className="flex justify-end">
+              <FormDanhMucMoi loaiGoiY={cacLoaiDanhMuc} />
+            </div>
+          ) : null}
           <div className="space-y-4">
             {cacLoaiDanhMuc.map((loai) => (
               <Card key={loai}>

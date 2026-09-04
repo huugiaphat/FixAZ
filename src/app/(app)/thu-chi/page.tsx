@@ -16,7 +16,7 @@ export default async function TrangThuChi({
 }: {
   searchParams: Promise<{ tu?: string; den?: string; loai?: string; ten_cong_trinh?: string; noi_dung?: string }>;
 }) {
-  const nv = await requireNhanVien(["Quản lý", "Kế toán"]);
+  const nv = await requireNhanVien(["Quản lý", "Kế toán", "Kiểm soát"]);
   const { tu, den, loai, ten_cong_trinh: tenCongTrinh, noi_dung: noiDung } = await searchParams;
   const supabase = await createClient();
 
@@ -61,7 +61,7 @@ export default async function TrangThuChi({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Sổ thu chi</h1>
-        <FormThuChiMoi maNvHienTai={nv.ma_nv} />
+        {nv.vai_tro_app !== "Kiểm soát" ? <FormThuChiMoi maNvHienTai={nv.ma_nv} /> : null}
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">

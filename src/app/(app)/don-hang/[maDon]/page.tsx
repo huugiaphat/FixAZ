@@ -25,7 +25,7 @@ export default async function ChiTietDonHang({
   params: Promise<{ maDon: string }>;
   searchParams: Promise<{ tab?: string }>;
 }) {
-  const nv = await requireNhanVien(["Quản lý", "CSKH-Điều phối", "Thợ", "Kế toán", "Kho"]);
+  const nv = await requireNhanVien(["Quản lý", "CSKH-Điều phối", "Thợ", "Kế toán", "Kho", "Kiểm soát"]);
   const { maDon } = await params;
   const { tab } = await searchParams;
   const CAC_TAB_HOP_LE = ["chi-tiet-don", "bao-gia", "dieu-phoi", "phat-sinh", "nghiem-thu", "thu-tien"];
@@ -63,7 +63,7 @@ export default async function ChiTietDonHang({
             <BadgeUuTien uuTien={donHang.uu_tien} />
           </div>
         </div>
-        <ChuyenTrangThaiDon maDon={donHang.ma_don} trangThai={donHang.trang_thai} vaiTro={nv.vai_tro_app} />
+        <ChuyenTrangThaiDon maDon={donHang.ma_don} trangThai={donHang.trang_thai} vaiTro={nv.vai_tro_app} laThoPhuTrach={laThoPhuTrach} />
       </div>
 
       {donHang.trang_thai === "Đã hủy" && donHang.ly_do_tu_choi_huy ? (
@@ -148,10 +148,16 @@ export default async function ChiTietDonHang({
           />
         </TabsContent>
         <TabsContent value="phat-sinh" className="pt-4">
-          <TabPhatSinh maDon={maDon} danhSach={(phatSinh as PhatSinh[]) ?? []} bangGiaDichVu={(bangGia as BangGiaDichVu[]) ?? []} />
+          <TabPhatSinh
+            maDon={maDon}
+            danhSach={(phatSinh as PhatSinh[]) ?? []}
+            bangGiaDichVu={(bangGia as BangGiaDichVu[]) ?? []}
+            vaiTro={nv.vai_tro_app}
+            laThoPhuTrach={laThoPhuTrach}
+          />
         </TabsContent>
         <TabsContent value="nghiem-thu" className="pt-4">
-          <TabNghiemThu maDon={maDon} danhSach={(nghiemThu as NghiemThu[]) ?? []} />
+          <TabNghiemThu maDon={maDon} danhSach={(nghiemThu as NghiemThu[]) ?? []} vaiTro={nv.vai_tro_app} laThoPhuTrach={laThoPhuTrach} />
         </TabsContent>
         <TabsContent value="thu-tien" className="pt-4">
           <TabThuTien maDon={maDon} danhSach={(thuTien as ThuTien[]) ?? []} congNo={donHang.cong_no} vaiTro={nv.vai_tro_app} />

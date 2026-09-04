@@ -8,7 +8,7 @@ import type { DonHangTinhToan, VaiTro } from "@/types/database";
 // Danh sách nhanh các đơn còn công nợ để thu tiền — mở đơn để vào tab
 // "Thu tiền" ghi nhận khoản thu đầy đủ.
 export default async function TrangThuTienNhanh() {
-  const nv = await requireNhanVien(["Quản lý", "Kế toán", "Thợ"]);
+  const nv = await requireNhanVien(["Quản lý", "Kế toán", "Thợ", "Kiểm soát"]);
   const supabase = await createClient();
 
   let query = supabase.from("v_don_hang").select("*").gt("cong_no", 0).order("ngay_tiep_nhan", { ascending: false });

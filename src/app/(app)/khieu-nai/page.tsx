@@ -5,7 +5,7 @@ import { TheKhieuNai } from "@/components/khieu-nai/the-khieu-nai";
 import type { KhieuNai } from "@/types/database";
 
 export default async function TrangKhieuNai() {
-  await requireNhanVien(["Quản lý", "CSKH-Điều phối"]);
+  const nv = await requireNhanVien(["Quản lý", "CSKH-Điều phối", "Kiểm soát"]);
   const supabase = await createClient();
   const { data, error } = await supabase.from("khieu_nai").select("*").order("created_at", { ascending: false });
   const danhSach = (data as KhieuNai[]) ?? [];
@@ -14,7 +14,7 @@ export default async function TrangKhieuNai() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Khiếu nại</h1>
-        <FormKhieuNaiMoi />
+        {nv.vai_tro_app !== "Kiểm soát" ? <FormKhieuNaiMoi /> : null}
       </div>
 
       {error ? (
@@ -24,7 +24,7 @@ export default async function TrangKhieuNai() {
       ) : (
         <div className="space-y-2">
           {danhSach.map((kn) => (
-            <TheKhieuNai key={kn.ma_kn} khieuNai={kn} />
+            <TheKhieuNai key={kn.ma_kn} khieuNai={kn} vaiTro={nv.vai_tro_app} />
           ))}
         </div>
       )}

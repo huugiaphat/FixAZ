@@ -12,7 +12,7 @@ export default async function TrangKhachHang({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
-  const nv = await requireNhanVien(["Quản lý", "CSKH-Điều phối", "Kế toán"]);
+  const nv = await requireNhanVien(["Quản lý", "CSKH-Điều phối", "Kế toán", "Kiểm soát"]);
   const { q } = await searchParams;
   const supabase = await createClient();
 

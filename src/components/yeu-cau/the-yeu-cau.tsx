@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { FormKhachHangMoi } from "@/components/khach-hang/form-khach-hang";
 import { ICON_DICH_VU } from "@/lib/schemas/yeu-cau-dich-vu";
 import { formatDateTime } from "@/lib/format";
-import type { YeuCauDichVu } from "@/types/database";
+import type { YeuCauDichVu, VaiTro } from "@/types/database";
 
 const MAU_TRANG_THAI: Record<string, string> = {
   "Mới": "bg-blue-100 text-blue-700 hover:bg-blue-100",
@@ -20,8 +20,9 @@ const MAU_TRANG_THAI: Record<string, string> = {
   "Đã hủy": "bg-slate-100 text-slate-500 hover:bg-slate-100",
 };
 
-export function TheYeuCau({ yeuCau }: { yeuCau: YeuCauDichVu }) {
+export function TheYeuCau({ yeuCau, vaiTro }: { yeuCau: YeuCauDichVu; vaiTro: VaiTro }) {
   const router = useRouter();
+  const duocXuLy = ["Quản lý", "CSKH-Điều phối"].includes(vaiTro);
   const [dangXuLy, setDangXuLy] = useState(false);
   const IconDichVu = ICON_DICH_VU[yeuCau.dich_vu];
 
@@ -68,7 +69,7 @@ export function TheYeuCau({ yeuCau }: { yeuCau: YeuCauDichVu }) {
           </Link>
         ) : null}
 
-        {!daXongViec ? (
+        {!daXongViec && duocXuLy ? (
           <div className="flex flex-wrap items-center gap-2 pt-1">
             {yeuCau.trang_thai === "Mới" ? (
               <Button size="sm" variant="outline" disabled={dangXuLy} onClick={() => capNhat({ trang_thai: "Đã liên hệ" })}>

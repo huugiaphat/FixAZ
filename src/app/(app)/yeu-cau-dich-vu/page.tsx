@@ -7,7 +7,7 @@ import { TheYeuCau } from "@/components/yeu-cau/the-yeu-cau";
 import type { YeuCauDichVu } from "@/types/database";
 
 export default async function TrangYeuCauDichVu() {
-  const nv = await requireNhanVien(["Quản lý", "CSKH-Điều phối"]);
+  const nv = await requireNhanVien(["Quản lý", "CSKH-Điều phối", "Kiểm soát"]);
   const supabase = await createClient();
 
   const { data } = await supabase.from("yeu_cau_dich_vu").select("*").order("created_at", { ascending: false }).limit(100);
@@ -55,7 +55,7 @@ export default async function TrangYeuCauDichVu() {
       ) : (
         <div className="space-y-2">
           {danhSach.map((yc) => (
-            <TheYeuCau key={yc.ma_yc} yeuCau={yc} />
+            <TheYeuCau key={yc.ma_yc} yeuCau={yc} vaiTro={nv.vai_tro_app} />
           ))}
         </div>
       )}

@@ -17,10 +17,21 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UploadAnh } from "@/components/upload-anh";
 import { cn } from "@/lib/utils";
-import type { NghiemThu } from "@/types/database";
+import type { NghiemThu, VaiTro } from "@/types/database";
 
-export function TabNghiemThu({ maDon, danhSach }: { maDon: string; danhSach: NghiemThu[] }) {
+export function TabNghiemThu({
+  maDon,
+  danhSach,
+  vaiTro,
+  laThoPhuTrach,
+}: {
+  maDon: string;
+  danhSach: NghiemThu[];
+  vaiTro: VaiTro;
+  laThoPhuTrach: boolean;
+}) {
   const router = useRouter();
+  const duocTao = ["Quản lý", "CSKH-Điều phối"].includes(vaiTro) || (vaiTro === "Thợ" && laThoPhuTrach);
   const supabase = createClient();
   const [anh, setAnh] = useState<string[]>([]);
   const [dangXacNhan, setDangXacNhan] = useState<string | null>(null);
@@ -100,7 +111,7 @@ export function TabNghiemThu({ maDon, danhSach }: { maDon: string; danhSach: Ngh
                   </div>
                 ) : null}
                 {nt.y_kien_khach ? <p className="text-sm italic text-muted-foreground">&quot;{nt.y_kien_khach}&quot;</p> : null}
-                {!nt.khach_xac_nhan ? (
+                {!nt.khach_xac_nhan && duocTao ? (
                   <Button size="sm" disabled={dangXacNhan === nt.ma_nt} onClick={() => xacNhanKhach(nt.ma_nt)}>
                     Ghi nhận khách đã xác nhận
                   </Button>
@@ -111,6 +122,7 @@ export function TabNghiemThu({ maDon, danhSach }: { maDon: string; danhSach: Ngh
         </div>
       )}
 
+      {duocTao ? (
       <Card>
         <CardContent className="pt-6">
           <p className="mb-3 font-medium">Lập biên bản nghiệm thu</p>
@@ -147,6 +159,7 @@ export function TabNghiemThu({ maDon, danhSach }: { maDon: string; danhSach: Ngh
           </form>
         </CardContent>
       </Card>
+      ) : null}
     </div>
   );
 }

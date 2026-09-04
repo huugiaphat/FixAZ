@@ -3,7 +3,7 @@
 // tạo lại bằng: npx supabase gen types typescript --project-id <id> > src/types/database.ts
 // và merge lại phần enum/tiện ích ở cuối file.
 
-export type VaiTro = "Quản lý" | "CSKH-Điều phối" | "Thợ" | "Kế toán" | "Kho";
+export type VaiTro = "Quản lý" | "CSKH-Điều phối" | "Thợ" | "Kế toán" | "Kho" | "Kiểm soát";
 export type TrangThaiNhanVien = "Đang làm" | "Nghỉ phép" | "Đã nghỉ việc";
 export type NguonKhachHang = "Điện thoại/Hotline" | "Zalo/Facebook" | "App/Website" | "Khách quen giới thiệu";
 export type DichVu = "Nhà cửa" | "Điện" | "Nước" | "Tổng hợp" | "Thiết bị" | "Khác";

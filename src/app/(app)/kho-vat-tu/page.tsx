@@ -10,7 +10,7 @@ import { formatVND } from "@/lib/format";
 import type { VatTuTinhToan } from "@/types/database";
 
 export default async function TrangKhoVatTu() {
-  await requireNhanVien(["Quản lý", "Kho"]);
+  const nv = await requireNhanVien(["Quản lý", "Kho", "Kiểm soát"]);
   const supabase = await createClient();
   const { data, error } = await supabase.from("v_vat_tu").select("*").order("ten");
   const danhSach = (data as VatTuTinhToan[]) ?? [];
@@ -19,10 +19,12 @@ export default async function TrangKhoVatTu() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Kho vật tư</h1>
-        <div className="flex gap-2">
-          <FormXuatNhapKho danhSachVatTu={danhSach} />
-          <FormVatTuMoi />
-        </div>
+        {nv.vai_tro_app !== "Kiểm soát" ? (
+          <div className="flex gap-2">
+            <FormXuatNhapKho danhSachVatTu={danhSach} />
+            <FormVatTuMoi />
+          </div>
+        ) : null}
       </div>
 
       {error ? (

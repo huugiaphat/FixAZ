@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatDate } from "@/lib/format";
-import type { KhieuNai, NhanVien } from "@/types/database";
+import type { KhieuNai, NhanVien, VaiTro } from "@/types/database";
 
 const MAU_MUC_DO: Record<string, string> = {
   "Thấp": "bg-slate-100 text-slate-700 hover:bg-slate-100",
@@ -18,8 +18,9 @@ const MAU_MUC_DO: Record<string, string> = {
   "Cao-Khẩn cấp": "bg-red-100 text-red-700 hover:bg-red-100",
 };
 
-export function TheKhieuNai({ khieuNai }: { khieuNai: KhieuNai }) {
+export function TheKhieuNai({ khieuNai, vaiTro }: { khieuNai: KhieuNai; vaiTro: VaiTro }) {
   const router = useRouter();
+  const duocXuLy = ["Quản lý", "CSKH-Điều phối"].includes(vaiTro);
   const supabase = createClient();
   const [nhanVienList, setNhanVienList] = useState<NhanVien[]>([]);
   const [dangSua, setDangSua] = useState(false);
@@ -66,7 +67,7 @@ export function TheKhieuNai({ khieuNai }: { khieuNai: KhieuNai }) {
         </p>
         {khieuNai.ket_qua ? <p className="text-sm">Kết quả: {khieuNai.ket_qua}</p> : null}
 
-        {!dangSua ? (
+        {!duocXuLy ? null : !dangSua ? (
           <Button size="sm" variant="outline" onClick={() => setDangSua(true)}>Cập nhật xử lý</Button>
         ) : (
           <div className="space-y-3 pt-2">

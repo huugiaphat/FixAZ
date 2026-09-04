@@ -10,7 +10,7 @@ import { Plus } from "lucide-react";
 import type { DonHangTinhToan, KhachHang, NhanVien } from "@/types/database";
 
 export default async function TrangDonHang() {
-  const nv = await requireNhanVien(["Quản lý", "CSKH-Điều phối", "Thợ", "Kế toán"]);
+  const nv = await requireNhanVien(["Quản lý", "CSKH-Điều phối", "Thợ", "Kế toán", "Kiểm soát"]);
   const supabase = await createClient();
 
   const { data, error } = await supabase
