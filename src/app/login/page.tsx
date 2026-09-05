@@ -38,7 +38,7 @@ export default function TrangDangNhap() {
       <Card className="w-full max-w-sm">
         <CardHeader className="items-center text-center gap-2">
           <Image src="/logo.png" alt="Hữu Gia Phát" width={500} height={500} className="h-28 w-28 object-contain" priority />
-          <CardDescription>Quản lý dịch vụ sửa chữa điện nước</CardDescription>
+          <CardDescription>Quản lý dịch vụ sửa nhà cửa, điện nước</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={xuLyDangNhap} className="space-y-4">
