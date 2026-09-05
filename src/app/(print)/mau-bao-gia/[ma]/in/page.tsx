@@ -3,7 +3,7 @@ import Image from "next/image";
 import { requireNhanVien } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { NutIn } from "@/components/mau-bao-gia/nut-in";
-import { formatVND, formatNgayDaiVN } from "@/lib/format";
+import { formatNgayDaiVN } from "@/lib/format";
 import { CONG_TY } from "@/lib/company-info";
 import type { MauBaoGiaTinhToan, MauBaoGiaDongTinhToan } from "@/types/database";
 
@@ -26,12 +26,12 @@ export default async function TrangInMauBaoGia({ params }: { params: Promise<{ m
   const danhSachDong = (dong as MauBaoGiaDongTinhToan[]) ?? [];
 
   return (
-    <div className="mx-auto max-w-3xl p-6 print:p-0">
+    <div className="mx-auto max-w-3xl p-3 sm:p-6 print:p-0">
       <div className="mb-4 flex justify-end print:hidden">
         <NutIn />
       </div>
 
-      <div className="space-y-5 border p-8 text-sm print:border-0" style={{ fontFamily: "Times New Roman, Times, serif" }}>
+      <div className="space-y-5 border p-4 text-sm sm:p-8 print:border-0" style={{ fontFamily: "Times New Roman, Times, serif" }}>
         <div className="space-y-1 text-center">
           <div className="flex items-start justify-center gap-3">
             <Image src="/logo.png" alt="Hữu Gia Phát" width={500} height={500} className="h-[5.76rem] w-[5.76rem] shrink-0 object-contain" />
@@ -55,36 +55,38 @@ export default async function TrangInMauBaoGia({ params }: { params: Promise<{ m
           trân trọng gửi đến Quý Khách báo giá như sau:
         </p>
 
-        <table className="w-full border-collapse border border-black text-center">
-          <thead>
-            <tr className="bg-blue-100 font-bold text-red-700">
-              <th className="border border-black px-2 py-1">STT</th>
-              <th className="border border-black px-2 py-1">Nội Dung Công Việc</th>
-              <th className="border border-black px-2 py-1">ĐVT</th>
-              <th className="border border-black px-2 py-1">Số lượng</th>
-              <th className="border border-black px-2 py-1">Đơn Giá</th>
-              <th className="border border-black px-2 py-1">Thành Tiền</th>
-            </tr>
-          </thead>
-          <tbody>
-            {danhSachDong.map((d, i) => (
-              <tr key={d.ma_dong}>
-                <td className="border border-black px-2 py-1">{i + 1}</td>
-                <td className="border border-black px-2 py-1 text-left">{d.ten_hang_muc}</td>
-                <td className="border border-black px-2 py-1">{d.don_vi_tinh ?? "—"}</td>
-                <td className="border border-black px-2 py-1">{d.so_luong}</td>
-                <td className="border border-black px-2 py-1 text-right">{d.don_gia.toLocaleString("vi-VN")}</td>
-                <td className="border border-black px-2 py-1 text-right font-bold">{d.thanh_tien.toLocaleString("vi-VN")}</td>
+        <div className="-mx-4 overflow-x-auto px-4 print:mx-0 print:overflow-visible print:px-0 sm:mx-0 sm:px-0">
+          <table className="w-full min-w-[560px] border-collapse border border-black text-center print:min-w-0">
+            <thead>
+              <tr className="bg-blue-100 font-bold text-red-700">
+                <th className="border border-black px-2 py-1 whitespace-nowrap">STT</th>
+                <th className="border border-black px-2 py-1 whitespace-nowrap">Nội Dung Công Việc</th>
+                <th className="border border-black px-2 py-1 whitespace-nowrap">ĐVT</th>
+                <th className="border border-black px-2 py-1 whitespace-nowrap">Số lượng</th>
+                <th className="border border-black px-2 py-1 whitespace-nowrap">Đơn Giá</th>
+                <th className="border border-black px-2 py-1 whitespace-nowrap">Thành Tiền</th>
               </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr className="bg-gray-200 font-bold">
-              <td className="border border-black px-2 py-1" colSpan={5}>Cộng</td>
-              <td className="border border-black px-2 py-1 text-right">{chiTiet.tong_tien.toLocaleString("vi-VN")}</td>
-            </tr>
-          </tfoot>
-        </table>
+            </thead>
+            <tbody>
+              {danhSachDong.map((d, i) => (
+                <tr key={d.ma_dong}>
+                  <td className="border border-black px-2 py-1">{i + 1}</td>
+                  <td className="border border-black px-2 py-1 text-left">{d.ten_hang_muc}</td>
+                  <td className="border border-black px-2 py-1 whitespace-nowrap">{d.don_vi_tinh ?? "—"}</td>
+                  <td className="border border-black px-2 py-1 whitespace-nowrap">{d.so_luong}</td>
+                  <td className="border border-black px-2 py-1 whitespace-nowrap text-right">{d.don_gia.toLocaleString("vi-VN")}</td>
+                  <td className="border border-black px-2 py-1 whitespace-nowrap text-right font-bold">{d.thanh_tien.toLocaleString("vi-VN")}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="bg-gray-200 font-bold">
+                <td className="border border-black px-2 py-1" colSpan={5}>Cộng</td>
+                <td className="border border-black px-2 py-1 whitespace-nowrap text-right">{chiTiet.tong_tien.toLocaleString("vi-VN")}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
 
         <div>
           <p className="underline">Ghi Chú:</p>
