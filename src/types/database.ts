@@ -136,6 +136,36 @@ export interface BaoGia {
   created_at: string;
 }
 
+export interface MauBaoGia {
+  ma_mbg: string;
+  ten_khach_hang: string;
+  sdt: string | null;
+  dia_chi: string | null;
+  dich_vu: DichVu | null;
+  ghi_chu: string | null;
+  ma_don: string | null;
+  nguoi_tao: string;
+  created_at: string;
+}
+
+export interface MauBaoGiaTinhToan extends MauBaoGia {
+  tong_tien: number;
+}
+
+export interface MauBaoGiaDong {
+  ma_dong: string;
+  ma_mbg: string;
+  ten_hang_muc: string;
+  don_vi_tinh: string | null;
+  so_luong: number;
+  don_gia: number;
+  created_at: string;
+}
+
+export interface MauBaoGiaDongTinhToan extends MauBaoGiaDong {
+  thanh_tien: number;
+}
+
 export interface PhatSinh {
   ma_ps: string;
   ma_don: string;

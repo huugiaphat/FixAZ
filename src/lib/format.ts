@@ -27,6 +27,16 @@ export function formatDate(value: string | Date | null | undefined): string {
   return new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: MUI_GIO_VN }).format(date);
 }
 
+// "ngày 28 tháng 08 năm 2026" — dùng cho phần ký ngày trên văn bản in
+// (báo giá...), đúng định dạng mẫu giấy tờ thật của công ty.
+export function formatNgayDaiVN(value: string | Date | null | undefined): string {
+  if (!value) return "—";
+  const date = typeof value === "string" ? new Date(value) : value;
+  const parts = new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: MUI_GIO_VN }).formatToParts(date);
+  const lay = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  return `ngày ${lay("day")} tháng ${lay("month")} năm ${lay("year")}`;
+}
+
 export function formatDateTime(value: string | Date | null | undefined): string {
   if (!value) return "—";
   const date = typeof value === "string" ? new Date(value) : value;
