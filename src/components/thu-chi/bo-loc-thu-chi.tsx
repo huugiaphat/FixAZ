@@ -54,7 +54,7 @@ export function BoLocThuChi({
         />
       </div>
       <div className="space-y-1.5">
-        <Label>Nội dung</Label>
+        <Label>Danh mục</Label>
         <Select name="noi_dung" defaultValue={noiDung ?? "tat-ca"}>
           <SelectTrigger className="w-44">
             <SelectValue>{(v: string) => ([...NOI_DUNG_THU, ...NOI_DUNG_CHI] as string[]).includes(v) ? v : "Tất cả"}</SelectValue>
@@ -62,13 +62,13 @@ export function BoLocThuChi({
           <SelectContent>
             <SelectItem value="tat-ca">Tất cả</SelectItem>
             <SelectGroup>
-              <SelectLabel>Nội dung thu</SelectLabel>
+              <SelectLabel>Danh mục thu</SelectLabel>
               {NOI_DUNG_THU.map((n) => (
                 <SelectItem key={n} value={n}>{n}</SelectItem>
               ))}
             </SelectGroup>
             <SelectGroup>
-              <SelectLabel>Nội dung chi</SelectLabel>
+              <SelectLabel>Danh mục chi</SelectLabel>
               {NOI_DUNG_CHI.map((n) => (
                 <SelectItem key={n} value={n}>{n}</SelectItem>
               ))}

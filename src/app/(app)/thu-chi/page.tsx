@@ -110,7 +110,8 @@ export default async function TrangThuChi({
                 <TableRow>
                   <TableHead>Loại</TableHead>
                   <TableHead>Tên công trình</TableHead>
-                  <TableHead>Nội dung</TableHead>
+                  <TableHead>Danh mục</TableHead>
+                  <TableHead>Mô tả</TableHead>
                   <TableHead>Số tiền</TableHead>
                   <TableHead>Phương thức</TableHead>
                   <TableHead>Người thu chi</TableHead>
@@ -132,6 +133,7 @@ export default async function TrangThuChi({
                       {tc.don_hang?.mo_ta_su_co ?? tc.ten_cong_trinh ?? "—"}
                     </TableCell>
                     <TableCell>{tc.noi_dung_thu ?? tc.noi_dung_chi}</TableCell>
+                    <TableCell className="max-w-56 truncate text-muted-foreground">{tc.ghi_chu ?? "—"}</TableCell>
                     <TableCell className={tc.loai === "Thu" ? "text-emerald-600" : "text-destructive"}>
                       {tc.loai === "Thu" ? "+" : "-"}{formatVND(tc.so_tien)}
                     </TableCell>

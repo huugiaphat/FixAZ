@@ -120,12 +120,12 @@ export function FormThuChiMoi({ maNvHienTai }: { maNvHienTai: string }) {
           </div>
 
           <div className="space-y-2">
-            <Label>Nội dung {loai === "Thu" ? "thu" : "chi"} *</Label>
+            <Label>Danh mục {loai === "Thu" ? "thu" : "chi"} *</Label>
             {loai === "Thu" ? (
               <>
                 <Select value={watch("noi_dung_thu")} onValueChange={(v) => setValue("noi_dung_thu", v as ThuChiFormValues["noi_dung_thu"], { shouldValidate: true })}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Chọn nội dung thu" />
+                    <SelectValue placeholder="Chọn danh mục thu" />
                   </SelectTrigger>
                   <SelectContent>
                     {NOI_DUNG_THU_NHAP_TAY.map((n) => (
@@ -140,7 +140,7 @@ export function FormThuChiMoi({ maNvHienTai }: { maNvHienTai: string }) {
             ) : (
               <Select value={watch("noi_dung_chi")} onValueChange={(v) => setValue("noi_dung_chi", v as ThuChiFormValues["noi_dung_chi"], { shouldValidate: true })}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Chọn nội dung chi" />
+                  <SelectValue placeholder="Chọn danh mục chi" />
                 </SelectTrigger>
                 <SelectContent>
                   {NOI_DUNG_CHI.map((n) => (
@@ -206,7 +206,7 @@ export function FormThuChiMoi({ maNvHienTai }: { maNvHienTai: string }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="ghi_chu">Ghi chú</Label>
+            <Label htmlFor="ghi_chu">Mô tả</Label>
             <Textarea id="ghi_chu" rows={2} {...register("ghi_chu")} />
           </div>
 
