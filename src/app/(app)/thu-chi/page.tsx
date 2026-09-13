@@ -1,13 +1,14 @@
 import { requireNhanVien } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { FormThuChiMoi } from "@/components/thu-chi/form-thu-chi-moi";
+import { FormSuaThuChi } from "@/components/thu-chi/form-sua-thu-chi";
 import { BoLocThuChi } from "@/components/thu-chi/bo-loc-thu-chi";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { formatVND, formatDateTime } from "@/lib/format";
 import { NOI_DUNG_THU, NOI_DUNG_CHI } from "@/lib/schemas/thu-chi";
-import type { ThuChi } from "@/types/database";
+import type { NhanVien, ThuChi } from "@/types/database";
 
 type ThuChiVoiDon = ThuChi & { don_hang: { mo_ta_su_co: string } | null; nhan_vien: { ho_ten: string } | null };
 
@@ -39,6 +40,13 @@ export default async function TrangThuChi({
 
   const { data, error } = await query;
   let danhSach = (data as ThuChiVoiDon[]) ?? [];
+
+  const laQuanLy = nv.vai_tro_app === "Quản lý";
+  let nhanVienList: NhanVien[] = [];
+  if (laQuanLy) {
+    const { data: nvData } = await supabase.from("nhan_vien").select("*").eq("trang_thai", "Đang làm").order("ho_ten");
+    nhanVienList = (nvData as NhanVien[]) ?? [];
+  }
 
   if (tenCongTrinh) {
     const tuKhoa = tenCongTrinh.toLowerCase();
@@ -116,6 +124,7 @@ export default async function TrangThuChi({
                   <TableHead>Phương thức</TableHead>
                   <TableHead>Người thu chi</TableHead>
                   <TableHead>Ngày</TableHead>
+                  {laQuanLy ? <TableHead className="w-10" /> : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -140,6 +149,11 @@ export default async function TrangThuChi({
                     <TableCell className="text-muted-foreground">{tc.phuong_thuc}</TableCell>
                     <TableCell className="text-muted-foreground">{tc.nhan_vien?.ho_ten ?? tc.nguoi_tao}</TableCell>
                     <TableCell className="text-muted-foreground">{formatDateTime(tc.ngay)}</TableCell>
+                    {laQuanLy ? (
+                      <TableCell>
+                        {tc.ma_thu ? null : <FormSuaThuChi phieu={tc} nhanVienList={nhanVienList} />}
+                      </TableCell>
+                    ) : null}
                   </TableRow>
                 ))}
               </TableBody>
