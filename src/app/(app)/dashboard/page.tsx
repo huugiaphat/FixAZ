@@ -18,6 +18,7 @@ import {
   phanBoDanhGia,
   chiTietTheoNoiDungChi,
   chiTietTheoNoiDungThu,
+  thuChiTheoCongTrinh,
 } from "@/lib/dashboard-analytics";
 import type { ThuChiTongHop, DonHangTinhToan, NghiemThu, NhanVien, ThuChi } from "@/types/database";
 import { CalendarDays, CalendarRange, Coins } from "lucide-react";
@@ -50,7 +51,7 @@ export default async function TrangDashboard() {
       supabase.from("v_don_hang").select("*").order("ngay_tiep_nhan", { ascending: false }).limit(1000),
       supabase.from("nghiem_thu").select("ma_don, diem_danh_gia"),
       supabase.from("nhan_vien").select("ma_nv, ho_ten"),
-      supabase.from("thu_chi").select("loai, noi_dung_thu, noi_dung_chi, so_tien").gte("ngay", dauThang),
+      supabase.from("thu_chi").select("loai, noi_dung_thu, noi_dung_chi, so_tien, ten_cong_trinh, don_hang(mo_ta_su_co)").gte("ngay", dauThang),
     ]);
 
   const khachHangList = (khachHang3Thang as { ngay_tao: string }[]) ?? [];
@@ -58,7 +59,8 @@ export default async function TrangDashboard() {
   const donList = (allDon as DonHangTinhToan[]) ?? [];
   const nghiemThuList = (allNghiemThu as Pick<NghiemThu, "ma_don" | "diem_danh_gia">[]) ?? [];
   const nvMap = new Map(((allNv as Pick<NhanVien, "ma_nv" | "ho_ten">[]) ?? []).map((n) => [n.ma_nv, n.ho_ten]));
-  const thuChiThangList = (thuChiThang as Pick<ThuChi, "loai" | "noi_dung_thu" | "noi_dung_chi" | "so_tien">[]) ?? [];
+  type ThuChiThang = Pick<ThuChi, "loai" | "noi_dung_thu" | "noi_dung_chi" | "so_tien" | "ten_cong_trinh"> & { don_hang: { mo_ta_su_co: string } | null };
+  const thuChiThangList = (thuChiThang as unknown as ThuChiThang[]) ?? [];
 
   const theoCongTrinh = congTrinhTheoThang(khachHangList, donList, 3);
   const theoThang = doanhThuTheoThang(donList, 6);
@@ -72,6 +74,7 @@ export default async function TrangDashboard() {
   const danhGia = phanBoDanhGia(nghiemThuList as NghiemThu[]);
   const chiTietChi = chiTietTheoNoiDungChi(thuChiThangList);
   const chiTietThu = chiTietTheoNoiDungThu(thuChiThangList);
+  const thuChiCongTrinh = thuChiTheoCongTrinh(thuChiThangList);
 
   return (
     <div className="space-y-8">
@@ -142,6 +145,40 @@ export default async function TrangDashboard() {
             </CardContent>
           </Card>
         </div>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Thu chi công trình</h2>
+        {thuChiCongTrinh.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Chưa có khoản thu chi nào trong tháng.</p>
+        ) : (
+          <Card className="max-w-2xl overflow-hidden py-0">
+            <CardContent className="overflow-x-auto p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Tên công trình</TableHead>
+                    <TableHead>Tổng thu</TableHead>
+                    <TableHead>Tổng chi</TableHead>
+                    <TableHead>Lợi nhuận</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {thuChiCongTrinh.map((ct) => (
+                    <TableRow key={ct.tenCongTrinh}>
+                      <TableCell className="max-w-56 truncate font-medium">{ct.tenCongTrinh}</TableCell>
+                      <TableCell className="text-emerald-600">{formatVND(ct.tongThu)}</TableCell>
+                      <TableCell className="text-destructive">{formatVND(ct.tongChi)}</TableCell>
+                      <TableCell className={`font-medium ${ct.loiNhuan >= 0 ? "text-emerald-600" : "text-destructive"}`}>
+                        {formatVND(ct.loiNhuan)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        )}
       </section>
 
       <section className="space-y-3">

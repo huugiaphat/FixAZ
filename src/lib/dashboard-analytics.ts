@@ -198,3 +198,27 @@ export function chiTietTheoNoiDungThu(danhSach: ThuChiRutGon[]): DiemNoiDung[] {
   }
   return [...map.entries()].sort((a, b) => b[1] - a[1]).map(([nhan, soTien]) => ({ nhan, soTien }));
 }
+
+export interface ThuChiCongTrinh {
+  tenCongTrinh: string;
+  tongThu: number;
+  tongChi: number;
+  loiNhuan: number;
+}
+
+type ThuChiVoiCongTrinh = Pick<ThuChi, "loai" | "so_tien" | "ten_cong_trinh"> & { don_hang: { mo_ta_su_co: string } | null };
+
+/** Tổng thu/chi/lợi nhuận theo từng công trình (đơn hàng, hoặc tên công trình tự nhập nếu không gắn đơn). */
+export function thuChiTheoCongTrinh(danhSach: ThuChiVoiCongTrinh[]): ThuChiCongTrinh[] {
+  const map = new Map<string, { tongThu: number; tongChi: number }>();
+  for (const tc of danhSach) {
+    const ten = tc.don_hang?.mo_ta_su_co ?? tc.ten_cong_trinh ?? "Khác";
+    const hien = map.get(ten) ?? { tongThu: 0, tongChi: 0 };
+    if (tc.loai === "Thu") hien.tongThu += tc.so_tien;
+    else hien.tongChi += tc.so_tien;
+    map.set(ten, hien);
+  }
+  return [...map.entries()]
+    .map(([tenCongTrinh, v]) => ({ tenCongTrinh, tongThu: v.tongThu, tongChi: v.tongChi, loiNhuan: v.tongThu - v.tongChi }))
+    .sort((a, b) => b.loiNhuan - a.loiNhuan);
+}
