@@ -13,15 +13,15 @@ export function BieuDoCotNhom({ diem, chuoi, chieuCao = 170 }: { diem: DiemNhomC
   const max = Math.max(1, ...diem.flatMap((d) => d.giaTri));
   return (
     <div>
-      <div className="flex items-end justify-around gap-2 border-b" style={{ height: chieuCao }}>
+      <div className="flex items-end justify-around gap-2 border-b bg-[linear-gradient(to_top,var(--border)_1px,transparent_1px)] bg-[size:100%_25%] pt-6" style={{ height: chieuCao }}>
         {diem.map((d) => (
           <div key={d.nhan} className="flex h-full flex-1 items-end justify-center gap-1.5">
             {d.giaTri.map((v, i) => (
               <div key={i} className="flex h-full flex-col items-center justify-end" style={{ width: 26 }}>
-                <span className="mb-1 text-[11px] font-medium tabular-nums">{v}</span>
+                <span className="mb-1 text-xs font-medium tabular-nums">{v}</span>
                 <div
-                  className={`w-full rounded-t-sm ${chuoi[i]?.mau ?? "bg-primary"}`}
-                  style={{ height: `${v > 0 ? Math.max((v / max) * 100, 3) : 0}%` }}
+                  className={`w-full shrink-0 rounded-t-md ${chuoi[i]?.mau ?? "bg-primary"}`}
+                  style={{ height: `${v > 0 ? (v / max) * 78 : 0}%` }}
                 />
               </div>
             ))}

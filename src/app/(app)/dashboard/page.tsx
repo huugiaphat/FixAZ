@@ -1,3 +1,5 @@
+import Link from "next/link";
+import styles from "./dashboard.module.css";
 import { requireNhanVien } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { StatCard } from "@/components/dashboard/stat-card";
@@ -77,17 +79,20 @@ export default async function TrangDashboard() {
   const thuChiCongTrinh = thuChiTheoCongTrinh(thuChiThangList);
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
+    <div className={styles.dashboard}>
+      <div className={styles.heading}>
+        <div><p className="mb-1 text-xs font-semibold uppercase tracking-widest text-blue-600">Hữu Gia Phát · Điều hành</p>
+        <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
         <p className="text-sm text-muted-foreground">
-          Số liệu tháng {now.getMonth() + 1}/{now.getFullYear()}
-        </p>
+          Tổng quan hoạt động · Tháng {now.getMonth() + 1}/{now.getFullYear()}
+        </p></div>
+        <Link href="/thu-chi" className="rounded-lg border bg-card px-4 py-2 text-sm font-medium hover:bg-muted">Mở sổ thu chi →</Link>
       </div>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Công Trình</h2>
-        <Card className="max-w-xl">
+        <h2 className="text-lg font-semibold tracking-tight">Công Trình</h2>
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <Card>
           <CardContent className="pt-6">
             <p className="mb-3 text-xs text-muted-foreground">Khách mới · CT mới · CT hoàn thành — 3 tháng gần nhất</p>
             <BieuDoCotNhom
@@ -96,29 +101,39 @@ export default async function TrangDashboard() {
             />
           </CardContent>
         </Card>
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { nhan: "Đang xử lý", so: donList.filter(d => !["Đã đóng", "Đã hủy"].includes(d.trang_thai)).length, ghiChu: "Đơn chưa đóng hoặc hủy", mau: "text-blue-600" },
+            { nhan: "Đã hoàn thành", so: donList.filter(d => d.trang_thai === "Đã đóng").length, ghiChu: "Đơn đã đóng", mau: "text-emerald-600" },
+            { nhan: "Khẩn cấp", so: donList.filter(d => d.uu_tien === "P1-Khẩn cấp" && !["Đã đóng", "Đã hủy"].includes(d.trang_thai)).length, ghiChu: "Đang cần ưu tiên xử lý", mau: "text-rose-600" },
+            { nhan: "Chờ thu tiền", so: donList.filter(d => d.trang_thai === "Đã nghiệm thu - chờ thu tiền").length, ghiChu: "Đã nghiệm thu", mau: "text-amber-600" },
+          ].map(m => <div key={m.nhan} className="rounded-xl border bg-card p-4"><p className="text-sm font-medium">{m.nhan}</p><p className={`my-2 text-4xl font-semibold tabular-nums ${m.mau}`}>{m.so}<span className="ml-2 text-xs font-normal text-muted-foreground">đơn</span></p><p className="text-xs text-muted-foreground">{m.ghiChu}</p></div>)}
+          <p className="col-span-2 text-xs text-muted-foreground">Tổng hợp từ {donList.length} đơn gần nhất, tối đa 1.000 đơn.</p>
+        </div>
+        </div>
       </section>
 
       {tc ? (
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Thu chi</h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:max-w-xl">
+          <h2 className="text-lg font-semibold tracking-tight">Thu chi</h2>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 ">
             <StatCard
               icon={CalendarDays}
-              nhan="Thu chi hôm nay"
+              nhan="Chênh lệch hôm nay"
               giaTri={formatVND(tc.thu_hom_nay - tc.chi_hom_nay)}
               mucCanhBao={tc.thu_hom_nay - tc.chi_hom_nay >= 0 ? "xanh" : "do"}
               ghiChu={`Thu ${formatVND(tc.thu_hom_nay)} · Chi ${formatVND(tc.chi_hom_nay)}`}
             />
             <StatCard
               icon={CalendarRange}
-              nhan="Thu chi tháng này"
+              nhan="Chênh lệch tháng này"
               giaTri={formatVND(tc.thu_thang_nay - tc.chi_thang_nay)}
               mucCanhBao={tc.thu_thang_nay - tc.chi_thang_nay >= 0 ? "xanh" : "do"}
               ghiChu={`Thu ${formatVND(tc.thu_thang_nay)} · Chi ${formatVND(tc.chi_thang_nay)}`}
             />
             <StatCard
               icon={Coins}
-              nhan="Thu chi năm nay"
+              nhan="Chênh lệch năm nay"
               giaTri={formatVND(tc.thu_nam_nay - tc.chi_nam_nay)}
               mucCanhBao={tc.thu_nam_nay - tc.chi_nam_nay >= 0 ? "xanh" : "do"}
               ghiChu={`Thu ${formatVND(tc.thu_nam_nay)} · Chi ${formatVND(tc.chi_nam_nay)}`}
@@ -128,48 +143,49 @@ export default async function TrangDashboard() {
       ) : null}
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Chi tiết thu chi</h2>
-        <div className="grid gap-3 lg:grid-cols-2 lg:max-w-xl">
+        <h2 className="text-lg font-semibold tracking-tight">Chi tiết thu chi</h2>
+        <div className="grid gap-3 lg:grid-cols-2 ">
           <Card>
             <CardContent className="space-y-1 pt-6">
               <p className="font-medium">Chi tiết chi</p>
-              <p className="mb-1 text-xs text-muted-foreground">Theo nội dung chi — tháng này</p>
-              <DanhSachGiaTri items={chiTietChi.map((t) => ({ nhan: t.nhan, hienThi: formatVND(t.soTien) }))} />
+              <p className="mb-1 text-xs text-muted-foreground">Theo danh mục chi — tháng này</p>
+              <DanhSachGiaTri mau="bg-rose-500" items={chiTietChi.map((t) => ({ nhan: t.nhan, hienThi: formatVND(t.soTien), giaTri: t.soTien }))} />
             </CardContent>
           </Card>
           <Card>
             <CardContent className="space-y-1 pt-6">
               <p className="font-medium">Chi tiết thu</p>
-              <p className="mb-1 text-xs text-muted-foreground">Theo nội dung thu — tháng này</p>
-              <DanhSachGiaTri items={chiTietThu.map((t) => ({ nhan: t.nhan, hienThi: formatVND(t.soTien) }))} />
+              <p className="mb-1 text-xs text-muted-foreground">Theo danh mục thu — tháng này</p>
+              <DanhSachGiaTri mau="bg-emerald-500" items={chiTietThu.map((t) => ({ nhan: t.nhan, hienThi: formatVND(t.soTien), giaTri: t.soTien }))} />
             </CardContent>
           </Card>
         </div>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Thu chi công trình</h2>
+        <div className="flex flex-wrap items-end justify-between gap-2"><h2 className="text-lg font-semibold tracking-tight">Thu chi công trình</h2><span className="text-xs text-muted-foreground">Tháng này · {thuChiCongTrinh.length} công trình</span></div>
+        <p className="text-xs text-muted-foreground">Lợi nhuận ở đây = tổng thu − tổng chi đã ghi sổ trong tháng; chưa phản ánh toàn bộ vòng đời công trình.</p>
         {thuChiCongTrinh.length === 0 ? (
           <p className="text-sm text-muted-foreground">Chưa có khoản thu chi nào trong tháng.</p>
         ) : (
-          <Card className="max-w-2xl overflow-hidden py-0">
+          <Card className="overflow-hidden py-0">
             <CardContent className="overflow-x-auto p-0">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Tên công trình</TableHead>
-                    <TableHead>Tổng thu</TableHead>
-                    <TableHead>Tổng chi</TableHead>
-                    <TableHead>Lợi nhuận</TableHead>
+                    <TableHead className="text-right">Tổng thu</TableHead>
+                    <TableHead className="text-right">Tổng chi</TableHead>
+                    <TableHead className="text-right">Lợi nhuận</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {thuChiCongTrinh.map((ct) => (
                     <TableRow key={ct.tenCongTrinh}>
-                      <TableCell className="max-w-56 truncate font-medium">{ct.tenCongTrinh}</TableCell>
-                      <TableCell className="text-emerald-600">{formatVND(ct.tongThu)}</TableCell>
-                      <TableCell className="text-destructive">{formatVND(ct.tongChi)}</TableCell>
-                      <TableCell className={`font-medium ${ct.loiNhuan >= 0 ? "text-emerald-600" : "text-destructive"}`}>
+                      <TableCell className="min-w-48 max-w-96 whitespace-normal font-medium">{ct.tenCongTrinh}</TableCell>
+                      <TableCell className="text-right tabular-nums text-emerald-600">{formatVND(ct.tongThu)}</TableCell>
+                      <TableCell className="text-right tabular-nums text-destructive">{formatVND(ct.tongChi)}</TableCell>
+                      <TableCell className={`text-right tabular-nums font-semibold ${ct.loiNhuan >= 0 ? "text-emerald-600" : "text-destructive"}`}>
                         {formatVND(ct.loiNhuan)}
                       </TableCell>
                     </TableRow>
@@ -182,51 +198,51 @@ export default async function TrangDashboard() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Doanh thu</h2>
-        <div className="grid gap-3 lg:grid-cols-2 lg:max-w-xl">
+        <h2 className="text-lg font-semibold tracking-tight">Doanh thu</h2>
+        <div className="grid gap-3 lg:grid-cols-2 ">
           <Card>
             <CardContent className="space-y-1 pt-6">
               <p className="font-medium">Doanh thu theo tháng</p>
               <p className="mb-1 text-xs text-muted-foreground">6 tháng gần nhất — tính theo ngày đóng đơn</p>
-              <DanhSachGiaTri items={theoThang.map((t) => ({ nhan: t.nhan, hienThi: formatVND(t.doanhThu) }))} />
+              <DanhSachGiaTri items={theoThang.map((t) => ({ nhan: t.nhan, hienThi: formatVND(t.doanhThu), giaTri: t.doanhThu }))} />
             </CardContent>
           </Card>
           <Card>
             <CardContent className="space-y-1 pt-6">
               <p className="font-medium">Doanh thu theo loại dịch vụ</p>
               <p className="mb-1 text-xs text-muted-foreground">Trên các đơn đã đóng</p>
-              <DanhSachGiaTri items={theoDichVu.map((t) => ({ nhan: t.nhan, hienThi: formatVND(t.doanhThu) }))} />
+              <DanhSachGiaTri items={theoDichVu.map((t) => ({ nhan: t.nhan, hienThi: formatVND(t.doanhThu), giaTri: t.doanhThu }))} />
             </CardContent>
           </Card>
         </div>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Vận hành</h2>
+        <h2 className="text-lg font-semibold tracking-tight">Vận hành</h2>
         <div className="grid gap-3 lg:grid-cols-2">
           <Card>
             <CardContent className="space-y-1 pt-6">
               <p className="font-medium">Đơn theo trạng thái</p>
-              <p className="mb-1 text-xs text-muted-foreground">Toàn bộ {donList.length} đơn trong hệ thống</p>
-              <DanhSachGiaTri items={theoTrangThai.map((t) => ({ nhan: t.nhan, hienThi: `${t.soLuong} đơn` }))} />
+              <p className="mb-1 text-xs text-muted-foreground">Trong {donList.length} đơn gần nhất (tối đa 1.000)</p>
+              <DanhSachGiaTri items={theoTrangThai.map((t) => ({ nhan: t.nhan, hienThi: `${t.soLuong} đơn`, giaTri: t.soLuong }))} />
             </CardContent>
           </Card>
           <Card>
             <CardContent className="space-y-1 pt-6">
               <p className="font-medium">Đơn theo mức ưu tiên</p>
-              <p className="mb-1 text-xs text-muted-foreground">Toàn bộ {donList.length} đơn trong hệ thống</p>
-              <DanhSachGiaTri items={theoUuTien.map((t) => ({ nhan: t.nhan, hienThi: `${t.soLuong} đơn` }))} />
+              <p className="mb-1 text-xs text-muted-foreground">Trong {donList.length} đơn gần nhất (tối đa 1.000)</p>
+              <DanhSachGiaTri items={theoUuTien.map((t) => ({ nhan: t.nhan, hienThi: `${t.soLuong} đơn`, giaTri: t.soLuong }))} />
             </CardContent>
           </Card>
         </div>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Đội thợ</h2>
+        <h2 className="text-lg font-semibold tracking-tight">Đội thợ</h2>
         {hieuSuatTho.length === 0 ? (
           <p className="text-sm text-muted-foreground">Chưa có đơn hoàn thành để tính hiệu suất.</p>
         ) : (
-          <Card className="max-w-xl overflow-hidden py-0">
+          <Card className="overflow-hidden py-0">
             <CardContent className="overflow-x-auto p-0">
               <Table>
                 <TableHeader>
@@ -258,7 +274,7 @@ export default async function TrangDashboard() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Thanh toán & Chất lượng</h2>
+        <h2 className="text-lg font-semibold tracking-tight">Thanh toán & Chất lượng</h2>
         <div className="grid gap-3 lg:grid-cols-2">
           <Card>
             <CardContent className="space-y-1 pt-6">
@@ -280,7 +296,7 @@ export default async function TrangDashboard() {
             <CardContent className="space-y-1 pt-6">
               <p className="font-medium">Phân bố đánh giá</p>
               <p className="mb-1 text-xs text-muted-foreground">Trên các lượt nghiệm thu có chấm điểm</p>
-              <DanhSachGiaTri items={danhGia.map((d2) => ({ nhan: d2.nhan, hienThi: `${d2.soLuong}` }))} />
+              <DanhSachGiaTri items={danhGia.map((d2) => ({ nhan: d2.nhan, hienThi: `${d2.soLuong} lượt`, giaTri: d2.soLuong }))} />
             </CardContent>
           </Card>
         </div>

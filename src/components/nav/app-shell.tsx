@@ -73,7 +73,7 @@ export function AppShell({ nhanVien, children }: { nhanVien: NhanVien; children:
         </div>
       </aside>
 
-      <div className="flex min-h-screen flex-1 flex-col">
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
         {/* Header mobile + desktop */}
         <header className="flex h-14 items-center justify-between border-b px-4 md:px-6">
           <div className="flex items-center gap-2 md:hidden">
