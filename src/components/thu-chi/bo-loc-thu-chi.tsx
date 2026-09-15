@@ -20,19 +20,19 @@ export function BoLocThuChi({
   noiDung?: string;
 }) {
   return (
-    <form className="flex flex-wrap items-end gap-3">
+    <form className="grid grid-cols-1 items-end gap-4 rounded-xl border bg-card p-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
       <div className="space-y-1.5">
         <Label htmlFor="tu">Từ ngày</Label>
-        <Input id="tu" name="tu" type="date" defaultValue={tu} className="w-40" />
+        <Input id="tu" name="tu" type="date" defaultValue={tu} className="w-full" />
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="den">Đến ngày</Label>
-        <Input id="den" name="den" type="date" defaultValue={den} className="w-40" />
+        <Input id="den" name="den" type="date" defaultValue={den} className="w-full" />
       </div>
       <div className="space-y-1.5">
         <Label>Loại</Label>
         <Select name="loai" defaultValue={loai ?? "tat-ca"}>
-          <SelectTrigger className="w-36">
+          <SelectTrigger className="w-full">
             <SelectValue>{(v: string) => (v === "Thu" || v === "Chi" ? v : "Tất cả")}</SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -49,14 +49,14 @@ export function BoLocThuChi({
           name="ten_cong_trinh"
           defaultValue={tenCongTrinh}
           placeholder="Tìm theo tên công trình…"
-          className="w-52"
+          className="w-full"
           autoComplete="off"
         />
       </div>
       <div className="space-y-1.5">
         <Label>Danh mục</Label>
         <Select name="noi_dung" defaultValue={noiDung ?? "tat-ca"}>
-          <SelectTrigger className="w-44">
+          <SelectTrigger className="w-full">
             <SelectValue>{(v: string) => ([...NOI_DUNG_THU, ...NOI_DUNG_CHI] as string[]).includes(v) ? v : "Tất cả"}</SelectValue>
           </SelectTrigger>
           <SelectContent>

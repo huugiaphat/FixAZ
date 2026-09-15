@@ -1,3 +1,5 @@
+import { PageHeading } from "@/components/page-heading";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { requireNhanVien } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -25,13 +27,13 @@ export default async function TrangKhachHang({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Khách hàng</h1>
+      <PageHeading title="Khách hàng" description="Thông tin liên hệ và lịch sử sử dụng dịch vụ.">
         {duocTao ? <FormKhachHangMoi /> : null}
-      </div>
+      </PageHeading>
 
-      <form className="max-w-sm">
-        <Input name="q" defaultValue={q} placeholder="Tìm theo tên, SĐT, mã khách hàng…" />
+      <form className="flex max-w-2xl gap-2 rounded-xl border bg-card p-3">
+        <Input aria-label="Tìm khách hàng" name="q" defaultValue={q} placeholder="Tìm theo tên, SĐT, mã khách hàng…" />
+        <Button type="submit" variant="outline">Tìm</Button>
       </form>
 
       {error ? (

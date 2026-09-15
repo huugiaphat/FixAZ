@@ -1,3 +1,4 @@
+import { PageHeading } from "@/components/page-heading";
 import Link from "next/link";
 import { requireNhanVien } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -35,14 +36,13 @@ export default async function TrangDonHang() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Đơn hàng</h1>
+      <PageHeading title="Đơn hàng" description="Theo dõi công việc từ tiếp nhận, thi công đến thanh toán.">
         {duocTao ? (
           <Button render={<Link href="/don-hang/moi" />} className="gap-2">
             <Plus className="h-4 w-4" /> Tạo đơn mới
           </Button>
         ) : null}
-      </div>
+      </PageHeading>
 
       {error ? (
         <p className="text-sm text-destructive">Lỗi tải dữ liệu: {error.message}</p>
@@ -51,7 +51,17 @@ export default async function TrangDonHang() {
           {nv.vai_tro_app === "Thợ" ? "Bạn chưa được điều phối đơn nào." : "Chưa có đơn hàng nào."}
         </p>
       ) : (
-        <Card className="overflow-hidden py-0">
+        <>
+        <div className="grid gap-3 lg:hidden">
+          {danhSach.map(d => <Link key={d.ma_don} href={`/don-hang/${d.ma_don}`} className="rounded-xl border bg-card p-4 hover:border-primary/50">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><span className="text-xs font-semibold text-primary">{d.ma_don}</span><BadgeTrangThaiDon trangThai={d.trang_thai} /></div>
+            <h2 className="font-semibold leading-relaxed">{d.mo_ta_su_co}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{khMap.get(d.ma_kh)?.ho_ten ?? "Khách hàng"} · {d.dich_vu}</p>
+            <div className="my-3 flex items-center justify-between gap-2"><BadgeUuTien uuTien={d.uu_tien} /><span className="text-xs text-muted-foreground">{formatDate(d.ngay_tiep_nhan)}</span></div>
+            <div className="grid grid-cols-2 gap-3 border-t pt-3 text-sm"><div><p className="text-xs text-muted-foreground">Tổng tiền</p><p className="mt-1 font-semibold tabular-nums">{formatVND(d.tong_tien)}</p></div><div className="text-right"><p className="text-xs text-muted-foreground">Công nợ</p><p className="mt-1 font-semibold tabular-nums text-destructive">{formatVND(d.cong_no)}</p></div></div>
+          </Link>)}
+        </div>
+        <Card className="hidden overflow-hidden py-0 lg:flex">
           <CardContent className="overflow-x-auto p-0">
             <Table>
               <TableHeader>
@@ -109,6 +119,7 @@ export default async function TrangDonHang() {
             </Table>
           </CardContent>
         </Card>
+        </>
       )}
     </div>
   );

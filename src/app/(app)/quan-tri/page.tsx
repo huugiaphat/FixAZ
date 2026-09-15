@@ -1,3 +1,4 @@
+import { PageHeading } from "@/components/page-heading";
 import { requireNhanVien } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -32,7 +33,7 @@ export default async function TrangQuanTri() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Quản trị</h1>
+      <PageHeading title="Quản trị" description="Nhân viên, bảng giá dịch vụ và danh mục dùng chung." />
 
       <Tabs defaultValue="nhan-vien">
         <TabsList className="flex-wrap h-auto">

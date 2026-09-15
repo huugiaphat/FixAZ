@@ -1,3 +1,4 @@
+import { PageHeading } from "@/components/page-heading";
 import { requireNhanVien } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { FormThuChiMoi } from "@/components/thu-chi/form-thu-chi-moi";
@@ -67,12 +68,11 @@ export default async function TrangThuChi({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Sổ thu chi</h1>
+      <PageHeading title="Sổ thu chi" description="Ghi nhận thu chi và theo dõi dòng tiền theo công trình.">
         {nv.vai_tro_app !== "Kiểm soát" ? <FormThuChiMoi maNvHienTai={nv.ma_nv} /> : null}
-      </div>
+      </PageHeading>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Card>
           <CardContent className="py-4">
             <p className="text-sm text-muted-foreground">Tổng thu (đang lọc)</p>
@@ -111,7 +111,16 @@ export default async function TrangThuChi({
       ) : danhSach.length === 0 ? (
         <p className="text-sm text-muted-foreground">Chưa có khoản thu chi nào.</p>
       ) : (
-        <Card className="overflow-hidden py-0">
+        <>
+        <div className="grid gap-3 lg:hidden">
+          {danhSach.map(tc => <article key={tc.ma_tc} className="rounded-xl border bg-card p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2"><Badge variant="secondary">{tc.loai} · {tc.noi_dung_thu ?? tc.noi_dung_chi}</Badge><span className={tc.loai === "Thu" ? "font-semibold tabular-nums text-emerald-600" : "font-semibold tabular-nums text-destructive"}>{tc.loai === "Thu" ? "+" : "−"}{formatVND(tc.so_tien)}</span></div>
+            <h2 className="mt-3 font-semibold">{tc.don_hang?.mo_ta_su_co ?? tc.ten_cong_trinh ?? "Chưa gắn công trình"}</h2>
+            {tc.ghi_chu && <p className="mt-1 whitespace-pre-wrap break-words text-sm text-muted-foreground">{tc.ghi_chu}</p>}
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-3"><div className="space-y-1 text-xs text-muted-foreground"><p>{tc.nhan_vien?.ho_ten ?? tc.nguoi_tao} · {tc.phuong_thuc}</p><p>{formatDateTime(tc.ngay)}</p></div>{laQuanLy && !tc.ma_thu ? <FormSuaThuChi phieu={tc} nhanVienList={nhanVienList} /> : null}</div>
+          </article>)}
+        </div>
+        <Card className="hidden overflow-hidden py-0 lg:flex">
           <CardContent className="overflow-x-auto p-0">
             <Table>
               <TableHeader>
@@ -160,6 +169,7 @@ export default async function TrangThuChi({
             </Table>
           </CardContent>
         </Card>
+        </>
       )}
     </div>
   );

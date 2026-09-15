@@ -1,3 +1,4 @@
+import { PageHeading } from "@/components/page-heading";
 import Link from "next/link";
 import { requireNhanVien } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -23,15 +24,10 @@ export default async function TrangMauBaoGia() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Mẫu báo giá</h1>
+      <PageHeading title="Mẫu báo giá" description="Lập báo giá tham khảo, in gửi khách và liên kết đơn hàng.">
         {nv.vai_tro_app !== "Kiểm soát" ? <FormMauBaoGiaMoi /> : null}
-      </div>
-      <p className="text-sm text-muted-foreground">
-        Báo giá sơ bộ gửi khách hàng tham khảo trước khi có đơn hàng. Khi khách đồng ý, liên kết mẫu báo giá với đơn hàng tương ứng.
-      </p>
-
-      {error ? (
+      </PageHeading>
+{error ? (
         <p className="text-sm text-destructive">Lỗi tải dữ liệu: {error.message}</p>
       ) : danhSach.length === 0 ? (
         <p className="text-sm text-muted-foreground">Chưa có mẫu báo giá nào.</p>

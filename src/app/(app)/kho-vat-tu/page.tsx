@@ -1,3 +1,4 @@
+import { PageHeading } from "@/components/page-heading";
 import Link from "next/link";
 import { requireNhanVien } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -17,15 +18,14 @@ export default async function TrangKhoVatTu() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Kho vật tư</h1>
+      <PageHeading title="Kho vật tư" description="Theo dõi tồn kho, giá vật tư và lịch sử nhập xuất.">
         {nv.vai_tro_app !== "Kiểm soát" ? (
           <div className="flex gap-2">
             <FormXuatNhapKho danhSachVatTu={danhSach} />
             <FormVatTuMoi />
           </div>
         ) : null}
-      </div>
+      </PageHeading>
 
       {error ? (
         <p className="text-sm text-destructive">Lỗi tải dữ liệu: {error.message}</p>

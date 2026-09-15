@@ -1,3 +1,4 @@
+import { PageHeading } from "@/components/page-heading";
 import { requireNhanVien } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { FormKpiMoi } from "@/components/kpi/form-kpi-moi";
@@ -29,10 +30,9 @@ export default async function TrangKpi() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">KPI nhân viên</h1>
+      <PageHeading title="KPI nhân viên" description="Điểm hiệu suất và xếp loại nhân viên theo tháng.">
         {nv.vai_tro_app === "Quản lý" ? <FormKpiMoi /> : null}
-      </div>
+      </PageHeading>
 
       {error ? (
         <p className="text-sm text-destructive">Lỗi tải dữ liệu: {error.message}</p>

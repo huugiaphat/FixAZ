@@ -1,3 +1,4 @@
+import { PageHeading } from "@/components/page-heading";
 import { headers } from "next/headers";
 import QRCode from "qrcode";
 import { requireNhanVien } from "@/lib/auth";
@@ -25,10 +26,8 @@ export default async function TrangYeuCauDichVu() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Yêu cầu dịch vụ</h1>
-      <p className="text-sm text-muted-foreground">
-        Yêu cầu khách gửi trực tiếp từ trang công khai (quét mã QR), chưa qua bước tiếp nhận của CSKH.
-      </p>
+      <PageHeading title="Yêu cầu dịch vụ" description="Yêu cầu khách gửi từ trang công khai. Tiếp nhận và liên hệ để tư vấn." />
+
 
       {qrDataUrl ? (
         <Card>

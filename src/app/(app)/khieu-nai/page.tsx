@@ -1,3 +1,4 @@
+import { PageHeading } from "@/components/page-heading";
 import { requireNhanVien } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { FormKhieuNaiMoi } from "@/components/khieu-nai/form-khieu-nai-moi";
@@ -12,10 +13,9 @@ export default async function TrangKhieuNai() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Khiếu nại</h1>
+      <PageHeading title="Khiếu nại" description="Tiếp nhận phản hồi và theo dõi tiến độ giải quyết.">
         {nv.vai_tro_app !== "Kiểm soát" ? <FormKhieuNaiMoi /> : null}
-      </div>
+      </PageHeading>
 
       {error ? (
         <p className="text-sm text-destructive">Lỗi tải dữ liệu: {error.message}</p>

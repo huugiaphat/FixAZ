@@ -1,3 +1,4 @@
+import { PageHeading } from "@/components/page-heading";
 import { requireNhanVien } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { FormBaoHanhMoi } from "@/components/bao-hanh/form-bao-hanh-moi";
@@ -12,10 +13,9 @@ export default async function TrangBaoHanh() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Bảo hành</h1>
+      <PageHeading title="Bảo hành" description="Theo dõi các yêu cầu bảo hành sau khi hoàn thành công việc.">
         {nv.vai_tro_app !== "Kiểm soát" ? <FormBaoHanhMoi /> : null}
-      </div>
+      </PageHeading>
 
       {error ? (
         <p className="text-sm text-destructive">Lỗi tải dữ liệu: {error.message}</p>

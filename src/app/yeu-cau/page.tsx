@@ -38,8 +38,8 @@ export default function TrangYeuCauDichVu() {
 
   if (ketQua) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-        <Card className="w-full max-w-sm">
+      <main className="public-page flex items-center justify-center py-8">
+        <Card className="w-full max-w-xl p-2 sm:p-5">
           <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
             <CheckCircle2 className="h-14 w-14 text-emerald-600" />
             <p className="text-lg font-semibold">Đã gửi yêu cầu thành công!</p>
@@ -53,11 +53,12 @@ export default function TrangYeuCauDichVu() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-      <Card className="w-full max-w-sm">
+    <main className="public-page flex items-center justify-center py-8">
+      <Card className="w-full max-w-xl p-2 sm:p-5">
         <CardHeader className="items-center text-center gap-2">
           <Image src="/logo.png" alt="Hữu Gia Phát" width={500} height={500} className="h-24 w-24 object-contain" priority />
-          <CardDescription>Kính chào quý khách! Chúng tôi chuyên sửa chữa nhà cửa, điện nước,. Mời quý khách lựa chọn dịch vụ phù hợp!</CardDescription>
+          <h1 className="text-2xl font-semibold">Bạn cần sửa chữa gì?</h1>
+          <CardDescription>Gửi thông tin để Hữu Gia Phát liên hệ tư vấn dịch vụ nhà cửa, điện nước.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
