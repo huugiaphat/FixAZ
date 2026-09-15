@@ -26,7 +26,7 @@ export default async function TrangYeuCauDichVu() {
 
   return (
     <div className="space-y-4">
-      <PageHeading title="Yêu cầu dịch vụ" description="Yêu cầu khách gửi từ trang công khai. Tiếp nhận và liên hệ để tư vấn." />
+      <PageHeading title="Yêu cầu dịch vụ" description="CSKH liên hệ tư vấn khách hàng và tạo đơn hàng" />
 
 
       {qrDataUrl ? (

@@ -164,7 +164,6 @@ export default async function TrangDashboard() {
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-end justify-between gap-2"><h2 className="text-lg font-semibold tracking-tight">Thu chi công trình</h2><span className="text-xs text-muted-foreground">Tháng này · {thuChiCongTrinh.length} công trình</span></div>
-        <p className="text-xs text-muted-foreground">Lợi nhuận ở đây = tổng thu − tổng chi đã ghi sổ trong tháng; chưa phản ánh toàn bộ vòng đời công trình.</p>
         {thuChiCongTrinh.length === 0 ? (
           <p className="text-sm text-muted-foreground">Chưa có khoản thu chi nào trong tháng.</p>
         ) : (
