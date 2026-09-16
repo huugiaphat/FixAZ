@@ -15,10 +15,14 @@ export function NutXoaThuChi({ maTc }: { maTc: string }) {
     if (!confirm(`Xóa vĩnh viễn phiếu ${maTc}? Không thể khôi phục.`)) return;
     setDangXoa(true);
     const supabase = createClient();
-    const { error } = await supabase.from("thu_chi").delete().eq("ma_tc", maTc);
+    const { data, error } = await supabase.from("thu_chi").delete().eq("ma_tc", maTc).select("ma_tc");
     setDangXoa(false);
     if (error) {
       toast.error(`Không xóa được: ${error.message}`);
+      return;
+    }
+    if (!data || data.length === 0) {
+      toast.error("Không xóa được: không có quyền xóa phiếu này (kiểm tra lại phân quyền Admin trên Sổ thu chi).");
       return;
     }
     toast.success(`Đã xóa phiếu ${maTc}`);
