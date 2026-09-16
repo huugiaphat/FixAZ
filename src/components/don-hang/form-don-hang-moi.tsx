@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { donHangSchema, DICH_VU, UU_TIEN, type DonHangFormValues } from "@/lib/schemas/don-hang";
+import { donHangSchema, QUI_MO, DICH_VU, UU_TIEN, type DonHangFormValues } from "@/lib/schemas/don-hang";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +33,7 @@ export function FormDonHangMoi({
   } = useForm<DonHangFormValues>({
     resolver: zodResolver(donHangSchema),
     defaultValues: {
+      qui_mo: "Sửa nhanh",
       uu_tien: "P2-Trong ngày",
       dich_vu: dichVuGoiY,
       mo_ta_su_co: tuYeuCau?.yeu_cau ?? "",
@@ -60,7 +61,7 @@ export function FormDonHangMoi({
     }
 
     toast.success(`Đã tạo đơn ${data.ma_don}`);
-    router.push(`/don-hang/${data.ma_don}`);
+    router.push(`/don-hang/${data.ma_don}${values.qui_mo === "Công trình" ? "?tab=thu-tien" : ""}`);
     router.refresh();
   }
 
@@ -75,6 +76,21 @@ export function FormDonHangMoi({
           </p>
         ) : null}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <fieldset className="space-y-2">
+            <legend className="text-sm font-medium">Qui mô *</legend>
+            <div className="flex flex-wrap gap-6">
+              {QUI_MO.map((quiMo) => (
+                <label key={quiMo} className="flex cursor-pointer items-center gap-2 text-sm">
+                  <input type="radio" value={quiMo} {...register("qui_mo")} className="h-4 w-4 accent-primary" />
+                  {quiMo}
+                </label>
+              ))}
+            </div>
+            {errors.qui_mo ? <p className="text-sm text-destructive">{errors.qui_mo.message}</p> : null}
+            {watch("qui_mo") === "Công trình" ? (
+              <p className="text-sm text-muted-foreground">Đơn công trình chuyển thẳng đến giai đoạn thu tiền.</p>
+            ) : null}
+          </fieldset>
           <div className="space-y-2">
             <Label>Khách hàng *</Label>
             <ChonKhachHang

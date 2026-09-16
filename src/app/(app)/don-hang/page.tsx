@@ -56,7 +56,7 @@ export default async function TrangDonHang() {
           {danhSach.map(d => <Link key={d.ma_don} href={`/don-hang/${d.ma_don}`} className="rounded-xl border bg-card p-4 hover:border-primary/50">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><span className="text-xs font-semibold text-primary">{d.ma_don}</span><BadgeTrangThaiDon trangThai={d.trang_thai} /></div>
             <h2 className="font-semibold leading-relaxed">{d.mo_ta_su_co}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">{khMap.get(d.ma_kh)?.ho_ten ?? "Khách hàng"} · {d.dich_vu}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{khMap.get(d.ma_kh)?.ho_ten ?? "Khách hàng"} · {d.dich_vu} · {d.qui_mo ?? "Sửa nhanh"}</p>
             <div className="my-3 flex items-center justify-between gap-2"><BadgeUuTien uuTien={d.uu_tien} /><span className="text-xs text-muted-foreground">{formatDate(d.ngay_tiep_nhan)}</span></div>
             <div className="grid grid-cols-2 gap-3 border-t pt-3 text-sm"><div><p className="text-xs text-muted-foreground">Tổng tiền</p><p className="mt-1 font-semibold tabular-nums">{formatVND(d.tong_tien)}</p></div><div className="text-right"><p className="text-xs text-muted-foreground">Công nợ</p><p className="mt-1 font-semibold tabular-nums text-destructive">{formatVND(d.cong_no)}</p></div></div>
           </Link>)}
@@ -70,6 +70,7 @@ export default async function TrangDonHang() {
                   <TableHead>Ngày tiếp nhận</TableHead>
                   <TableHead>Khách hàng</TableHead>
                   <TableHead>Loại dịch vụ</TableHead>
+                  <TableHead>Qui mô</TableHead>
                   <TableHead>Mức độ</TableHead>
                   <TableHead>Thợ phụ trách</TableHead>
                   <TableHead>Giá</TableHead>
@@ -101,6 +102,7 @@ export default async function TrangDonHang() {
                         )}
                       </TableCell>
                       <TableCell>{d.dich_vu}</TableCell>
+                      <TableCell>{d.qui_mo ?? "Sửa nhanh"}</TableCell>
                       <TableCell>
                         <BadgeUuTien uuTien={d.uu_tien} />
                       </TableCell>

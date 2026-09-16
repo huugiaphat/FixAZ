@@ -1,9 +1,12 @@
 import { z } from "zod";
 
+export const QUI_MO = ["Sửa nhanh", "Công trình"] as const;
+
 export const DICH_VU = ["Nhà cửa", "Điện", "Nước", "Tổng hợp", "Thiết bị", "Khác"] as const;
 export const UU_TIEN = ["P1-Khẩn cấp", "P2-Trong ngày", "P3-Đặt lịch"] as const;
 
 export const donHangSchema = z.object({
+  qui_mo: z.enum(QUI_MO),
   ma_kh: z.string().min(1, "Chọn khách hàng"),
   dich_vu: z.enum(DICH_VU),
   mo_ta_su_co: z.string().trim().min(5, "Vui lòng mô tả sự cố"),

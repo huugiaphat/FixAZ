@@ -76,7 +76,10 @@ export interface KhachHang {
   nguoi_tao: string | null;
 }
 
+export type QuiMo = "Sửa nhanh" | "Công trình";
+
 export interface DonHang {
+  qui_mo: QuiMo;
   ma_don: string;
   ma_kh: string;
   ngay_tiep_nhan: string;

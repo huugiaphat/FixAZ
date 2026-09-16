@@ -28,13 +28,16 @@ export default async function ChiTietDonHang({
   const nv = await requireNhanVien(["Quản lý", "CSKH-Điều phối", "Thợ", "Kế toán", "Kho", "Kiểm soát"]);
   const { maDon } = await params;
   const { tab } = await searchParams;
-  const CAC_TAB_HOP_LE = ["chi-tiet-don", "bao-gia", "dieu-phoi", "phat-sinh", "nghiem-thu", "thu-tien"];
-  const tabMacDinh = tab && CAC_TAB_HOP_LE.includes(tab) ? tab : "chi-tiet-don";
   const supabase = await createClient();
 
   const { data: don } = await supabase.from("v_don_hang").select("*").eq("ma_don", maDon).single();
   if (!don) notFound();
   const donHang = don as DonHangTinhToan;
+  const laCongTrinh = donHang.qui_mo === "Công trình";
+  const cacTabHopLe = laCongTrinh
+    ? ["chi-tiet-don", "thu-tien"]
+    : ["chi-tiet-don", "bao-gia", "dieu-phoi", "phat-sinh", "nghiem-thu", "thu-tien"];
+  const tabMacDinh = tab && cacTabHopLe.includes(tab) ? tab : laCongTrinh ? "thu-tien" : "chi-tiet-don";
 
   const [{ data: kh }, { data: chiTietDon }, { data: baoGia }, { data: phatSinh }, { data: dieuPhoi }, { data: nghiemThu }, { data: thuTien }, { data: bangGia }] =
     await Promise.all([
@@ -89,6 +92,10 @@ export default async function ChiTietDonHang({
             <p className="font-medium">{donHang.dich_vu}</p>
           </div>
           <div>
+            <p className="text-xs text-muted-foreground">Qui mô</p>
+            <p className="font-medium">{donHang.qui_mo ?? "Sửa nhanh"}</p>
+          </div>
+          <div>
             <p className="text-xs text-muted-foreground">Ngày tiếp nhận</p>
             <p className="font-medium">{formatDateTime(donHang.ngay_tiep_nhan)}</p>
           </div>
@@ -125,19 +132,19 @@ export default async function ChiTietDonHang({
 
       <Tabs defaultValue={tabMacDinh}>
         <TabsList className="flex-wrap h-auto">
-          <TabsTrigger value="dieu-phoi">Điều phối</TabsTrigger>
-          <TabsTrigger value="bao-gia">BG tạm tính</TabsTrigger>
+          {!laCongTrinh ? <TabsTrigger value="dieu-phoi">Điều phối</TabsTrigger> : null}
+          {!laCongTrinh ? <TabsTrigger value="bao-gia">BG tạm tính</TabsTrigger> : null}
           <TabsTrigger value="chi-tiet-don">Chi tiết BG</TabsTrigger>
-          <TabsTrigger value="phat-sinh">Phát sinh</TabsTrigger>
-          <TabsTrigger value="nghiem-thu">Nghiệm thu</TabsTrigger>
+          {!laCongTrinh ? <TabsTrigger value="phat-sinh">Phát sinh</TabsTrigger> : null}
+          {!laCongTrinh ? <TabsTrigger value="nghiem-thu">Nghiệm thu</TabsTrigger> : null}
           <TabsTrigger value="thu-tien">Thu tiền</TabsTrigger>
         </TabsList>
-        <TabsContent value="dieu-phoi" className="pt-4">
+        {!laCongTrinh ? <TabsContent value="dieu-phoi" className="pt-4">
           <TabDieuPhoi maDon={maDon} danhSach={(dieuPhoi as DieuPhoi[]) ?? []} vaiTro={nv.vai_tro_app} maNvHienTai={nv.ma_nv} />
-        </TabsContent>
-        <TabsContent value="bao-gia" className="pt-4">
+        </TabsContent> : null}
+        {!laCongTrinh ? <TabsContent value="bao-gia" className="pt-4">
           <TabBaoGia maDon={maDon} danhSach={(baoGia as BaoGia[]) ?? []} vaiTro={nv.vai_tro_app} />
-        </TabsContent>
+        </TabsContent> : null}
         <TabsContent value="chi-tiet-don" className="pt-4">
           <TabChiTietDon
             maDon={maDon}
@@ -147,7 +154,7 @@ export default async function ChiTietDonHang({
             laThoPhuTrach={laThoPhuTrach}
           />
         </TabsContent>
-        <TabsContent value="phat-sinh" className="pt-4">
+        {!laCongTrinh ? <TabsContent value="phat-sinh" className="pt-4">
           <TabPhatSinh
             maDon={maDon}
             danhSach={(phatSinh as PhatSinh[]) ?? []}
@@ -155,10 +162,10 @@ export default async function ChiTietDonHang({
             vaiTro={nv.vai_tro_app}
             laThoPhuTrach={laThoPhuTrach}
           />
-        </TabsContent>
-        <TabsContent value="nghiem-thu" className="pt-4">
+        </TabsContent> : null}
+        {!laCongTrinh ? <TabsContent value="nghiem-thu" className="pt-4">
           <TabNghiemThu maDon={maDon} danhSach={(nghiemThu as NghiemThu[]) ?? []} vaiTro={nv.vai_tro_app} laThoPhuTrach={laThoPhuTrach} />
-        </TabsContent>
+        </TabsContent> : null}
         <TabsContent value="thu-tien" className="pt-4">
           <TabThuTien maDon={maDon} danhSach={(thuTien as ThuTien[]) ?? []} congNo={donHang.cong_no} vaiTro={nv.vai_tro_app} />
         </TabsContent>
