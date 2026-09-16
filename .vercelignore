@@ -1,0 +1,8 @@
+/.agents/
+/.claude/
+/supabase/
+/scripts/
+*.pdf
+dev.log
+*.tsbuildinfo
+.env*

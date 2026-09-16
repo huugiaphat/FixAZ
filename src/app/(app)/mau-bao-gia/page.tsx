@@ -27,7 +27,7 @@ export default async function TrangMauBaoGia() {
       <PageHeading title="Mẫu báo giá" description="Lập báo giá tham khảo, in gửi khách và liên kết đơn hàng.">
         {nv.vai_tro_app !== "Kiểm soát" ? <FormMauBaoGiaMoi /> : null}
       </PageHeading>
-{error ? (
+      {error ? (
         <p className="text-sm text-destructive">Lỗi tải dữ liệu: {error.message}</p>
       ) : danhSach.length === 0 ? (
         <p className="text-sm text-muted-foreground">Chưa có mẫu báo giá nào.</p>
