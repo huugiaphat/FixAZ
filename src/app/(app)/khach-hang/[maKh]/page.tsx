@@ -8,7 +8,7 @@ import { formatDate, formatDateTime } from "@/lib/format";
 import type { DonHang, KhachHang } from "@/types/database";
 
 export default async function ChiTietKhachHang({ params }: { params: Promise<{ maKh: string }> }) {
-  await requireNhanVien(["Quản lý", "CSKH-Điều phối", "Kế toán", "Kiểm soát"]);
+  await requireNhanVien(["Quản lý", "Admin", "CSKH-Điều phối", "Kế toán", "Kiểm soát"]);
   const { maKh } = await params;
   const supabase = await createClient();
 

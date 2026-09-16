@@ -11,7 +11,7 @@ import { formatVND } from "@/lib/format";
 import type { VatTuTinhToan } from "@/types/database";
 
 export default async function TrangKhoVatTu() {
-  const nv = await requireNhanVien(["Quản lý", "Kho", "Kiểm soát"]);
+  const nv = await requireNhanVien(["Quản lý", "Admin", "Kho", "Kiểm soát"]);
   const supabase = await createClient();
   const { data, error } = await supabase.from("v_vat_tu").select("*").order("ten");
   const danhSach = (data as VatTuTinhToan[]) ?? [];

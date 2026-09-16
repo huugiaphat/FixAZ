@@ -11,7 +11,7 @@ import { Plus } from "lucide-react";
 import type { DonHangTinhToan, KhachHang, NhanVien } from "@/types/database";
 
 export default async function TrangDonHang() {
-  const nv = await requireNhanVien(["Quản lý", "CSKH-Điều phối", "Thợ", "Kế toán", "Kiểm soát"]);
+  const nv = await requireNhanVien(["Quản lý", "Admin", "CSKH-Điều phối", "Thợ", "Kế toán", "Kiểm soát"]);
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -32,7 +32,7 @@ export default async function TrangDonHang() {
   const khMap = new Map((khList as Pick<KhachHang, "ma_kh" | "ho_ten" | "sdt">[] | null ?? []).map((k) => [k.ma_kh, k]));
   const nvMap = new Map((nvList as Pick<NhanVien, "ma_nv" | "ho_ten">[] | null ?? []).map((n) => [n.ma_nv, n]));
 
-  const duocTao = nv.vai_tro_app === "Quản lý" || nv.vai_tro_app === "CSKH-Điều phối";
+  const duocTao = (nv.vai_tro_app === "Quản lý" || nv.vai_tro_app === "Admin") || nv.vai_tro_app === "CSKH-Điều phối";
 
   return (
     <div className="space-y-4">

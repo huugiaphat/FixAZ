@@ -15,8 +15,8 @@ import { FormDanhMucMoi } from "@/components/quan-tri/form-danh-muc-moi";
 import type { NhanVien, BangGiaDichVu, DanhMuc } from "@/types/database";
 
 export default async function TrangQuanTri() {
-  const nv = await requireNhanVien(["Quản lý", "Kiểm soát"]);
-  const duocSua = nv.vai_tro_app === "Quản lý";
+  const nv = await requireNhanVien(["Quản lý", "Admin", "Kiểm soát"]);
+  const duocSua = (nv.vai_tro_app === "Quản lý" || nv.vai_tro_app === "Admin");
   const supabase = await createClient();
 
   const [{ data: nvList }, { data: bgList }, { data: dmList }] = await Promise.all([

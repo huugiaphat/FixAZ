@@ -10,7 +10,7 @@ import type { MauBaoGiaTinhToan, MauBaoGiaDongTinhToan } from "@/types/database"
 // Bố cục và văn phong đúng theo mẫu báo giá thật của công ty
 // (mau-bao-gia.pdf, 2026-09-05) — không tự ý đổi câu chữ/thứ tự cột.
 export default async function TrangInMauBaoGia({ params }: { params: Promise<{ ma: string }> }) {
-  await requireNhanVien(["Quản lý", "CSKH-Điều phối", "Kế toán", "Kiểm soát"]);
+  await requireNhanVien(["Quản lý", "Admin", "CSKH-Điều phối", "Kế toán", "Kiểm soát"]);
   const { ma } = await params;
   const supabase = await createClient();
 

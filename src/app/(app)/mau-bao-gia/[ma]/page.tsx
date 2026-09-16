@@ -19,7 +19,7 @@ type MauBaoGiaChiTiet = MauBaoGiaTinhToan & {
 };
 
 export default async function TrangChiTietMauBaoGia({ params }: { params: Promise<{ ma: string }> }) {
-  const nv = await requireNhanVien(["Quản lý", "CSKH-Điều phối", "Kế toán", "Kiểm soát"]);
+  const nv = await requireNhanVien(["Quản lý", "Admin", "CSKH-Điều phối", "Kế toán", "Kiểm soát"]);
   const { ma } = await params;
   const supabase = await createClient();
 

@@ -6,7 +6,7 @@ import { TheBaoHanh } from "@/components/bao-hanh/the-bao-hanh";
 import type { BaoHanh } from "@/types/database";
 
 export default async function TrangBaoHanh() {
-  const nv = await requireNhanVien(["Quản lý", "CSKH-Điều phối", "Kiểm soát"]);
+  const nv = await requireNhanVien(["Quản lý", "Admin", "CSKH-Điều phối", "Kiểm soát"]);
   const supabase = await createClient();
   const { data, error } = await supabase.from("bao_hanh").select("*").order("created_at", { ascending: false });
   const danhSach = (data as BaoHanh[]) ?? [];

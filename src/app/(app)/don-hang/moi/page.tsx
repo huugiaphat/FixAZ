@@ -6,7 +6,7 @@ export default async function TrangTaoDonHangMoi({
 }: {
   searchParams: Promise<{ ma_yc?: string; ho_ten?: string; sdt?: string; dich_vu?: string; yeu_cau?: string }>;
 }) {
-  await requireNhanVien(["Quản lý", "CSKH-Điều phối"]); // nguyên tắc 6 — chỉ 2 vai trò này được tạo đơn
+  await requireNhanVien(["Quản lý", "Admin", "CSKH-Điều phối"]); // nguyên tắc 6 — chỉ 2 vai trò này được tạo đơn
   const { ma_yc, ho_ten, sdt, dich_vu, yeu_cau } = await searchParams;
 
   return (

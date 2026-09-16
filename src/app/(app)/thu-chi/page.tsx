@@ -3,6 +3,7 @@ import { requireNhanVien } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { FormThuChiMoi } from "@/components/thu-chi/form-thu-chi-moi";
 import { FormSuaThuChi } from "@/components/thu-chi/form-sua-thu-chi";
+import { NutXoaThuChi } from "@/components/thu-chi/nut-xoa-thu-chi";
 import { BoLocThuChi } from "@/components/thu-chi/bo-loc-thu-chi";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -18,7 +19,7 @@ export default async function TrangThuChi({
 }: {
   searchParams: Promise<{ tu?: string; den?: string; loai?: string; ten_cong_trinh?: string; noi_dung?: string }>;
 }) {
-  const nv = await requireNhanVien(["Quản lý", "Kế toán", "Kiểm soát"]);
+  const nv = await requireNhanVien(["Quản lý", "Admin", "Kế toán", "Kiểm soát"]);
   const { tu, den, loai, ten_cong_trinh: tenCongTrinh, noi_dung: noiDung } = await searchParams;
   const supabase = await createClient();
 
@@ -42,7 +43,8 @@ export default async function TrangThuChi({
   const { data, error } = await query;
   let danhSach = (data as ThuChiVoiDon[]) ?? [];
 
-  const laQuanLy = nv.vai_tro_app === "Quản lý";
+  const laQuanLy = (nv.vai_tro_app === "Quản lý" || nv.vai_tro_app === "Admin");
+  const laAdmin = nv.vai_tro_app === "Admin";
   let nhanVienList: NhanVien[] = [];
   if (laQuanLy) {
     const { data: nvData } = await supabase.from("nhan_vien").select("*").eq("trang_thai", "Đang làm").order("ho_ten");
@@ -117,7 +119,7 @@ export default async function TrangThuChi({
             <div className="flex flex-wrap items-center justify-between gap-2"><Badge variant="secondary">{tc.loai} · {tc.noi_dung_thu ?? tc.noi_dung_chi}</Badge><span className={tc.loai === "Thu" ? "font-semibold tabular-nums text-emerald-600" : "font-semibold tabular-nums text-destructive"}>{tc.loai === "Thu" ? "+" : "−"}{formatVND(tc.so_tien)}</span></div>
             <h2 className="mt-3 font-semibold">{tc.don_hang?.mo_ta_su_co ?? tc.ten_cong_trinh ?? "Chưa gắn công trình"}</h2>
             {tc.ghi_chu && <p className="mt-1 whitespace-pre-wrap break-words text-sm text-muted-foreground">{tc.ghi_chu}</p>}
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-3"><div className="space-y-1 text-xs text-muted-foreground"><p>{tc.nhan_vien?.ho_ten ?? tc.nguoi_tao} · {tc.phuong_thuc}</p><p>{formatDateTime(tc.ngay)}</p></div>{laQuanLy && !tc.ma_thu ? <FormSuaThuChi phieu={tc} nhanVienList={nhanVienList} /> : null}</div>
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-3"><div className="space-y-1 text-xs text-muted-foreground"><p>{tc.nhan_vien?.ho_ten ?? tc.nguoi_tao} · {tc.phuong_thuc}</p><p>{formatDateTime(tc.ngay)}</p></div><div className="flex items-center gap-1">{laQuanLy && !tc.ma_thu ? <FormSuaThuChi phieu={tc} nhanVienList={nhanVienList} /> : null}{laAdmin && !tc.ma_thu ? <NutXoaThuChi maTc={tc.ma_tc} /> : null}</div></div>
           </article>)}
         </div>
         <Card className="hidden overflow-hidden py-0 lg:flex">
@@ -160,7 +162,10 @@ export default async function TrangThuChi({
                     <TableCell className="text-muted-foreground">{formatDateTime(tc.ngay)}</TableCell>
                     {laQuanLy ? (
                       <TableCell>
-                        {tc.ma_thu ? null : <FormSuaThuChi phieu={tc} nhanVienList={nhanVienList} />}
+                        <div className="flex items-center gap-1">
+                          {tc.ma_thu ? null : <FormSuaThuChi phieu={tc} nhanVienList={nhanVienList} />}
+                          {laAdmin && !tc.ma_thu ? <NutXoaThuChi maTc={tc.ma_tc} /> : null}
+                        </div>
                       </TableCell>
                     ) : null}
                   </TableRow>

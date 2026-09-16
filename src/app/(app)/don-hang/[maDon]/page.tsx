@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BadgeTrangThaiDon, BadgeUuTien } from "@/components/don-hang/badge-trang-thai";
 import { ChuyenTrangThaiDon } from "@/components/don-hang/chuyen-trang-thai";
+import { NutXoaDonHang } from "@/components/don-hang/nut-xoa-don-hang";
 import { TabChiTietDon } from "@/components/don-hang/tab-chi-tiet-don";
 import { TabBaoGia } from "@/components/don-hang/tab-bao-gia";
 import { TabPhatSinh } from "@/components/don-hang/tab-phat-sinh";
@@ -25,7 +26,7 @@ export default async function ChiTietDonHang({
   params: Promise<{ maDon: string }>;
   searchParams: Promise<{ tab?: string }>;
 }) {
-  const nv = await requireNhanVien(["Quản lý", "CSKH-Điều phối", "Thợ", "Kế toán", "Kho", "Kiểm soát"]);
+  const nv = await requireNhanVien(["Quản lý", "Admin", "CSKH-Điều phối", "Thợ", "Kế toán", "Kho", "Kiểm soát"]);
   const { maDon } = await params;
   const { tab } = await searchParams;
   const supabase = await createClient();
@@ -66,7 +67,10 @@ export default async function ChiTietDonHang({
             <BadgeUuTien uuTien={donHang.uu_tien} />
           </div>
         </div>
-        <ChuyenTrangThaiDon maDon={donHang.ma_don} trangThai={donHang.trang_thai} vaiTro={nv.vai_tro_app} laThoPhuTrach={laThoPhuTrach} />
+        <div className="flex flex-wrap items-center gap-2">
+          <ChuyenTrangThaiDon maDon={donHang.ma_don} trangThai={donHang.trang_thai} vaiTro={nv.vai_tro_app} laThoPhuTrach={laThoPhuTrach} />
+          {nv.vai_tro_app === "Admin" ? <NutXoaDonHang maDon={donHang.ma_don} /> : null}
+        </div>
       </div>
 
       {donHang.trang_thai === "Đã hủy" && donHang.ly_do_tu_choi_huy ? (

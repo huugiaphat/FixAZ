@@ -24,19 +24,19 @@ export interface MucDieuHuong {
 }
 
 export const DANH_SACH_DIEU_HUONG: MucDieuHuong[] = [
-  { href: "/", nhan: "Trang chủ", icon: LayoutDashboard, vaiTro: ["Quản lý", "CSKH-Điều phối", "Thợ", "Kế toán", "Kho", "Kiểm soát"], uuTienMobile: true },
-  { href: "/dashboard", nhan: "Dashboard", icon: LayoutDashboard, vaiTro: ["Quản lý", "Kiểm soát"] },
-  { href: "/thu-chi", nhan: "Sổ thu chi", icon: Receipt, vaiTro: ["Quản lý", "Kế toán", "Kiểm soát"] },
-  { href: "/khach-hang", nhan: "Khách hàng", icon: Users, vaiTro: ["Quản lý", "CSKH-Điều phối", "Kế toán", "Kiểm soát"] },
-  { href: "/don-hang", nhan: "Đơn hàng", icon: ClipboardList, vaiTro: ["Quản lý", "CSKH-Điều phối", "Thợ", "Kế toán", "Kiểm soát"], uuTienMobile: true },
-  { href: "/yeu-cau-dich-vu", nhan: "Yêu cầu dịch vụ", icon: Inbox, vaiTro: ["Quản lý", "CSKH-Điều phối", "Kiểm soát"] },
-  { href: "/mau-bao-gia", nhan: "Mẫu báo giá", icon: FileText, vaiTro: ["Quản lý", "CSKH-Điều phối", "Kế toán", "Kiểm soát"] },
-  { href: "/nghiem-thu", nhan: "Nghiệm thu", icon: ClipboardCheck, vaiTro: ["Thợ", "Kiểm soát"], uuTienMobile: true },
-  { href: "/kho-vat-tu", nhan: "Kho vật tư", icon: Warehouse, vaiTro: ["Quản lý", "Kho", "Kiểm soát"] },
-  { href: "/bao-hanh", nhan: "Bảo hành", icon: ShieldCheck, vaiTro: ["Quản lý", "CSKH-Điều phối", "Kiểm soát"] },
-  { href: "/kpi", nhan: "KPI nhân viên", icon: Award, vaiTro: ["Quản lý", "CSKH-Điều phối", "Thợ", "Kế toán", "Kho", "Kiểm soát"] },
-  { href: "/khieu-nai", nhan: "Khiếu nại", icon: MessageCircleWarning, vaiTro: ["Quản lý", "CSKH-Điều phối", "Kiểm soát"] },
-  { href: "/quan-tri", nhan: "Quản trị", icon: Settings, vaiTro: ["Quản lý", "Kiểm soát"] },
+  { href: "/", nhan: "Trang chủ", icon: LayoutDashboard, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Thợ", "Kế toán", "Kho", "Kiểm soát"], uuTienMobile: true },
+  { href: "/dashboard", nhan: "Dashboard", icon: LayoutDashboard, vaiTro: ["Quản lý", "Admin", "Kiểm soát"] },
+  { href: "/thu-chi", nhan: "Sổ thu chi", icon: Receipt, vaiTro: ["Quản lý", "Admin", "Kế toán", "Kiểm soát"] },
+  { href: "/khach-hang", nhan: "Khách hàng", icon: Users, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Kế toán", "Kiểm soát"] },
+  { href: "/don-hang", nhan: "Đơn hàng", icon: ClipboardList, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Thợ", "Kế toán", "Kiểm soát"], uuTienMobile: true },
+  { href: "/yeu-cau-dich-vu", nhan: "Yêu cầu dịch vụ", icon: Inbox, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Kiểm soát"] },
+  { href: "/mau-bao-gia", nhan: "Mẫu báo giá", icon: FileText, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Kế toán", "Kiểm soát"] },
+  { href: "/nghiem-thu", nhan: "Nghiệm thu", icon: ClipboardCheck, vaiTro: ["Thợ", "Kiểm soát", "Admin"], uuTienMobile: true },
+  { href: "/kho-vat-tu", nhan: "Kho vật tư", icon: Warehouse, vaiTro: ["Quản lý", "Admin", "Kho", "Kiểm soát"] },
+  { href: "/bao-hanh", nhan: "Bảo hành", icon: ShieldCheck, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Kiểm soát"] },
+  { href: "/kpi", nhan: "KPI nhân viên", icon: Award, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Thợ", "Kế toán", "Kho", "Kiểm soát"] },
+  { href: "/khieu-nai", nhan: "Khiếu nại", icon: MessageCircleWarning, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Kiểm soát"] },
+  { href: "/quan-tri", nhan: "Quản trị", icon: Settings, vaiTro: ["Quản lý", "Admin", "Kiểm soát"] },
 ];
 
 export function dieuHuongTheoVaiTro(vaiTro: VaiTro): MucDieuHuong[] {
@@ -68,6 +68,7 @@ export const MO_TA_MODULE: Record<string, string> = {
 export function dieuHuongMobile(vaiTro: VaiTro) {
   const uuTien: Record<VaiTro, string[]> = {
     "Quản lý": ["/", "/dashboard", "/don-hang", "/thu-chi"],
+    "Admin": ["/", "/dashboard", "/don-hang", "/thu-chi"],
     "Kiểm soát": ["/", "/dashboard", "/don-hang", "/thu-chi"],
     "CSKH-Điều phối": ["/", "/yeu-cau-dich-vu", "/don-hang", "/khach-hang"],
     "Thợ": ["/", "/don-hang", "/nghiem-thu", "/kpi"],

@@ -14,7 +14,7 @@ export default async function TrangKhachHang({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
-  const nv = await requireNhanVien(["Quản lý", "CSKH-Điều phối", "Kế toán", "Kiểm soát"]);
+  const nv = await requireNhanVien(["Quản lý", "Admin", "CSKH-Điều phối", "Kế toán", "Kiểm soát"]);
   const { q } = await searchParams;
   const supabase = await createClient();
 
@@ -23,7 +23,7 @@ export default async function TrangKhachHang({
   const { data, error } = await query;
   const danhSach = (data as KhachHang[]) ?? [];
 
-  const duocTao = nv.vai_tro_app === "Quản lý" || nv.vai_tro_app === "CSKH-Điều phối";
+  const duocTao = (nv.vai_tro_app === "Quản lý" || nv.vai_tro_app === "Admin") || nv.vai_tro_app === "CSKH-Điều phối";
 
   return (
     <div className="space-y-4">

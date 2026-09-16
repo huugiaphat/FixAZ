@@ -6,7 +6,7 @@ import { TheKhieuNai } from "@/components/khieu-nai/the-khieu-nai";
 import type { KhieuNai } from "@/types/database";
 
 export default async function TrangKhieuNai() {
-  const nv = await requireNhanVien(["Quản lý", "CSKH-Điều phối", "Kiểm soát"]);
+  const nv = await requireNhanVien(["Quản lý", "Admin", "CSKH-Điều phối", "Kiểm soát"]);
   const supabase = await createClient();
   const { data, error } = await supabase.from("khieu_nai").select("*").order("created_at", { ascending: false });
   const danhSach = (data as KhieuNai[]) ?? [];

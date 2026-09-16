@@ -29,7 +29,7 @@ export default async function TrangChu() {
     <div className="space-y-6">
       <div className="rounded-2xl border-l-4 border-primary bg-card p-5 sm:p-8">
         <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-primary">Không gian làm việc</p>
-        <h1 className="text-2xl font-semibold">Xin chào, {nv.ho_ten}</h1>
+        <h1 className="text-2xl font-semibold text-primary">Xin chào, {nv.ho_ten}</h1>
         <p className="mt-2 text-sm text-muted-foreground">{nv.vai_tro_app} · Chọn công việc để bắt đầu ngày làm việc.</p>
       </div>
 
@@ -61,7 +61,7 @@ export default async function TrangChu() {
         const muc = nhom.duongDan.flatMap(href => mucNhanh.filter(m => m.href === href));
         if (!muc.length) return null;
         return <section key={nhom.nhan} className="space-y-3">
-          <h2 className="text-base font-semibold">{nhom.nhan}</h2>
+          <h2 className="text-base font-semibold text-primary">{nhom.nhan}</h2>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {muc.map(m => { const Icon = m.icon; return <Link key={m.href} href={m.href} className="group flex items-start gap-4 rounded-xl border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-primary/5">
               <span className="rounded-xl bg-primary/10 p-3 text-primary"><Icon className="size-5" /></span>

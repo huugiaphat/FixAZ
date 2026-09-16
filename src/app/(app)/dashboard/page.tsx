@@ -39,7 +39,7 @@ const CHUOI_CONG_TRINH = [
 ];
 
 export default async function TrangDashboard() {
-  await requireNhanVien(["Quản lý", "Kiểm soát"]);
+  await requireNhanVien(["Quản lý", "Admin", "Kiểm soát"]);
   const supabase = await createClient();
 
   const now = new Date();

@@ -25,7 +25,7 @@ interface TaoNhanVienInput {
 // khoản không lộ thông tin đăng nhập ra client ngoài mật khẩu tạm 1
 // lần hiển thị cho Quản lý tự gửi cho nhân viên).
 export async function taoNhanVien(input: TaoNhanVienInput): Promise<{ ok: boolean; matKhauTam?: string; loi?: string }> {
-  const nv = await requireNhanVien(["Quản lý"]);
+  const nv = await requireNhanVien(["Quản lý", "Admin"]);
   void nv;
 
   const admin = createAdminClient();
@@ -83,7 +83,7 @@ function loiRangBuocDuyNhat(message: string): string | null {
 // tài khoản Supabase Auth nên khi đổi email phải đồng bộ sang cả
 // auth.users, không chỉ bảng nhan_vien.
 export async function suaNhanVien(maNv: string, input: SuaNhanVienInput): Promise<{ ok: boolean; loi?: string }> {
-  await requireNhanVien(["Quản lý"]);
+  await requireNhanVien(["Quản lý", "Admin"]);
 
   const admin = createAdminClient();
   const { data: nvHienTai } = await admin.from("nhan_vien").select("auth_user_id, email").eq("ma_nv", maNv).single();
@@ -121,7 +121,7 @@ export async function suaNhanVien(maNv: string, input: SuaNhanVienInput): Promis
 // viên đã có dữ liệu liên quan — báo người dùng dùng "Đánh dấu nghỉ
 // việc" thay vì cố xóa.
 export async function xoaNhanVien(maNv: string): Promise<{ ok: boolean; loi?: string }> {
-  const nvHienTai = await requireNhanVien(["Quản lý"]);
+  const nvHienTai = await requireNhanVien(["Quản lý", "Admin"]);
   if (nvHienTai.ma_nv === maNv) {
     return { ok: false, loi: "Không thể tự xóa tài khoản của chính mình." };
   }
@@ -148,7 +148,7 @@ export async function xoaNhanVien(maNv: string): Promise<{ ok: boolean; loi?: st
 // đăng nhập bằng SĐT), nên đây là cách duy nhất để lấy lại quyền
 // truy cập, cùng cơ chế với lúc tạo tài khoản mới.
 export async function datLaiMatKhau(maNv: string): Promise<{ ok: boolean; matKhauTam?: string; loi?: string }> {
-  await requireNhanVien(["Quản lý"]);
+  await requireNhanVien(["Quản lý", "Admin"]);
 
   const admin = createAdminClient();
   const { data: nv } = await admin.from("nhan_vien").select("auth_user_id").eq("ma_nv", maNv).single();

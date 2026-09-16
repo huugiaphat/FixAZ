@@ -8,7 +8,7 @@ import { TheYeuCau } from "@/components/yeu-cau/the-yeu-cau";
 import type { YeuCauDichVu } from "@/types/database";
 
 export default async function TrangYeuCauDichVu() {
-  const nv = await requireNhanVien(["Quản lý", "CSKH-Điều phối", "Kiểm soát"]);
+  const nv = await requireNhanVien(["Quản lý", "Admin", "CSKH-Điều phối", "Kiểm soát"]);
   const supabase = await createClient();
 
   const { data } = await supabase.from("yeu_cau_dich_vu").select("*").order("created_at", { ascending: false }).limit(100);
@@ -16,7 +16,7 @@ export default async function TrangYeuCauDichVu() {
 
   let qrDataUrl: string | null = null;
   let urlCongKhai = "";
-  if (nv.vai_tro_app === "Quản lý") {
+  if ((nv.vai_tro_app === "Quản lý" || nv.vai_tro_app === "Admin")) {
     const h = await headers();
     const host = h.get("host") ?? "localhost:3000";
     const proto = host.startsWith("localhost") ? "http" : "https";

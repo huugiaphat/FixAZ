@@ -12,7 +12,7 @@ import type { MauBaoGiaTinhToan } from "@/types/database";
 type MauBaoGiaVoiQuanHe = MauBaoGiaTinhToan & { nhan_vien: { ho_ten: string } | null };
 
 export default async function TrangMauBaoGia() {
-  const nv = await requireNhanVien(["Quản lý", "CSKH-Điều phối", "Kế toán", "Kiểm soát"]);
+  const nv = await requireNhanVien(["Quản lý", "Admin", "CSKH-Điều phối", "Kế toán", "Kiểm soát"]);
   const supabase = await createClient();
 
   const { data, error } = await supabase

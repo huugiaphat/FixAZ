@@ -23,7 +23,7 @@ export default async function TrangKpi() {
   const danhSach = (data as KpiNhanVienTinhToan[]) ?? [];
 
   let tenNhanVien: Record<string, string> = {};
-  if (nv.vai_tro_app === "Quản lý") {
+  if ((nv.vai_tro_app === "Quản lý" || nv.vai_tro_app === "Admin")) {
     const { data: nvList } = await supabase.from("nhan_vien").select("*");
     tenNhanVien = Object.fromEntries(((nvList as NhanVien[]) ?? []).map((x) => [x.ma_nv, x.ho_ten]));
   }
@@ -31,7 +31,7 @@ export default async function TrangKpi() {
   return (
     <div className="space-y-4">
       <PageHeading title="KPI nhân viên" description="Điểm hiệu suất và xếp loại nhân viên theo tháng.">
-        {nv.vai_tro_app === "Quản lý" ? <FormKpiMoi /> : null}
+        {(nv.vai_tro_app === "Quản lý" || nv.vai_tro_app === "Admin") ? <FormKpiMoi /> : null}
       </PageHeading>
 
       {error ? (
@@ -44,7 +44,7 @@ export default async function TrangKpi() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  {nv.vai_tro_app === "Quản lý" ? <TableHead>Nhân viên</TableHead> : null}
+                  {(nv.vai_tro_app === "Quản lý" || nv.vai_tro_app === "Admin") ? <TableHead>Nhân viên</TableHead> : null}
                   <TableHead>Tháng</TableHead>
                   <TableHead>Điểm tổng</TableHead>
                   <TableHead>Xếp loại</TableHead>
@@ -54,7 +54,7 @@ export default async function TrangKpi() {
               <TableBody>
                 {danhSach.map((k) => (
                   <TableRow key={k.ma_kpi}>
-                    {nv.vai_tro_app === "Quản lý" ? <TableCell>{tenNhanVien[k.ma_nv] ?? k.ma_nv}</TableCell> : null}
+                    {(nv.vai_tro_app === "Quản lý" || nv.vai_tro_app === "Admin") ? <TableCell>{tenNhanVien[k.ma_nv] ?? k.ma_nv}</TableCell> : null}
                     <TableCell>{k.thang}</TableCell>
                     <TableCell>{k.diem_tong}</TableCell>
                     <TableCell>

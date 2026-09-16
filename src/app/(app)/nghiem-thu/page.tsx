@@ -9,7 +9,7 @@ import type { DonHang } from "@/types/database";
 // Danh sách nhanh các đơn của Thợ cần nghiệm thu — mở đơn để vào tab
 // "Nghiệm thu" lập biên bản đầy đủ (checklist 6 mục + ảnh + đánh giá).
 export default async function TrangNghiemThuNhanh() {
-  const nv = await requireNhanVien(["Thợ", "Kiểm soát"]);
+  const nv = await requireNhanVien(["Thợ", "Kiểm soát", "Admin"]);
   const supabase = await createClient();
 
   let query = supabase
