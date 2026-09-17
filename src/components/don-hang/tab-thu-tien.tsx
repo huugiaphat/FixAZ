@@ -44,8 +44,8 @@ export function TabThuTien({
     defaultValues: { phuong_thuc: "Tiền mặt" },
   });
 
-  const duocThu = ["Quản lý", "Kế toán", "Thợ"].includes(vaiTro);
-  const duocDoiSoat = ["Quản lý", "Kế toán"].includes(vaiTro);
+  const duocThu = ["Quản lý", "Admin", "Kế toán", "Thợ"].includes(vaiTro);
+  const duocDoiSoat = ["Quản lý", "Admin", "Kế toán"].includes(vaiTro);
 
   async function onSubmit(values: ThuTienFormValues) {
     const ketQua = await saveOrQueue({

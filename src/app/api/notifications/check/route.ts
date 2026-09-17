@@ -35,7 +35,7 @@ export async function GET(request: Request) {
       loai: "Nhắc xác nhận phát sinh",
       tieu_de: `Phát sinh chưa xác nhận — đơn ${ps.ma_don}`,
       noi_dung: `Hạng mục "${ps.hang_muc}" vẫn chưa được khách xác nhận.`,
-      vai_tro: ["Quản lý", "CSKH-Điều phối"],
+      vai_tro: ["Quản lý", "Admin", "CSKH-Điều phối"],
       ma_don: ps.ma_don,
     });
   }
@@ -67,7 +67,7 @@ export async function GET(request: Request) {
       loai: "Cảnh báo đơn trễ hẹn",
       tieu_de: `Đơn ${dp.ma_don} trễ hẹn`,
       noi_dung: `Đã quá giờ hẹn (ETA) mà thợ chưa check-in tại hiện trường.`,
-      vai_tro: ["Quản lý", "CSKH-Điều phối"],
+      vai_tro: ["Quản lý", "Admin", "CSKH-Điều phối"],
       ma_don: dp.ma_don,
     });
   }

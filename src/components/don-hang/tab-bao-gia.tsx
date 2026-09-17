@@ -43,7 +43,7 @@ export function TabBaoGia({ maDon, danhSach, vaiTro }: { maDon: string; danhSach
     defaultValues: { giam_gia: 0, tong_truoc_giam: 0 },
   });
 
-  const duocTao = ["Quản lý", "CSKH-Điều phối", "Thợ"].includes(vaiTro);
+  const duocTao = ["Quản lý", "Admin", "CSKH-Điều phối", "Thợ"].includes(vaiTro);
 
   async function onSubmit(values: BaoGiaFormValues) {
     const { error } = await supabase.from("bao_gia").insert({

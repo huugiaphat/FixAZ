@@ -61,7 +61,7 @@ export function TabChiTietDon({
     defaultValues: { loai: "Dịch vụ", so_luong: 1, gia_ban: 0 },
   });
 
-  const duocXoa = ["Quản lý", "CSKH-Điều phối"].includes(vaiTro);
+  const duocXoa = ["Quản lý", "Admin", "CSKH-Điều phối"].includes(vaiTro);
   const duocTao = duocXoa || (vaiTro === "Thợ" && laThoPhuTrach);
   const tongCong = danhSach.reduce((s, c) => s + c.thanh_tien, 0);
   const loaiDangChon = watch("loai");

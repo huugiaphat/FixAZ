@@ -31,7 +31,7 @@ export function TabNghiemThu({
   laThoPhuTrach: boolean;
 }) {
   const router = useRouter();
-  const duocTao = ["Quản lý", "CSKH-Điều phối"].includes(vaiTro) || (vaiTro === "Thợ" && laThoPhuTrach);
+  const duocTao = ["Quản lý", "Admin", "CSKH-Điều phối"].includes(vaiTro) || (vaiTro === "Thợ" && laThoPhuTrach);
   const supabase = createClient();
   const [anh, setAnh] = useState<string[]>([]);
   const [dangXacNhan, setDangXacNhan] = useState<string | null>(null);

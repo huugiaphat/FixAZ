@@ -21,7 +21,7 @@ const MAU_TRANG_THAI: Record<string, string> = {
 
 export function TheBaoHanh({ baoHanh, vaiTro }: { baoHanh: BaoHanh; vaiTro: VaiTro }) {
   const router = useRouter();
-  const duocXuLy = ["Quản lý", "CSKH-Điều phối"].includes(vaiTro);
+  const duocXuLy = ["Quản lý", "Admin", "CSKH-Điều phối"].includes(vaiTro);
   const [dangSua, setDangSua] = useState(false);
   const [dangLuu, setDangLuu] = useState(false);
   const [ketQua, setKetQua] = useState(baoHanh.ket_qua ?? "");

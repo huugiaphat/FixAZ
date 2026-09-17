@@ -22,7 +22,7 @@ const MAU_TRANG_THAI: Record<string, string> = {
 
 export function TheYeuCau({ yeuCau, vaiTro }: { yeuCau: YeuCauDichVu; vaiTro: VaiTro }) {
   const router = useRouter();
-  const duocXuLy = ["Quản lý", "CSKH-Điều phối"].includes(vaiTro);
+  const duocXuLy = ["Quản lý", "Admin", "CSKH-Điều phối"].includes(vaiTro);
   const [dangXuLy, setDangXuLy] = useState(false);
   const IconDichVu = ICON_DICH_VU[yeuCau.dich_vu];
 

@@ -32,7 +32,7 @@ export function TabDieuPhoi({
   const [eta, setEta] = useState("");
   const [dangXuLy, setDangXuLy] = useState(false);
 
-  const duocGan = ["Quản lý", "CSKH-Điều phối"].includes(vaiTro);
+  const duocGan = ["Quản lý", "Admin", "CSKH-Điều phối"].includes(vaiTro);
 
   useEffect(() => {
     if (!duocGan) return;

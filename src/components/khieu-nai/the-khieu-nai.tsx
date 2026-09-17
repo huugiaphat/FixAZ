@@ -20,7 +20,7 @@ const MAU_MUC_DO: Record<string, string> = {
 
 export function TheKhieuNai({ khieuNai, vaiTro }: { khieuNai: KhieuNai; vaiTro: VaiTro }) {
   const router = useRouter();
-  const duocXuLy = ["Quản lý", "CSKH-Điều phối"].includes(vaiTro);
+  const duocXuLy = ["Quản lý", "Admin", "CSKH-Điều phối"].includes(vaiTro);
   const supabase = createClient();
   const [nhanVienList, setNhanVienList] = useState<NhanVien[]>([]);
   const [dangSua, setDangSua] = useState(false);

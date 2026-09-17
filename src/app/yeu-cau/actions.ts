@@ -40,7 +40,7 @@ export async function guiYeuCauDichVu(input: YeuCauDichVuFormValues): Promise<{ 
     loai: "Yêu cầu dịch vụ mới",
     tieu_de: `Yêu cầu dịch vụ mới — ${parsed.data.ho_ten}`,
     noi_dung: `${parsed.data.dich_vu} · ${parsed.data.sdt} · ${parsed.data.dia_chi} — "${parsed.data.yeu_cau}"`,
-    vai_tro: ["Quản lý", "CSKH-Điều phối"],
+    vai_tro: ["Quản lý", "Admin", "CSKH-Điều phối"],
     ma_yc: data.ma_yc,
   });
 

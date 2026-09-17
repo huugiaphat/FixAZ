@@ -46,7 +46,7 @@ export function ChuyenTrangThaiDon({
   const [lyDoHuy, setLyDoHuy] = useState("");
 
   const buocTiepTheo = BUOC_TIEP_THEO[trangThai];
-  const chiQuanLySua = ["Quản lý", "CSKH-Điều phối"].includes(vaiTro);
+  const chiQuanLySua = ["Quản lý", "Admin", "CSKH-Điều phối"].includes(vaiTro);
   // Khớp đúng điều kiện p_don_update (0012) — ai thực sự được phép đổi trạng thái.
   const coQuyenChuyen = chiQuanLySua || (vaiTro === "Thợ" && laThoPhuTrach);
 
