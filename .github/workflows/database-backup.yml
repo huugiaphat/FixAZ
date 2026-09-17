@@ -1,0 +1,25 @@
+name: Sao lưu database Supabase
+
+on:
+  schedule:
+    - cron: "0 19 * * *" # 19:00 UTC = 02:00 sáng giờ VN, mỗi ngày
+  workflow_dispatch: {}
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump toàn bộ database
+        run: |
+          docker run --rm -v "$PWD:/backup" postgres:17 \
+            pg_dump "${{ secrets.SUPABASE_DB_URL }}" --no-owner --no-acl -Fc -f /backup/dump.bin
+
+      - name: Đặt tên file kèm ngày
+        run: mv dump.bin "supabase-backup-$(date +%F).bin"
+
+      - name: Upload backup làm artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: supabase-backup-${{ github.run_id }}
+          path: supabase-backup-*.bin
+          retention-days: 30
