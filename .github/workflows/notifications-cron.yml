@@ -11,5 +11,5 @@ jobs:
     steps:
       - name: Gọi endpoint kiểm tra thông báo
         run: |
-          curl -sf -X GET "https://huu-gia-phat-app.vercel.app/api/notifications/check" \
+          curl -sf -X GET "https://app.huugiaphat.com/api/notifications/check" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
