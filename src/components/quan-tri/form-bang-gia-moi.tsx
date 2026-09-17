@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
-import { bangGiaDichVuSchema, type BangGiaDichVuFormValues } from "@/lib/schemas/danh-muc";
+import { bangGiaDichVuSchema, NHOM_DICH_VU, type BangGiaDichVuFormValues } from "@/lib/schemas/danh-muc";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,7 @@ export function FormBangGiaMoi() {
     watch,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<BangGiaDichVuFormValues>({ resolver: zodResolver(bangGiaDichVuSchema), defaultValues: { nhom_dich_vu: "Điện" } });
+  } = useForm<BangGiaDichVuFormValues>({ resolver: zodResolver(bangGiaDichVuSchema), defaultValues: { nhom_dich_vu: NHOM_DICH_VU[0] } });
 
   async function onSubmit(values: BangGiaDichVuFormValues) {
     const supabase = createClient();
@@ -58,8 +58,9 @@ export function FormBangGiaMoi() {
               <Select value={watch("nhom_dich_vu")} onValueChange={(v) => setValue("nhom_dich_vu", v as BangGiaDichVuFormValues["nhom_dich_vu"])}>
                 <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Điện">Điện</SelectItem>
-                  <SelectItem value="Nước">Nước</SelectItem>
+                  {NHOM_DICH_VU.map((nhom) => (
+                    <SelectItem key={nhom} value={nhom}>{nhom}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
