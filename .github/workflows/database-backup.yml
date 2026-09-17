@@ -9,13 +9,15 @@ jobs:
   backup:
     runs-on: ubuntu-latest
     steps:
-      - name: Dump toàn bộ database
+      - name: Cài PostgreSQL client 17
         run: |
-          docker run --rm -v "$PWD:/backup" postgres:17 \
-            pg_dump "${{ secrets.SUPABASE_DB_URL }}" --no-owner --no-acl -Fc -f /backup/dump.bin
+          sudo apt-get update
+          sudo apt-get install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y postgresql-client-17
 
-      - name: Đặt tên file kèm ngày
-        run: mv dump.bin "supabase-backup-$(date +%F).bin"
+      - name: Dump toàn bộ database
+        run: pg_dump "${{ secrets.SUPABASE_DB_URL }}" --no-owner --no-acl -Fc -f "supabase-backup-$(date +%F).bin"
 
       - name: Upload backup làm artifact
         uses: actions/upload-artifact@v4
