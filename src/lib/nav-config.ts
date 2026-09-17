@@ -3,7 +3,6 @@ import {
   LayoutDashboard,
   Users,
   ClipboardList,
-  ClipboardCheck,
   Warehouse,
   ShieldCheck,
   Award,
@@ -31,7 +30,6 @@ export const DANH_SACH_DIEU_HUONG: MucDieuHuong[] = [
   { href: "/don-hang", nhan: "Đơn hàng", icon: ClipboardList, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Thợ", "Kế toán", "Kiểm soát"], uuTienMobile: true },
   { href: "/yeu-cau-dich-vu", nhan: "Yêu cầu dịch vụ", icon: Inbox, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Kiểm soát"] },
   { href: "/mau-bao-gia", nhan: "Mẫu báo giá", icon: FileText, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Kế toán", "Kiểm soát"] },
-  { href: "/nghiem-thu", nhan: "Nghiệm thu", icon: ClipboardCheck, vaiTro: ["Thợ", "Kiểm soát", "Admin"], uuTienMobile: true },
   { href: "/kho-vat-tu", nhan: "Kho vật tư", icon: Warehouse, vaiTro: ["Quản lý", "Admin", "Kho", "Kiểm soát"] },
   { href: "/bao-hanh", nhan: "Bảo hành", icon: ShieldCheck, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Kiểm soát"] },
   { href: "/kpi", nhan: "KPI nhân viên", icon: Award, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Thợ", "Kế toán", "Kho", "Kiểm soát"] },
@@ -45,7 +43,7 @@ export function dieuHuongTheoVaiTro(vaiTro: VaiTro): MucDieuHuong[] {
 
 export const NHOM_DIEU_HUONG = [
   { nhan: "Tổng quan", duongDan: ["/", "/dashboard"] },
-  { nhan: "Khách hàng & công việc", duongDan: ["/yeu-cau-dich-vu", "/khach-hang", "/mau-bao-gia", "/don-hang", "/nghiem-thu"] },
+  { nhan: "Khách hàng & công việc", duongDan: ["/yeu-cau-dich-vu", "/khach-hang", "/mau-bao-gia", "/don-hang"] },
   { nhan: "Tài chính & vật tư", duongDan: ["/thu-chi", "/kho-vat-tu"] },
   { nhan: "Chất lượng & quản trị", duongDan: ["/bao-hanh", "/khieu-nai", "/kpi", "/quan-tri"] },
 ];
@@ -56,7 +54,6 @@ export const MO_TA_MODULE: Record<string, string> = {
   "/khach-hang": "Tra cứu thông tin và lịch sử của khách hàng.",
   "/mau-bao-gia": "Lập, in báo giá tham khảo và liên kết đơn hàng.",
   "/don-hang": "Theo dõi công việc từ tiếp nhận đến hoàn thành.",
-  "/nghiem-thu": "Kiểm tra chất lượng và ghi nhận kết quả thi công.",
   "/thu-chi": "Ghi nhận dòng tiền và theo dõi thu chi công trình.",
   "/kho-vat-tu": "Quản lý vật tư, nhập xuất và số lượng tồn kho.",
   "/bao-hanh": "Theo dõi và xử lý bảo hành sau sửa chữa.",
@@ -71,7 +68,7 @@ export function dieuHuongMobile(vaiTro: VaiTro) {
     "Admin": ["/", "/dashboard", "/don-hang", "/thu-chi"],
     "Kiểm soát": ["/", "/dashboard", "/don-hang", "/thu-chi"],
     "CSKH-Điều phối": ["/", "/yeu-cau-dich-vu", "/don-hang", "/khach-hang"],
-    "Thợ": ["/", "/don-hang", "/nghiem-thu", "/kpi"],
+    "Thợ": ["/", "/don-hang", "/kpi"],
     "Kế toán": ["/", "/thu-chi", "/don-hang", "/mau-bao-gia"],
     "Kho": ["/", "/kho-vat-tu", "/kpi"],
   };
