@@ -20,7 +20,7 @@ jobs:
         env:
           PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
-          pg_dump -h db.fsjtjscpnmrsztyomyzg.supabase.co -p 5432 -U postgres -d postgres \
+          pg_dump -h aws-0-ap-northeast-2.pooler.supabase.com -p 5432 -U postgres.fsjtjscpnmrsztyomyzg -d postgres \
             --no-owner --no-acl -Fc -f "supabase-backup-$(date +%F).bin"
 
       - name: Upload backup làm artifact
