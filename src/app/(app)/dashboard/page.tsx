@@ -108,6 +108,16 @@ export default async function TrangDashboard() {
             { nhan: "Khẩn cấp", so: donList.filter(d => d.uu_tien === "P1-Khẩn cấp" && !["Đã đóng", "Đã hủy"].includes(d.trang_thai)).length, ghiChu: "Đang cần ưu tiên xử lý", mau: "text-rose-600" },
             { nhan: "Chờ thu tiền", so: donList.filter(d => d.trang_thai === "Đã nghiệm thu - chờ thu tiền").length, ghiChu: "Đã nghiệm thu", mau: "text-amber-600" },
           ].map(m => <div key={m.nhan} className="rounded-xl border bg-card p-4"><p className="text-sm font-medium">{m.nhan}</p><p className={`my-2 text-4xl font-semibold tabular-nums ${m.mau}`}>{m.so}<span className="ml-2 text-xs font-normal text-muted-foreground">đơn</span></p><p className="text-xs text-muted-foreground">{m.ghiChu}</p></div>)}
+          <div className="col-span-2 flex items-center justify-between rounded-xl border bg-card p-4">
+            <div>
+              <p className="text-sm font-medium">Đã hủy</p>
+              <p className="text-xs text-muted-foreground">Không tính vào doanh thu/thanh toán</p>
+            </div>
+            <p className="text-2xl font-semibold tabular-nums text-slate-500">
+              {donList.filter(d => d.trang_thai === "Đã hủy").length}
+              <span className="ml-2 text-xs font-normal text-muted-foreground">đơn</span>
+            </p>
+          </div>
           <p className="col-span-2 text-xs text-muted-foreground">Tổng hợp từ {donList.length} đơn gần nhất, tối đa 1.000 đơn.</p>
         </div>
         </div>
