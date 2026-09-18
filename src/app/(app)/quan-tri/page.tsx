@@ -103,18 +103,18 @@ export default async function TrangQuanTri() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Dịch vụ</TableHead>
-                    <TableHead>Nhóm</TableHead>
                     <TableHead>ĐVT</TableHead>
-                    <TableHead>Giá tham khảo</TableHead>
+                    <TableHead>Đơn giá</TableHead>
+                    <TableHead>Nhóm</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {danhSachBg.map((dv) => (
                     <TableRow key={dv.ma_dv}>
                       <TableCell className="font-medium">{dv.ten_dich_vu}</TableCell>
-                      <TableCell>{dv.nhom_dich_vu}</TableCell>
                       <TableCell>{dv.don_vi_tinh}</TableCell>
                       <TableCell className="text-muted-foreground">{dv.gia_tham_khao ?? "—"}</TableCell>
+                      <TableCell>{dv.nhom_dich_vu}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -122,7 +122,7 @@ export default async function TrangQuanTri() {
             </CardContent>
           </Card>
           <p className="text-xs text-muted-foreground">
-            Lưu ý: giá hiện là khung minh họa — cập nhật số liệu chính thức trước khi vận hành thật (Mục 12 tài liệu yêu cầu).
+            Bảng đơn giá khoán nội bộ — Điện / Nước / Nhà cửa.
           </p>
         </TabsContent>
 

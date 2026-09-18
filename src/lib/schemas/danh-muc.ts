@@ -1,23 +1,17 @@
 import { z } from "zod";
 
 export const NHOM_DICH_VU = [
-  "Điện nước - Lắp mới",
-  "Điện nước - Sửa chữa",
-  "Sơn nhà",
-  "Chống thấm",
-  "Trần & vách thạch cao",
-  "Sàn & gạch",
-  "Mái nhà",
-  "Phá dỡ",
-  "Xây tô",
-  "Cửa nhôm kính",
-  "Xây mới / cải tạo nhà",
-  "Sửa máy lạnh",
-  "Sửa máy giặt",
-  "Sửa tủ lạnh",
-  "Sửa máy nước nóng",
   "Điện",
+  "Máy bơm",
+  "Bình nóng lạnh",
+  "Điện 3 pha",
+  "Đi dây",
+  "Tủ điện",
+  "Thiết bị",
+  "EV",
+  "Khẩn cấp",
   "Nước",
+  "Nhà cửa",
 ] as const;
 
 export const bangGiaDichVuSchema = z.object({
