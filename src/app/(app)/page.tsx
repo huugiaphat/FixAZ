@@ -2,7 +2,7 @@ import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { requireNhanVien } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { dieuHuongTheoVaiTro, NHOM_DIEU_HUONG, MO_TA_MODULE } from "@/lib/nav-config";
+import { dieuHuongTheoVaiTro, MO_TA_MODULE } from "@/lib/nav-config";
 import { Card, CardContent } from "@/components/ui/card";
 import { BadgeTrangThaiDon } from "@/components/don-hang/badge-trang-thai";
 import { formatDate } from "@/lib/format";
@@ -57,20 +57,13 @@ export default async function TrangChu() {
           )}
         </section>
       ) : null}
-      {NHOM_DIEU_HUONG.map(nhom => {
-        const muc = nhom.duongDan.flatMap(href => mucNhanh.filter(m => m.href === href));
-        if (!muc.length) return null;
-        return <section key={nhom.nhan} className="space-y-3">
-          <h2 className="text-base font-semibold text-primary">{nhom.nhan}</h2>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {muc.map(m => { const Icon = m.icon; return <Link key={m.href} href={m.href} className="group flex items-start gap-4 rounded-xl border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-primary/5">
-              <span className="rounded-xl bg-primary/10 p-3 text-primary"><Icon className="size-5" /></span>
-              <div className="min-w-0 flex-1"><p className="font-semibold">{m.nhan}</p><p className="mt-1 text-sm leading-relaxed text-muted-foreground">{MO_TA_MODULE[m.href]}</p></div>
-              <ArrowUpRight className="size-4 shrink-0 text-muted-foreground group-hover:text-primary" />
-            </Link>; })}
-          </div>
-        </section>;
-      })}
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {mucNhanh.map(m => { const Icon = m.icon; return <Link key={m.href} href={m.href} className="group flex items-start gap-4 rounded-xl border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-primary/5">
+          <span className="rounded-xl bg-primary/10 p-3 text-primary"><Icon className="size-5" /></span>
+          <div className="min-w-0 flex-1"><p className="font-semibold">{m.nhan}</p><p className="mt-1 text-sm leading-relaxed text-muted-foreground">{MO_TA_MODULE[m.href]}</p></div>
+          <ArrowUpRight className="size-4 shrink-0 text-muted-foreground group-hover:text-primary" />
+        </Link>; })}
+      </section>
 
 
     </div>
