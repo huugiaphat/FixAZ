@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const chiTietDonSchema = z.object({
-  loai: z.enum(["Dịch vụ", "Vật tư"]),
+  loai: z.enum(["Dịch vụ", "Vật tư", "Thuế"]),
   ten_hang_muc: z.string().trim().min(1, "Vui lòng nhập tên hạng mục"),
   don_vi_tinh: z.string().trim().optional(),
   so_luong: z.number().positive("Số lượng phải lớn hơn 0"),

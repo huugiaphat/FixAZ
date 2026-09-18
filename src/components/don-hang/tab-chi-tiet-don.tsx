@@ -190,7 +190,6 @@ export function TabChiTietDon({
         <Card>
           <CardContent className="space-y-6 pt-6">
             <div className="space-y-4">
-              <p className="font-medium">Thêm từ danh sách có sẵn</p>
               <div className="space-y-2">
                 <Label>Loại *</Label>
                 <Select value={watch("loai")} onValueChange={(v) => setValue("loai", v as ChiTietDonFormValues["loai"])}>
@@ -198,72 +197,81 @@ export function TabChiTietDon({
                   <SelectContent>
                     <SelectItem value="Dịch vụ">Dịch vụ</SelectItem>
                     <SelectItem value="Vật tư">Vật tư</SelectItem>
+                    <SelectItem value="Thuế">Thuế</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label>Tên hạng mục</Label>
-                <Popover open={openChon} onOpenChange={setOpenChon}>
-                  <PopoverTrigger render={<Button variant="outline" className="w-full justify-between font-normal" />}>
-                    {dsDangChon.length > 0 ? `Đã chọn ${dsDangChon.length} ${loaiDangChon.toLowerCase()}` : `Chọn ${loaiDangChon.toLowerCase()} (có thể chọn nhiều)`}
-                    <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
-                  </PopoverTrigger>
-                  <PopoverContent className="w-96 p-0">
-                    <Command>
-                      <CommandInput placeholder={`Tìm ${loaiDangChon.toLowerCase()}…`} />
-                      <CommandList>
-                        <CommandEmpty>Không có {loaiDangChon.toLowerCase()} nào.</CommandEmpty>
-                        <CommandGroup>
-                          {dsGoiY.map((item) => {
-                            const daChon = dsDangChon.some((d) => d.ma === item.ma);
-                            return (
-                              <CommandItem key={item.ma} value={item.ten} data-checked={daChon} onSelect={() => toggleChon(item)}>
-                                <div>
-                                  <p>{item.ten}</p>
-                                  <p className="text-xs text-muted-foreground">{item.don_vi_tinh} · {item.giaGoiY}</p>
-                                </div>
-                              </CommandItem>
-                            );
-                          })}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </div>
 
-              {dsDangChon.length > 0 ? (
-                <div className="space-y-2 rounded-lg border p-3">
-                  {dsDangChon.map((d) => (
-                    <div key={d.ma} className="flex flex-wrap items-center gap-2 text-sm">
-                      <span className="flex-1 min-w-32 truncate">{d.ten}</span>
-                      <Input
-                        type="number"
-                        min={0}
-                        step="any"
-                        value={d.so_luong}
-                        onChange={(e) => capNhatDongDangChon(d.ma, { so_luong: Number(e.target.value) })}
-                        className="w-20"
-                      />
-                      <span className="text-muted-foreground">{d.don_vi_tinh}</span>
-                      <Input
-                        type="number"
-                        min={0}
-                        step={1000}
-                        value={d.gia_ban}
-                        onChange={(e) => capNhatDongDangChon(d.ma, { gia_ban: Number(e.target.value) })}
-                        className="w-28"
-                      />
-                      <Button size="icon-sm" variant="ghost" onClick={() => setDsDangChon((ds) => ds.filter((x) => x.ma !== d.ma))}>
-                        <X className="h-4 w-4" />
+              {loaiDangChon === "Thuế" ? (
+                <p className="text-sm text-muted-foreground">Thuế không có sẵn trong danh mục — nhập trực tiếp ở phần &quot;Hoặc nhập hạng mục khác&quot; bên dưới.</p>
+              ) : (
+                <>
+                  <p className="font-medium">Thêm từ danh sách có sẵn</p>
+                  <div className="space-y-2">
+                    <Label>Tên hạng mục</Label>
+                    <Popover open={openChon} onOpenChange={setOpenChon}>
+                      <PopoverTrigger render={<Button variant="outline" className="w-full justify-between font-normal" />}>
+                        {dsDangChon.length > 0 ? `Đã chọn ${dsDangChon.length} ${loaiDangChon.toLowerCase()}` : `Chọn ${loaiDangChon.toLowerCase()} (có thể chọn nhiều)`}
+                        <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                      </PopoverTrigger>
+                      <PopoverContent className="w-96 p-0">
+                        <Command>
+                          <CommandInput placeholder={`Tìm ${loaiDangChon.toLowerCase()}…`} />
+                          <CommandList>
+                            <CommandEmpty>Không có {loaiDangChon.toLowerCase()} nào.</CommandEmpty>
+                            <CommandGroup>
+                              {dsGoiY.map((item) => {
+                                const daChon = dsDangChon.some((d) => d.ma === item.ma);
+                                return (
+                                  <CommandItem key={item.ma} value={item.ten} data-checked={daChon} onSelect={() => toggleChon(item)}>
+                                    <div>
+                                      <p>{item.ten}</p>
+                                      <p className="text-xs text-muted-foreground">{item.don_vi_tinh} · {item.giaGoiY}</p>
+                                    </div>
+                                  </CommandItem>
+                                );
+                              })}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  {dsDangChon.length > 0 ? (
+                    <div className="space-y-2 rounded-lg border p-3">
+                      {dsDangChon.map((d) => (
+                        <div key={d.ma} className="flex flex-wrap items-center gap-2 text-sm">
+                          <span className="flex-1 min-w-32 truncate">{d.ten}</span>
+                          <Input
+                            type="number"
+                            min={0}
+                            step="any"
+                            value={d.so_luong}
+                            onChange={(e) => capNhatDongDangChon(d.ma, { so_luong: Number(e.target.value) })}
+                            className="w-20"
+                          />
+                          <span className="text-muted-foreground">{d.don_vi_tinh}</span>
+                          <Input
+                            type="number"
+                            min={0}
+                            step={1000}
+                            value={d.gia_ban}
+                            onChange={(e) => capNhatDongDangChon(d.ma, { gia_ban: Number(e.target.value) })}
+                            className="w-28"
+                          />
+                          <Button size="icon-sm" variant="ghost" onClick={() => setDsDangChon((ds) => ds.filter((x) => x.ma !== d.ma))}>
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button className="w-full" disabled={dangThemNhieu} onClick={themNhieuHangMuc}>
+                        {dangThemNhieu ? "Đang thêm…" : `Thêm ${dsDangChon.length} hạng mục`}
                       </Button>
                     </div>
-                  ))}
-                  <Button className="w-full" disabled={dangThemNhieu} onClick={themNhieuHangMuc}>
-                    {dangThemNhieu ? "Đang thêm…" : `Thêm ${dsDangChon.length} hạng mục`}
-                  </Button>
-                </div>
-              ) : null}
+                  ) : null}
+                </>
+              )}
             </div>
 
             <div className="border-t pt-6">
