@@ -90,6 +90,7 @@ export default async function TrangDashboard() {
       </div>
 
       <section className="space-y-3">
+        <h2 className="text-lg font-semibold tracking-tight">Công Trình</h2>
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <Card>
           <CardContent className="pt-6">
@@ -124,6 +125,7 @@ export default async function TrangDashboard() {
 
       {tc ? (
         <section className="space-y-3">
+          <h2 className="text-lg font-semibold tracking-tight">Thu chi</h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 ">
             <StatCard
               icon={CalendarDays}
@@ -151,6 +153,7 @@ export default async function TrangDashboard() {
       ) : null}
 
       <section className="space-y-3">
+        <h2 className="text-lg font-semibold tracking-tight">Chi tiết thu chi</h2>
         <div className="grid gap-3 lg:grid-cols-2 ">
           <Card>
             <CardContent className="space-y-1 pt-6">
@@ -170,7 +173,7 @@ export default async function TrangDashboard() {
       </section>
 
       <section className="space-y-3">
-        <p className="text-xs text-muted-foreground">Tháng này · {thuChiCongTrinh.length} công trình</p>
+        <div className="flex flex-wrap items-end justify-between gap-2"><h2 className="text-lg font-semibold tracking-tight">Thu chi công trình</h2><span className="text-xs text-muted-foreground">Tháng này · {thuChiCongTrinh.length} công trình</span></div>
         {thuChiCongTrinh.length === 0 ? (
           <p className="text-sm text-muted-foreground">Chưa có khoản thu chi nào trong tháng.</p>
         ) : (
@@ -204,6 +207,7 @@ export default async function TrangDashboard() {
       </section>
 
       <section className="space-y-3">
+        <h2 className="text-lg font-semibold tracking-tight">Doanh thu</h2>
         <div className="grid gap-3 lg:grid-cols-2 ">
           <Card>
             <CardContent className="space-y-1 pt-6">
@@ -223,6 +227,7 @@ export default async function TrangDashboard() {
       </section>
 
       <section className="space-y-3">
+        <h2 className="text-lg font-semibold tracking-tight">Vận hành</h2>
         <div className="grid gap-3 lg:grid-cols-2">
           <Card>
             <CardContent className="space-y-1 pt-6">
@@ -242,6 +247,7 @@ export default async function TrangDashboard() {
       </section>
 
       <section className="space-y-3">
+        <h2 className="text-lg font-semibold tracking-tight">Đội thợ</h2>
         {hieuSuatTho.length === 0 ? (
           <p className="text-sm text-muted-foreground">Chưa có đơn hoàn thành để tính hiệu suất.</p>
         ) : (
@@ -277,6 +283,7 @@ export default async function TrangDashboard() {
       </section>
 
       <section className="space-y-3">
+        <h2 className="text-lg font-semibold tracking-tight">Thanh toán & Chất lượng</h2>
         <div className="grid gap-3 lg:grid-cols-2">
           <Card>
             <CardContent className="space-y-1 pt-6">
