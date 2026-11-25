@@ -27,9 +27,13 @@ type TongHopThuChi = {
   tong_chi: number;
   thu_tien_mat: number;
   chi_tien_mat: number;
+};
+
+type TongHopChoDuyet = {
   cho_duyet_thu: number;
   cho_duyet_chi: number;
   so_phieu_cho_duyet: number;
+  so_de_xuat_cho_duyet: number;
 };
 
 const SO_PHIEU_MOI_TRANG = 25;
@@ -90,7 +94,12 @@ export default async function TrangThuChi({
   if (trangThaiLoc === "tu-dong-bo") query = query.not("ma_thu", "is", null);
   query = query.range((trang - 1) * SO_PHIEU_MOI_TRANG, trang * SO_PHIEU_MOI_TRANG - 1);
 
-  const [{ data, count, error }, { data: tongData, error: tongError }, { data: dxData, error: dxError }] = await Promise.all([
+  const [
+    { data, count, error },
+    { data: tongData, error: tongError },
+    { data: choDuyetData, error: choDuyetError },
+    { data: dxData, count: dxCount, error: dxError },
+  ] = await Promise.all([
     query,
     supabase.rpc("f_tong_hop_thu_chi_loc", {
       p_tu: tuThoiDiem,
@@ -100,12 +109,14 @@ export default async function TrangThuChi({
       p_cong_trinh: congTrinhLoc ?? null,
       p_trang_thai: trangThaiLoc ?? null,
     }).single(),
-    supabase.from("de_xuat_thanh_toan").select("*")
+    supabase.rpc("f_tong_hop_phieu_cho_duyet").single(),
+    supabase.from("de_xuat_thanh_toan").select("*", { count: "exact" })
       .eq("trang_thai", "Chờ duyệt").order("created_at", { ascending: false }).limit(50),
   ]);
   const danhSach = (data as ThuChiDanhSach[]) ?? [];
   const deXuatChoDuyet = (dxData as DeXuatThanhToan[]) ?? [];
   const tong = tongData as TongHopThuChi | null;
+  const choDuyet = choDuyetData as TongHopChoDuyet | null;
   const soTrang = Math.max(1, Math.ceil((count ?? 0) / SO_PHIEU_MOI_TRANG));
 
   const laAdmin = nv.vai_tro_app === "Admin";
@@ -176,9 +187,12 @@ export default async function TrangThuChi({
         </Card>
         <Card>
           <CardContent className="py-4">
-            <p className="text-sm text-muted-foreground">Phiếu thu chi chờ duyệt · {Number(tong?.so_phieu_cho_duyet ?? 0)} phiếu</p>
-            <p className="text-sm font-medium">Thu {formatVND(Number(tong?.cho_duyet_thu ?? 0))}</p>
-            <p className="text-sm font-medium">Chi {formatVND(Number(tong?.cho_duyet_chi ?? 0))}</p>
+            <p className="text-sm text-muted-foreground">Tất cả phiếu chờ duyệt · {choDuyet ? Number(choDuyet.so_phieu_cho_duyet) : "—"} phiếu</p>
+            {choDuyetError ? <p className="text-sm text-destructive">Không tính được: {choDuyetError.message}</p> : <>
+              <p className="text-sm font-medium">Thu {formatVND(Number(choDuyet?.cho_duyet_thu ?? 0))}</p>
+              <p className="text-sm font-medium">Chi {formatVND(Number(choDuyet?.cho_duyet_chi ?? 0))}</p>
+              <p className="mt-1 text-xs text-muted-foreground">Gồm {Number(choDuyet?.so_de_xuat_cho_duyet ?? 0)} đề xuất thanh toán · Không phụ thuộc bộ lọc</p>
+            </>}
           </CardContent>
         </Card>
       </div> : null}
@@ -192,6 +206,7 @@ export default async function TrangThuChi({
         </div>
         {dxError && <p className="text-sm text-destructive">Không tải được đề xuất: {dxError.message}</p>}
         {!dxError && deXuatChoDuyet.length === 0 && <p className="text-sm text-muted-foreground">Không có đề xuất chờ duyệt.</p>}
+        {!dxError && (dxCount ?? 0) > deXuatChoDuyet.length && <p className="text-sm text-muted-foreground">Đang hiện {deXuatChoDuyet.length}/{dxCount} đề xuất; mở danh sách để xem tất cả.</p>}
         {deXuatChoDuyet.map(dx => <Card key={dx.ma_dx}><CardContent className="flex flex-wrap items-center justify-between gap-3 py-3">
           <div><Link href={`/de-xuat-thanh-toan/${encodeURIComponent(dx.ma_dx)}`} className="font-semibold text-primary hover:underline">{dx.ma_dx}</Link>
             <p className="text-xs text-muted-foreground">Chi · {dx.noi_dung_chi} · {dx.ten_cong_trinh ?? dx.ma_don ?? "Không gắn công trình"}</p></div>
