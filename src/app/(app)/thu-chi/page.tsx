@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PageHeading } from "@/components/page-heading";
 import { requireNhanVien } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -12,36 +13,94 @@ import { formatVND, formatDateTime } from "@/lib/format";
 import { NOI_DUNG_THU, NOI_DUNG_CHI } from "@/lib/schemas/thu-chi";
 import type { NhanVien, ThuChi } from "@/types/database";
 
-type ThuChiVoiDon = ThuChi & { don_hang: { mo_ta_su_co: string } | null; nhan_vien: { ho_ten: string } | null };
+type ThuChiDanhSach = ThuChi & {
+  ten_cong_trinh_hien_thi: string | null;
+  ho_ten_nguoi_thu_chi: string | null;
+  duyet_du_lieu_cu: boolean;
+};
+
+type TongHopThuChi = {
+  tong_thu: number;
+  tong_chi: number;
+  thu_tien_mat: number;
+  chi_tien_mat: number;
+  cho_duyet_thu: number;
+  cho_duyet_chi: number;
+  so_phieu_cho_duyet: number;
+};
+
+const SO_PHIEU_MOI_TRANG = 25;
+const MUI_GIO = "+07:00";
+
+function thangHienTai() {
+  return new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Ho_Chi_Minh", year: "numeric", month: "2-digit" }).format(new Date());
+}
+
+function doiThang(thang: string, soThang: number) {
+  const [nam, thangSo] = thang.split("-").map(Number);
+  const ngay = new Date(Date.UTC(nam, thangSo - 1 + soThang, 1));
+  return `${ngay.getUTCFullYear()}-${String(ngay.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+function linkTrang(params: Record<string, string | undefined>, trang: number) {
+  const query = new URLSearchParams();
+  for (const [ten, giaTri] of Object.entries(params)) if (giaTri) query.set(ten, giaTri);
+  query.set("trang", String(trang));
+  return `/thu-chi?${query.toString()}`;
+}
 
 export default async function TrangThuChi({
   searchParams,
 }: {
-  searchParams: Promise<{ tu?: string; den?: string; loai?: string; ten_cong_trinh?: string; noi_dung?: string }>;
+  searchParams: Promise<{ thang?: string; tu?: string; den?: string; loai?: string; ten_cong_trinh?: string; noi_dung?: string; trang_thai?: string; trang?: string }>;
 }) {
   const nv = await requireNhanVien(["Quản lý", "Admin", "Kế toán", "Kiểm soát"]);
-  const { tu, den, loai, ten_cong_trinh: tenCongTrinh, noi_dung: noiDung } = await searchParams;
+  const { thang: thangParam, tu, den, loai, ten_cong_trinh: tenCongTrinh, noi_dung: noiDung, trang_thai: trangThai, trang: trangParam } = await searchParams;
+  const thang = /^\d{4}-(0[1-9]|1[0-2])$/.test(thangParam ?? "") ? thangParam! : thangHienTai();
+  const laNgay = (giaTri?: string) => giaTri && /^\d{4}-(0[1-9]|1[0-2])-([0-2]\d|3[01])$/.test(giaTri) ? giaTri : undefined;
+  const tuNgay = laNgay(tu);
+  const denNgay = laNgay(den);
+  const tuThoiDiem = `${tuNgay ?? `${thang}-01`}T00:00:00${MUI_GIO}`;
+  const denThoiDiem = `${denNgay ? new Date(Date.parse(`${denNgay}T00:00:00${MUI_GIO}`) + 86_400_000).toISOString() : `${doiThang(thang, 1)}-01T00:00:00${MUI_GIO}`}`;
+  const loaiLoc = loai === "Thu" || loai === "Chi" ? loai : undefined;
+  const noiDungLoc = noiDung && ([...NOI_DUNG_THU, ...NOI_DUNG_CHI] as readonly string[]).includes(noiDung) ? noiDung : undefined;
+  const trangThaiLoc = ["cho-duyet", "da-duyet", "tu-dong-bo"].includes(trangThai ?? "") ? trangThai : undefined;
+  const congTrinhLoc = tenCongTrinh?.trim() || undefined;
+  const trang = Math.max(1, Math.min(100_000, Number.parseInt(trangParam ?? "1", 10) || 1));
   const supabase = await createClient();
 
   let query = supabase
-    .from("thu_chi")
-    .select("*, don_hang(mo_ta_su_co), nhan_vien!thu_chi_nguoi_tao_fkey(ho_ten)")
+    .from("v_thu_chi_danh_sach")
+    .select("*", { count: "exact" })
     .order("ngay", { ascending: false })
-    .limit(1000);
-  if (tu) query = query.gte("ngay", tu);
-  if (den) query = query.lte("ngay", `${den}T23:59:59`);
-  if (loai === "Thu" || loai === "Chi") query = query.eq("loai", loai);
-  // noi_dung_thu/noi_dung_chi là 2 cột enum khác kiểu — không thể gộp
-  // .or() trên cả 2 vì Postgres sẽ cố ép giá trị sang CẢ 2 kiểu enum,
-  // lỗi ngay ở kiểu không khớp dù không rơi vào nhánh đó. Phải xác định
-  // đúng cột trước rồi lọc riêng.
-  if (noiDung && noiDung !== "tat-ca") {
-    if ((NOI_DUNG_THU as readonly string[]).includes(noiDung)) query = query.eq("noi_dung_thu", noiDung);
-    else if ((NOI_DUNG_CHI as readonly string[]).includes(noiDung)) query = query.eq("noi_dung_chi", noiDung);
+    .order("ma_tc", { ascending: false })
+    .gte("ngay", tuThoiDiem)
+    .lt("ngay", denThoiDiem);
+  if (loaiLoc) query = query.eq("loai", loaiLoc);
+  if (noiDungLoc) {
+    if ((NOI_DUNG_THU as readonly string[]).includes(noiDungLoc)) query = query.eq("noi_dung_thu", noiDungLoc);
+    else if ((NOI_DUNG_CHI as readonly string[]).includes(noiDungLoc)) query = query.eq("noi_dung_chi", noiDungLoc);
   }
+  if (congTrinhLoc) query = query.ilike("ten_cong_trinh_hien_thi", `%${congTrinhLoc}%`);
+  if (trangThaiLoc === "cho-duyet") query = query.is("ma_thu", null).eq("da_duyet", false);
+  if (trangThaiLoc === "da-duyet") query = query.is("ma_thu", null).eq("da_duyet", true);
+  if (trangThaiLoc === "tu-dong-bo") query = query.not("ma_thu", "is", null);
+  query = query.range((trang - 1) * SO_PHIEU_MOI_TRANG, trang * SO_PHIEU_MOI_TRANG - 1);
 
-  const { data, error } = await query;
-  let danhSach = (data as ThuChiVoiDon[]) ?? [];
+  const [{ data, count, error }, { data: tongData, error: tongError }] = await Promise.all([
+    query,
+    supabase.rpc("f_tong_hop_thu_chi_loc", {
+      p_tu: tuThoiDiem,
+      p_den: denThoiDiem,
+      p_loai: loaiLoc ?? null,
+      p_noi_dung: noiDungLoc ?? null,
+      p_cong_trinh: congTrinhLoc ?? null,
+      p_trang_thai: trangThaiLoc ?? null,
+    }).single(),
+  ]);
+  const danhSach = (data as ThuChiDanhSach[]) ?? [];
+  const tong = tongData as TongHopThuChi | null;
+  const soTrang = Math.max(1, Math.ceil((count ?? 0) / SO_PHIEU_MOI_TRANG));
 
   const laAdmin = nv.vai_tro_app === "Admin";
   const coTheThaoTac = ["Quản lý", "Admin", "Kế toán"].includes(nv.vai_tro_app);
@@ -51,27 +110,20 @@ export default async function TrangThuChi({
     nhanVienList = (nvData as NhanVien[]) ?? [];
   }
 
-  if (tenCongTrinh) {
-    const tuKhoa = tenCongTrinh.toLowerCase();
-    danhSach = danhSach.filter((tc) => (tc.don_hang?.mo_ta_su_co ?? tc.ten_cong_trinh ?? "").toLowerCase().includes(tuKhoa));
-  }
-
-  const laTienMat = (tc: ThuChiVoiDon) => tc.phuong_thuc === "Tiền mặt";
-
-  const tongThu = danhSach.filter((tc) => tc.loai === "Thu").reduce((s, tc) => s + tc.so_tien, 0);
-  const tongChi = danhSach.filter((tc) => tc.loai === "Chi").reduce((s, tc) => s + tc.so_tien, 0);
-
-  const tongThuTienMat = danhSach.filter((tc) => tc.loai === "Thu" && laTienMat(tc)).reduce((s, tc) => s + tc.so_tien, 0);
+  const tongThu = Number(tong?.tong_thu ?? 0);
+  const tongChi = Number(tong?.tong_chi ?? 0);
+  const tongThuTienMat = Number(tong?.thu_tien_mat ?? 0);
   const tongThuTaiKhoan = tongThu - tongThuTienMat;
-  const tongChiTienMat = danhSach.filter((tc) => tc.loai === "Chi" && laTienMat(tc)).reduce((s, tc) => s + tc.so_tien, 0);
+  const tongChiTienMat = Number(tong?.chi_tien_mat ?? 0);
   const tongChiTaiKhoan = tongChi - tongChiTienMat;
   const soDuTienMat = tongThuTienMat - tongChiTienMat;
   const soDuTaiKhoan = tongThuTaiKhoan - tongChiTaiKhoan;
 
-  const coTheSua = (tc: ThuChiVoiDon) =>
+  const coTheSua = (tc: ThuChiDanhSach) =>
     coTheThaoTac && !tc.ma_thu && (laAdmin || (!tc.da_duyet && tc.nguoi_lap === nv.ma_nv));
-  const coTheDuyet = (tc: ThuChiVoiDon) => laAdmin && !tc.ma_thu;
-  const trangThaiDuyet = (tc: ThuChiVoiDon) => tc.ma_thu ? "Tự đồng bộ" : tc.da_duyet ? "Đã duyệt" : "Chờ duyệt";
+  const coTheDuyet = (tc: ThuChiDanhSach) => laAdmin && !tc.ma_thu;
+  const trangThaiDuyet = (tc: ThuChiDanhSach) => tc.ma_thu ? "Tự đồng bộ" : tc.duyet_du_lieu_cu ? "Đã duyệt · dữ liệu cũ" : tc.da_duyet ? "Đã duyệt" : "Chờ duyệt";
+  const paramsLoc = { thang, tu: tuNgay, den: denNgay, loai: loaiLoc, ten_cong_trinh: congTrinhLoc, noi_dung: noiDungLoc, trang_thai: trangThaiLoc };
 
   return (
     <div className="space-y-4">
@@ -79,10 +131,16 @@ export default async function TrangThuChi({
         {nv.vai_tro_app !== "Kiểm soát" ? <FormThuChiMoi maNvHienTai={nv.ma_nv} /> : null}
       </PageHeading>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="flex flex-wrap items-center gap-3 text-sm">
+        <Link href={linkTrang({ thang: doiThang(thang, -1) }, 1)} className="rounded-md border px-3 py-1.5 hover:bg-muted">← Tháng trước</Link>
+        <span className="font-medium">{tuNgay || denNgay ? "Khoảng ngày đã chọn" : `Tháng ${thang.slice(5, 7)}/${thang.slice(0, 4)}`}</span>
+        <Link href={linkTrang({ thang: doiThang(thang, 1) }, 1)} className="rounded-md border px-3 py-1.5 hover:bg-muted">Tháng sau →</Link>
+      </div>
+
+      {tong ? <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Card>
           <CardContent className="py-4">
-            <p className="text-sm text-muted-foreground">Tổng thu (đang lọc)</p>
+            <p className="text-sm text-muted-foreground">Tổng thu đã hạch toán (đang lọc)</p>
             <p className="text-xl font-semibold text-emerald-600">{formatVND(tongThu)}</p>
             <p className="mt-1 text-xs text-muted-foreground">
               Tiền mặt {formatVND(tongThuTienMat)} · Tài khoản {formatVND(tongThuTaiKhoan)}
@@ -91,7 +149,7 @@ export default async function TrangThuChi({
         </Card>
         <Card>
           <CardContent className="py-4">
-            <p className="text-sm text-muted-foreground">Tổng chi (đang lọc)</p>
+            <p className="text-sm text-muted-foreground">Tổng chi đã hạch toán (đang lọc)</p>
             <p className="text-xl font-semibold text-destructive">{formatVND(tongChi)}</p>
             <p className="mt-1 text-xs text-muted-foreground">
               Tiền mặt {formatVND(tongChiTienMat)} · Tài khoản {formatVND(tongChiTaiKhoan)}
@@ -100,7 +158,7 @@ export default async function TrangThuChi({
         </Card>
         <Card>
           <CardContent className="py-4">
-            <p className="text-sm text-muted-foreground">Số dư</p>
+            <p className="text-sm text-muted-foreground">Số dư đã hạch toán</p>
             <p className={`text-xl font-semibold ${tongThu - tongChi >= 0 ? "text-emerald-600" : "text-destructive"}`}>
               {formatVND(tongThu - tongChi)}
             </p>
@@ -109,9 +167,19 @@ export default async function TrangThuChi({
             </p>
           </CardContent>
         </Card>
-      </div>
+        <Card>
+          <CardContent className="py-4">
+            <p className="text-sm text-muted-foreground">Chờ duyệt · {Number(tong?.so_phieu_cho_duyet ?? 0)} phiếu</p>
+            <p className="text-sm font-medium">Thu {formatVND(Number(tong?.cho_duyet_thu ?? 0))}</p>
+            <p className="text-sm font-medium">Chi {formatVND(Number(tong?.cho_duyet_chi ?? 0))}</p>
+          </CardContent>
+        </Card>
+      </div> : null}
 
-      <BoLocThuChi tu={tu} den={den} loai={loai} tenCongTrinh={tenCongTrinh} noiDung={noiDung} />
+      <BoLocThuChi thang={thang} tu={tuNgay} den={denNgay} loai={loaiLoc} tenCongTrinh={congTrinhLoc} noiDung={noiDungLoc} trangThai={trangThaiLoc} />
+
+      {tongError ? <p className="text-sm text-destructive">Lỗi tính tổng thu chi: {tongError.message}</p> : null}
+      {!error ? <p className="text-sm text-muted-foreground">{count ?? 0} phiếu phù hợp · Trang {Math.min(trang, soTrang)}/{soTrang}. Số tiền phía trên tính trên toàn bộ kết quả đang lọc.</p> : null}
 
       {error ? (
         <p className="text-sm text-destructive">Lỗi tải dữ liệu: {error.message}</p>
@@ -122,10 +190,10 @@ export default async function TrangThuChi({
         <div className="grid gap-3 lg:hidden">
           {danhSach.map(tc => <article key={tc.ma_tc} className="rounded-xl border bg-card p-4">
             <div className="flex flex-wrap items-center justify-between gap-2"><Badge variant="secondary">{tc.loai} · {tc.noi_dung_thu ?? tc.noi_dung_chi}</Badge><span className={tc.loai === "Thu" ? "font-semibold tabular-nums text-emerald-600" : "font-semibold tabular-nums text-destructive"}>{tc.loai === "Thu" ? "+" : "−"}{formatVND(tc.so_tien)}</span></div>
-            <h2 className="mt-3 font-semibold">{tc.don_hang?.mo_ta_su_co ?? tc.ten_cong_trinh ?? "Chưa gắn công trình"}</h2>
-            <Badge variant="secondary" className="mt-2" title={tc.duyet_luc ? `Duyệt lúc ${formatDateTime(tc.duyet_luc)}` : undefined}>{trangThaiDuyet(tc)}</Badge>
+            <h2 className="mt-3 font-semibold">{tc.ten_cong_trinh_hien_thi ?? "Chưa gắn công trình"}</h2>
+            <Badge variant="secondary" className="mt-2" title={tc.duyet_luc ? `${tc.duyet_du_lieu_cu ? "Chuyển dữ liệu cũ lúc" : "Duyệt lúc"} ${formatDateTime(tc.duyet_luc)}` : undefined}>{trangThaiDuyet(tc)}</Badge>
             {tc.ghi_chu && <p className="mt-1 whitespace-pre-wrap break-words text-sm text-muted-foreground">{tc.ghi_chu}</p>}
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-3"><div className="space-y-1 text-xs text-muted-foreground"><p>{tc.nhan_vien?.ho_ten ?? tc.nguoi_tao} · {tc.phuong_thuc}</p><p>{formatDateTime(tc.ngay)}</p></div><div className="flex items-center gap-1">{coTheSua(tc) ? <FormSuaThuChi phieu={tc} nhanVienList={nhanVienList} /> : null}{coTheDuyet(tc) ? <NutDuyetThuChi maTc={tc.ma_tc} daDuyet={tc.da_duyet} /> : null}</div></div>
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-3"><div className="space-y-1 text-xs text-muted-foreground"><p>{tc.ho_ten_nguoi_thu_chi ?? tc.nguoi_tao} · {tc.phuong_thuc}</p><p>{formatDateTime(tc.ngay)}</p></div><div className="flex items-center gap-1">{coTheSua(tc) ? <FormSuaThuChi phieu={tc} nhanVienList={nhanVienList} /> : null}{coTheDuyet(tc) ? <NutDuyetThuChi maTc={tc.ma_tc} daDuyet={tc.da_duyet} /> : null}</div></div>
           </article>)}
         </div>
         <Card className="hidden overflow-hidden py-0 lg:flex">
@@ -157,7 +225,7 @@ export default async function TrangThuChi({
                       </Badge>
                     </TableCell>
                     <TableCell className="max-w-56 truncate">
-                      {tc.don_hang?.mo_ta_su_co ?? tc.ten_cong_trinh ?? "—"}
+                      {tc.ten_cong_trinh_hien_thi ?? "—"}
                     </TableCell>
                     <TableCell>{tc.noi_dung_thu ?? tc.noi_dung_chi}</TableCell>
                     <TableCell className="max-w-56 truncate text-muted-foreground">{tc.ghi_chu ?? "—"}</TableCell>
@@ -165,9 +233,9 @@ export default async function TrangThuChi({
                       {tc.loai === "Thu" ? "+" : "-"}{formatVND(tc.so_tien)}
                     </TableCell>
                     <TableCell className="text-muted-foreground">{tc.phuong_thuc}</TableCell>
-                    <TableCell className="text-muted-foreground">{tc.nhan_vien?.ho_ten ?? tc.nguoi_tao}</TableCell>
+                    <TableCell className="text-muted-foreground">{tc.ho_ten_nguoi_thu_chi ?? tc.nguoi_tao}</TableCell>
                     <TableCell className="text-muted-foreground">{formatDateTime(tc.ngay)}</TableCell>
-                    <TableCell><Badge variant="secondary" title={tc.duyet_luc ? `Duyệt lúc ${formatDateTime(tc.duyet_luc)}` : undefined}>{trangThaiDuyet(tc)}</Badge></TableCell>
+                    <TableCell><Badge variant="secondary" title={tc.duyet_luc ? `${tc.duyet_du_lieu_cu ? "Chuyển dữ liệu cũ lúc" : "Duyệt lúc"} ${formatDateTime(tc.duyet_luc)}` : undefined}>{trangThaiDuyet(tc)}</Badge></TableCell>
                     {coTheThaoTac ? (
                       <TableCell>
                         <div className="flex items-center gap-1">
@@ -184,6 +252,13 @@ export default async function TrangThuChi({
         </Card>
         </>
       )}
+      {!error && soTrang > 1 ? (
+        <nav className="flex items-center justify-between gap-3 text-sm" aria-label="Phân trang sổ thu chi">
+          {trang > 1 ? <Link href={linkTrang(paramsLoc, trang - 1)} className="rounded-md border px-3 py-2 hover:bg-muted">← Trang trước</Link> : <span />}
+          <span>Trang {Math.min(trang, soTrang)} / {soTrang}</span>
+          {trang < soTrang ? <Link href={linkTrang(paramsLoc, trang + 1)} className="rounded-md border px-3 py-2 hover:bg-muted">Trang sau →</Link> : <span />}
+        </nav>
+      ) : null}
     </div>
   );
 }

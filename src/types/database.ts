@@ -242,6 +242,7 @@ export interface ThuChi {
   da_duyet: boolean;
   nguoi_duyet: string | null;
   duyet_luc: string | null;
+  duyet_du_lieu_cu: boolean;
 }
 
 export interface VatTu {

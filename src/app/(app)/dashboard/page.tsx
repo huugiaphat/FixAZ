@@ -53,7 +53,7 @@ export default async function TrangDashboard() {
       supabase.from("v_don_hang").select("*").order("ngay_tiep_nhan", { ascending: false }).limit(1000),
       supabase.from("nghiem_thu").select("ma_don, diem_danh_gia"),
       supabase.from("nhan_vien").select("ma_nv, ho_ten"),
-      supabase.from("thu_chi").select("loai, noi_dung_thu, noi_dung_chi, so_tien, ten_cong_trinh, don_hang(mo_ta_su_co)").gte("ngay", dauThang),
+      supabase.from("thu_chi").select("loai, noi_dung_thu, noi_dung_chi, so_tien, ten_cong_trinh, don_hang(mo_ta_su_co)").gte("ngay", dauThang).or("da_duyet.eq.true,ma_thu.not.is.null"),
     ]);
 
   const khachHangList = (khachHang3Thang as { ngay_tao: string }[]) ?? [];

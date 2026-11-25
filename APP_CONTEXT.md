@@ -21,7 +21,7 @@
 | PWA và ngoại tuyến | `public/manifest.json`, `public/sw.js`, Dexie/IndexedDB, hàng đợi ở `src/lib/offline/` |
 | Thông báo | Bảng `thong_bao`, Web Push/VAPID, API cron, GitHub Actions |
 | Mã nguồn giao diện | `src/app/` (route), `src/components/`, `src/lib/`, `src/types/database.ts` |
-| Database | `supabase/migrations/0001`–`0036`, file gộp `supabase/chay_toan_bo_migrations.sql` chỉ dành cho DB trống |
+| Database | `supabase/migrations/0001`–`0037`, file gộp `supabase/chay_toan_bo_migrations.sql` chỉ dành cho DB trống |
 | Cấu hình | `.env.local.example`, `next.config.ts`, `vercel.json`, `.github/workflows/` |
 
 Chạy local: `npm ci` → tạo `.env.local` từ `.env.local.example` và điền biến thật → `npm run dev`. Kiểm tra kiểu: `npx tsc --noEmit`; build: `npm run build`. **Trước khi sửa mã Next.js**, đọc hướng dẫn tương ứng trong `node_modules/next/dist/docs/` theo `AGENTS.md`.
@@ -141,4 +141,8 @@ Hiện trong working tree có `src/app/api/zalo/yeu-cau/route.ts`, chỉnh sửa
 
 ## 12. Thay đổi đang chuẩn bị: duyệt phiếu thu chi
 
-Theo xác nhận của người dùng, migration `0036_duyet_phieu_thu_chi.sql` đã chạy thành công trên Supabase ngày 25/11/2026. Phiếu nhập tay có trạng thái chờ/đã duyệt; người lập được sửa trước duyệt; Admin được sửa/xóa cả trước lẫn sau duyệt và là người duy nhất được duyệt hoặc “Không duyệt” để xóa phiếu chờ duyệt. Dòng tự đồng bộ từ `thu_tien` tiếp tục bất biến và không tham gia quy trình duyệt. Phiếu cũ không lưu tài khoản lập thật nên migration tạm gán `nguoi_lap = nguoi_tao`; nếu trước đây nhập hộ, cần kiểm tra lại người được quyền sửa. Các tổng thu/chi và Dashboard hiện vẫn tính cả phiếu chờ duyệt; chưa có yêu cầu đổi cách tính.
+Theo xác nhận của người dùng, migration `0036_duyet_phieu_thu_chi.sql` đã chạy thành công trên Supabase ngày 25/11/2026. Phiếu nhập tay có trạng thái chờ/đã duyệt; người lập được sửa trước duyệt; Admin được sửa/xóa cả trước lẫn sau duyệt và là người duy nhất được duyệt hoặc “Không duyệt” để xóa phiếu chờ duyệt. Dòng tự đồng bộ từ `thu_tien` tiếp tục bất biến và không tham gia quy trình duyệt. Phiếu cũ không lưu tài khoản lập thật nên migration tạm gán `nguoi_lap = nguoi_tao`; nếu trước đây nhập hộ, cần kiểm tra lại người được quyền sửa. Trước khi áp dụng `0037`, các tổng thu/chi và Dashboard vẫn tính cả phiếu chờ duyệt.
+
+## 13. Đang chuẩn bị: sổ thu chi theo tháng và phân trang
+
+Migration `0037_so_thu_chi_phan_trang.sql` và giao diện mới **chưa xác nhận đã áp dụng trên Supabase/Hostinger**. Khi chạy migration, mọi phiếu nhập tay còn chờ duyệt tại thời điểm đó được đánh dấu là dữ liệu cũ đã duyệt (`duyet_du_lieu_cu = true`) và ghi nhận thời điểm chuyển đổi, không gán cho Admin cụ thể; phiếu tạo sau migration vẫn chờ Admin duyệt. Sổ mặc định tháng hiện tại, 25 phiếu/trang, lọc/tìm kiếm ở database, tổng hợp toàn bộ kết quả lọc bằng RPC. Phiếu chờ duyệt không vào tổng thu/chi chính thức và Dashboard; dòng tự đồng bộ vẫn được tính. Chỉ chạy file migration riêng sau `0036`, không chạy lại file gộp.

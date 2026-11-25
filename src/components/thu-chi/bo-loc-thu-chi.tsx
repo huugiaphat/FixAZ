@@ -5,22 +5,31 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectLabel, SelectGroup, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { NOI_DUNG_THU, NOI_DUNG_CHI } from "@/lib/schemas/thu-chi";
+import Link from "next/link";
 
 export function BoLocThuChi({
+  thang,
   tu,
   den,
   loai,
   tenCongTrinh,
   noiDung,
+  trangThai,
 }: {
+  thang: string;
   tu?: string;
   den?: string;
   loai?: string;
   tenCongTrinh?: string;
   noiDung?: string;
+  trangThai?: string;
 }) {
   return (
-    <form className="grid grid-cols-1 items-end gap-4 rounded-xl border bg-card p-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+    <form className="grid grid-cols-1 items-end gap-4 rounded-xl border bg-card p-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="space-y-1.5">
+        <Label htmlFor="thang">Tháng</Label>
+        <Input id="thang" name="thang" type="month" defaultValue={thang} className="w-full" />
+      </div>
       <div className="space-y-1.5">
         <Label htmlFor="tu">Từ ngày</Label>
         <Input id="tu" name="tu" type="date" defaultValue={tu} className="w-full" />
@@ -76,7 +85,24 @@ export function BoLocThuChi({
           </SelectContent>
         </Select>
       </div>
-      <Button type="submit" variant="outline">Lọc</Button>
+      <div className="space-y-1.5">
+        <Label>Trạng thái</Label>
+        <Select name="trang_thai" defaultValue={trangThai ?? "tat-ca"}>
+          <SelectTrigger className="w-full">
+            <SelectValue>{(v: string) => ({ "cho-duyet": "Chờ duyệt", "da-duyet": "Đã duyệt", "tu-dong-bo": "Tự đồng bộ" } as Record<string, string>)[v] ?? "Tất cả"}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="tat-ca">Tất cả</SelectItem>
+            <SelectItem value="cho-duyet">Chờ duyệt</SelectItem>
+            <SelectItem value="da-duyet">Đã duyệt</SelectItem>
+            <SelectItem value="tu-dong-bo">Tự đồng bộ</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="flex items-center gap-2">
+        <Button type="submit" variant="outline">Lọc</Button>
+        <Link href={`/thu-chi?thang=${thang}`} className="text-sm text-muted-foreground underline-offset-4 hover:underline">Xóa lọc</Link>
+      </div>
     </form>
   );
 }
