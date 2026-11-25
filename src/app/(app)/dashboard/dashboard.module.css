@@ -20,8 +20,3 @@
 .dashboard [data-slot="card-content"] { padding-top: 1rem; padding-bottom: 1rem; }
 .dashboard [data-slot="table-head"] { background: var(--muted); }
 .dashboard [data-slot="table-cell"] { padding-block: 1rem; }
-@media (min-width: 1280px) {
-  .dashboard { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-  .heading, .dashboard > section { grid-column: 1 / -1; }
-  .dashboard > section:nth-of-type(5), .dashboard > section:nth-of-type(6) { grid-column: auto; }
-}

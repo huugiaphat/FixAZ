@@ -2,35 +2,21 @@ import Link from "next/link";
 import styles from "./dashboard.module.css";
 import { requireNhanVien } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { StatCard } from "@/components/dashboard/stat-card";
 import { BieuDoCotNhom } from "@/components/dashboard/bieu-do-cot-nhom";
+import { BieuDoDongTien } from "@/components/dashboard/bieu-do-dong-tien";
 import { DanhSachGiaTri } from "@/components/dashboard/danh-sach-gia-tri";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatVND } from "@/lib/format";
 import {
   congTrinhTheoThang,
-  doanhThuTheoThang,
-  doanhThuTheoDichVu,
   demTheoTrangThai,
   demTheoUuTien,
-  hieuSuatTheoTho,
-  demTheoThanhToan,
-  phanBoDanhGia,
   chiTietTheoNoiDungChi,
   chiTietTheoNoiDungThu,
   thuChiTheoCongTrinh,
 } from "@/lib/dashboard-analytics";
-import type { ThuChiTongHop, DonHangTinhToan, NghiemThu, NhanVien, ThuChi } from "@/types/database";
-import { CalendarDays, CalendarRange, Coins } from "lucide-react";
-
-const MAU_PILL_THANH_TOAN: Record<string, string> = {
-  "Đã thu đủ": "bg-emerald-100 text-emerald-700 hover:bg-emerald-100",
-  "Thu một phần": "bg-amber-100 text-amber-700 hover:bg-amber-100",
-  "Chưa thu": "bg-red-100 text-red-700 hover:bg-red-100",
-  "Chưa đến bước thanh toán": "bg-slate-100 text-slate-600 hover:bg-slate-100",
-};
+import type { DonHangTinhToan, ThuChi } from "@/types/database";
 
 const CHUOI_CONG_TRINH = [
   { nhan: "Khách mới", mau: "bg-blue-500" },
@@ -38,42 +24,68 @@ const CHUOI_CONG_TRINH = [
   { nhan: "CT hoàn thành", mau: "bg-slate-400" },
 ];
 
+function thangVietNam() {
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Ho_Chi_Minh", year: "numeric", month: "2-digit" }).formatToParts(new Date());
+  const lay = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return `${lay("year")}-${lay("month")}`;
+}
+
+function doiThang(thang: string, soThang: number) {
+  const [nam, thangSo] = thang.split("-").map(Number);
+  const ngay = new Date(Date.UTC(nam, thangSo - 1 + soThang, 1));
+  return `${ngay.getUTCFullYear()}-${String(ngay.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
 export default async function TrangDashboard() {
   await requireNhanVien(["Quản lý", "Admin", "Kiểm soát"]);
   const supabase = await createClient();
 
-  const now = new Date();
-  const dauThang = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const baThangTruoc = new Date(now.getFullYear(), now.getMonth() - 2, 1).toISOString();
+  const thangNay = thangVietNam();
+  const dauThang = `${thangNay}-01T00:00:00+07:00`;
+  const dauThangSau = `${doiThang(thangNay, 1)}-01T00:00:00+07:00`;
+  const baThangTruoc = `${doiThang(thangNay, -2)}-01T00:00:00+07:00`;
 
-  const [{ data: khachHang3Thang }, { data: thuChi }, { data: allDon }, { data: allNghiemThu }, { data: allNv }, { data: thuChiThang }] =
+  type ThuChiThang = Pick<ThuChi, "loai" | "noi_dung_thu" | "noi_dung_chi" | "so_tien" | "ten_cong_trinh"> & { don_hang: { mo_ta_su_co: string } | null };
+  async function docThuChiThang(): Promise<{ rows: ThuChiThang[]; error: string | null }> {
+    const rows: ThuChiThang[] = [];
+    for (let batDau = 0; ; batDau += 1000) {
+      const { data, error } = await supabase.from("thu_chi")
+        .select("loai, noi_dung_thu, noi_dung_chi, so_tien, ten_cong_trinh, don_hang(mo_ta_su_co)")
+        .gte("ngay", dauThang).lt("ngay", dauThangSau)
+        .or("da_duyet.eq.true,ma_thu.not.is.null")
+        .order("ngay", { ascending: false }).order("ma_tc", { ascending: false })
+        .range(batDau, batDau + 999);
+      if (error) return { rows: [], error: error.message };
+      const trang = (data as unknown as ThuChiThang[]) ?? [];
+      rows.push(...trang);
+      if (trang.length < 1000) break;
+    }
+    return { rows, error: null };
+  }
+
+  const [{ data: khachHang3Thang }, { data: allDon }, { data: dongTienData, error: dongTienError }, thuChiThangResult] =
     await Promise.all([
       supabase.from("khach_hang").select("ngay_tao").gte("ngay_tao", baThangTruoc),
-      supabase.from("v_thu_chi_tong_hop").select("*").single(),
       supabase.from("v_don_hang").select("*").order("ngay_tiep_nhan", { ascending: false }).limit(1000),
-      supabase.from("nghiem_thu").select("ma_don, diem_danh_gia"),
-      supabase.from("nhan_vien").select("ma_nv, ho_ten"),
-      supabase.from("thu_chi").select("loai, noi_dung_thu, noi_dung_chi, so_tien, ten_cong_trinh, don_hang(mo_ta_su_co)").gte("ngay", dauThang).or("da_duyet.eq.true,ma_thu.not.is.null"),
+      supabase.from("v_bao_cao_thang").select("thang, tong_thu, tong_chi")
+        .gte("thang", doiThang(thangNay, -5)).lte("thang", thangNay),
+      docThuChiThang(),
     ]);
 
   const khachHangList = (khachHang3Thang as { ngay_tao: string }[]) ?? [];
-  const tc = thuChi as ThuChiTongHop | null;
   const donList = (allDon as DonHangTinhToan[]) ?? [];
-  const nghiemThuList = (allNghiemThu as Pick<NghiemThu, "ma_don" | "diem_danh_gia">[]) ?? [];
-  const nvMap = new Map(((allNv as Pick<NhanVien, "ma_nv" | "ho_ten">[]) ?? []).map((n) => [n.ma_nv, n.ho_ten]));
-  type ThuChiThang = Pick<ThuChi, "loai" | "noi_dung_thu" | "noi_dung_chi" | "so_tien" | "ten_cong_trinh"> & { don_hang: { mo_ta_su_co: string } | null };
-  const thuChiThangList = (thuChiThang as unknown as ThuChiThang[]) ?? [];
+  const thuChiThangList = thuChiThangResult.rows;
+  const dongTienMap = new Map(((dongTienData as { thang: string; tong_thu: number; tong_chi: number }[]) ?? []).map((d) => [d.thang, d]));
+  const dongTienSauThang = Array.from({ length: 6 }, (_, i) => {
+    const thang = doiThang(thangNay, i - 5);
+    const d = dongTienMap.get(thang);
+    return { thang, thu: Number(d?.tong_thu ?? 0), chi: Number(d?.tong_chi ?? 0) };
+  });
+  const dongTienThangNay = dongTienSauThang[5];
 
   const theoCongTrinh = congTrinhTheoThang(khachHangList, donList, 3);
-  const theoThang = doanhThuTheoThang(donList, 6);
-  const theoDichVu = doanhThuTheoDichVu(donList);
   const theoTrangThai = demTheoTrangThai(donList);
   const theoUuTien = demTheoUuTien(donList);
-  const hieuSuatTho = hieuSuatTheoTho(donList, nghiemThuList as NghiemThu[]);
-  const tongDoanhThuTho = hieuSuatTho.reduce((s, t) => s + t.doanhThu, 0);
-  const thanhToan = demTheoThanhToan(donList);
-  const tongDonThanhToan = Object.values(thanhToan).reduce((s, v) => s + v, 0);
-  const danhGia = phanBoDanhGia(nghiemThuList as NghiemThu[]);
   const chiTietChi = chiTietTheoNoiDungChi(thuChiThangList);
   const chiTietThu = chiTietTheoNoiDungThu(thuChiThangList);
   const thuChiCongTrinh = thuChiTheoCongTrinh(thuChiThangList);
@@ -84,7 +96,7 @@ export default async function TrangDashboard() {
         <div><p className="mb-1 text-xs font-semibold uppercase tracking-widest text-blue-600">Hữu Gia Phát · Điều hành</p>
         <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
         <p className="text-sm text-muted-foreground">
-          Tổng quan hoạt động · Tháng {now.getMonth() + 1}/{now.getFullYear()}
+          Tổng quan hoạt động · Tháng {Number(thangNay.slice(5))}/{thangNay.slice(0, 4)}
         </p></div>
         <Link href="/thu-chi" className="rounded-lg border bg-card px-4 py-2 text-sm font-medium hover:bg-muted">Mở sổ thu chi →</Link>
       </div>
@@ -123,38 +135,27 @@ export default async function TrangDashboard() {
         </div>
       </section>
 
-      {tc ? (
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold tracking-tight">Thu chi</h2>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 ">
-            <StatCard
-              icon={CalendarDays}
-              nhan="Chênh lệch hôm nay"
-              giaTri={formatVND(tc.thu_hom_nay - tc.chi_hom_nay)}
-              mucCanhBao={tc.thu_hom_nay - tc.chi_hom_nay >= 0 ? "xanh" : "do"}
-              ghiChu={`Thu ${formatVND(tc.thu_hom_nay)} · Chi ${formatVND(tc.chi_hom_nay)}`}
-            />
-            <StatCard
-              icon={CalendarRange}
-              nhan="Chênh lệch tháng này"
-              giaTri={formatVND(tc.thu_thang_nay - tc.chi_thang_nay)}
-              mucCanhBao={tc.thu_thang_nay - tc.chi_thang_nay >= 0 ? "xanh" : "do"}
-              ghiChu={`Thu ${formatVND(tc.thu_thang_nay)} · Chi ${formatVND(tc.chi_thang_nay)}`}
-            />
-            <StatCard
-              icon={Coins}
-              nhan="Chênh lệch năm nay"
-              giaTri={formatVND(tc.thu_nam_nay - tc.chi_nam_nay)}
-              mucCanhBao={tc.thu_nam_nay - tc.chi_nam_nay >= 0 ? "xanh" : "do"}
-              ghiChu={`Thu ${formatVND(tc.thu_nam_nay)} · Chi ${formatVND(tc.chi_nam_nay)}`}
-            />
-          </div>
-        </section>
-      ) : null}
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <h2 className="text-lg font-semibold tracking-tight">Chênh lệch dòng tiền</h2>
+          <span className="text-xs text-muted-foreground">6 tháng gần nhất · Thu chi đã hạch toán</span>
+        </div>
+        <Card><CardContent className="space-y-5 pt-6">
+          {dongTienError ? <p className="text-sm text-destructive">Không tải được dòng tiền: {dongTienError.message}</p>
+            : <>
+              <div className="grid gap-4 border-b pb-5 sm:grid-cols-3">
+                <div className="border-l-2 border-emerald-500 pl-3"><p className="text-xs text-muted-foreground">Thu tháng này</p><p className="text-lg font-semibold tabular-nums text-emerald-700">{formatVND(dongTienThangNay.thu)}</p></div>
+                <div className="border-l-2 border-rose-500 pl-3"><p className="text-xs text-muted-foreground">Chi tháng này</p><p className="text-lg font-semibold tabular-nums text-rose-700">{formatVND(dongTienThangNay.chi)}</p></div>
+                <div className="border-l-2 border-blue-600 pl-3"><p className="text-xs text-muted-foreground">Chênh lệch tháng này</p><p className={`text-lg font-semibold tabular-nums ${dongTienThangNay.thu - dongTienThangNay.chi < 0 ? "text-amber-700" : "text-blue-700"}`}>{formatVND(dongTienThangNay.thu - dongTienThangNay.chi)}</p></div>
+              </div>
+              <BieuDoDongTien duLieu={dongTienSauThang} />
+            </>}
+        </CardContent></Card>
+      </section>
 
       <section className="space-y-3">
         <h2 className="text-lg font-semibold tracking-tight">Chi tiết thu chi</h2>
-        <div className="grid gap-3 lg:grid-cols-2 ">
+        {thuChiThangResult.error ? <p className="text-sm text-destructive">Không tải được chi tiết thu chi: {thuChiThangResult.error}</p> : <div className="grid gap-3 lg:grid-cols-2 ">
           <Card>
             <CardContent className="space-y-1 pt-6">
               <p className="font-medium">Chi tiết chi</p>
@@ -169,12 +170,12 @@ export default async function TrangDashboard() {
               <DanhSachGiaTri mau="bg-emerald-500" items={chiTietThu.map((t) => ({ nhan: t.nhan, hienThi: formatVND(t.soTien), giaTri: t.soTien }))} />
             </CardContent>
           </Card>
-        </div>
+        </div>}
       </section>
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-end justify-between gap-2"><h2 className="text-lg font-semibold tracking-tight">Thu chi công trình</h2><span className="text-xs text-muted-foreground">Tháng này · {thuChiCongTrinh.length} công trình</span></div>
-        {thuChiCongTrinh.length === 0 ? (
+        {thuChiThangResult.error ? <p className="text-sm text-destructive">Không tải được thu chi công trình: {thuChiThangResult.error}</p> : thuChiCongTrinh.length === 0 ? (
           <p className="text-sm text-muted-foreground">Chưa có khoản thu chi nào trong tháng.</p>
         ) : (
           <Card className="overflow-hidden py-0">
@@ -185,7 +186,7 @@ export default async function TrangDashboard() {
                     <TableHead>Tên công trình</TableHead>
                     <TableHead className="text-right">Tổng thu</TableHead>
                     <TableHead className="text-right">Tổng chi</TableHead>
-                    <TableHead className="text-right">Lợi nhuận</TableHead>
+                    <TableHead className="text-right">Chênh lệch</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -207,26 +208,6 @@ export default async function TrangDashboard() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold tracking-tight">Doanh thu</h2>
-        <div className="grid gap-3 lg:grid-cols-2 ">
-          <Card>
-            <CardContent className="space-y-1 pt-6">
-              <p className="font-medium">Doanh thu theo tháng</p>
-              <p className="mb-1 text-xs text-muted-foreground">6 tháng gần nhất — tính theo ngày đóng đơn</p>
-              <DanhSachGiaTri items={theoThang.map((t) => ({ nhan: t.nhan, hienThi: formatVND(t.doanhThu), giaTri: t.doanhThu }))} />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="space-y-1 pt-6">
-              <p className="font-medium">Doanh thu theo loại dịch vụ</p>
-              <p className="mb-1 text-xs text-muted-foreground">Trên các đơn đã đóng</p>
-              <DanhSachGiaTri items={theoDichVu.map((t) => ({ nhan: t.nhan, hienThi: formatVND(t.doanhThu), giaTri: t.doanhThu }))} />
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      <section className="space-y-3">
         <h2 className="text-lg font-semibold tracking-tight">Vận hành</h2>
         <div className="grid gap-3 lg:grid-cols-2">
           <Card>
@@ -241,71 +222,6 @@ export default async function TrangDashboard() {
               <p className="font-medium">Đơn theo mức ưu tiên</p>
               <p className="mb-1 text-xs text-muted-foreground">Trong {donList.length} đơn gần nhất (tối đa 1.000)</p>
               <DanhSachGiaTri items={theoUuTien.map((t) => ({ nhan: t.nhan, hienThi: `${t.soLuong} đơn`, giaTri: t.soLuong }))} />
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold tracking-tight">Đội thợ</h2>
-        {hieuSuatTho.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Chưa có đơn hoàn thành để tính hiệu suất.</p>
-        ) : (
-          <Card className="overflow-hidden py-0">
-            <CardContent className="overflow-x-auto p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Kỹ thuật viên</TableHead>
-                    <TableHead>Số đơn</TableHead>
-                    <TableHead>Doanh thu</TableHead>
-                    <TableHead>Tỷ trọng</TableHead>
-                    <TableHead>Đánh giá TB</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {hieuSuatTho.map((t) => (
-                    <TableRow key={t.maNv}>
-                      <TableCell className="font-medium">{nvMap.get(t.maNv) ?? t.maNv}</TableCell>
-                      <TableCell>{t.soDon}</TableCell>
-                      <TableCell>{formatVND(t.doanhThu)}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {tongDoanhThuTho > 0 ? Math.round((t.doanhThu / tongDoanhThuTho) * 100) : 0}%
-                      </TableCell>
-                      <TableCell>{t.danhGiaTb != null ? `${"★".repeat(Math.round(t.danhGiaTb))}${"☆".repeat(5 - Math.round(t.danhGiaTb))} ${t.danhGiaTb.toFixed(1)}` : "—"}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        )}
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold tracking-tight">Thanh toán & Chất lượng</h2>
-        <div className="grid gap-3 lg:grid-cols-2">
-          <Card>
-            <CardContent className="space-y-1 pt-6">
-              <p className="font-medium">Trạng thái thanh toán</p>
-              <p className="mb-3 text-xs text-muted-foreground">Trên {tongDonThanhToan} đơn (không tính đơn đã hủy)</p>
-              <div className="space-y-2.5">
-                {(Object.entries(thanhToan) as [string, number][]).map(([nhan, soLuong]) => (
-                  <div key={nhan} className="flex items-center justify-between text-sm">
-                    <Badge variant="secondary" className={MAU_PILL_THANH_TOAN[nhan]}>
-                      {nhan}
-                    </Badge>
-                    <span className="tabular-nums font-medium">{soLuong} đơn</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="space-y-1 pt-6">
-              <p className="font-medium">Phân bố đánh giá</p>
-              <p className="mb-1 text-xs text-muted-foreground">Trên các lượt nghiệm thu có chấm điểm</p>
-              <DanhSachGiaTri items={danhGia.map((d2) => ({ nhan: d2.nhan, hienThi: `${d2.soLuong} lượt`, giaTri: d2.soLuong }))} />
             </CardContent>
           </Card>
         </div>
