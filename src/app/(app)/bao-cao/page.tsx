@@ -85,9 +85,6 @@ export default async function TrangBaoCao({ searchParams }: {
 
   return <div className="space-y-6">
     <PageHeading title="Báo Cáo" description="Thu chi đã hạch toán theo công trình và theo tháng." />
-    <p className="rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-      “Báo Cáo Dòng Tiền” là tổng mọi khoản thu và chi trong tháng; “Thu Chi tháng” chỉ là phần không qua đơn hàng và đã nằm trong tổng đó. Chênh lệch = tiền đã thu − tiền đã chi; tỷ lệ = chênh lệch / tiền đã thu. Đây là dòng tiền thực thu, thực chi, chưa phải lợi nhuận kế toán. Phiếu chờ duyệt không được tính.
-    </p>
     {tongHopResult.error ? <p className="text-sm text-destructive">Không tải được tổng hợp: {tongHopResult.error.message}</p> :
       <div className="grid gap-3 sm:grid-cols-3">
         <Card><CardContent className="py-4"><p className="text-sm text-muted-foreground">Tổng thu · tất cả thời gian</p><p className="text-xl font-semibold text-emerald-700">{formatVND(Number(tongHop?.tong_thu ?? 0))}</p><p className="mt-1 text-xs text-muted-foreground">Thu chi quản lý: {formatVND(Number(tongHop?.thu_quan_ly ?? 0))}</p></CardContent></Card>
@@ -97,8 +94,7 @@ export default async function TrangBaoCao({ searchParams }: {
 
     <section className="space-y-3" aria-labelledby="bao-cao-cong-trinh">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div><h2 id="bao-cao-cong-trinh" className="text-xl font-semibold">Theo công trình</h2>
-          <p className="text-sm text-muted-foreground">25 dòng mỗi trang · “Thu Chi tháng MM/YYYY” chỉ gồm khoản ngoài đơn hàng. Bấm từng dòng để xem chi phí.</p></div>
+        <h2 id="bao-cao-cong-trinh" className="text-xl font-semibold">Theo công trình</h2>
         <form action="/bao-cao" className="flex gap-2">
           <input type="hidden" name="nam" value={nam} />
           <input name="tim" defaultValue={tim} aria-label="Tìm mã hoặc tên công trình" placeholder="Tìm công trình…" className="h-10 w-56 rounded-md border bg-background px-3 text-sm" />
@@ -122,7 +118,6 @@ export default async function TrangBaoCao({ searchParams }: {
                 <Link href={duongDan({ nam, tim, trang, maMuc: mo ? undefined : d.ma_muc })} aria-expanded={mo} className="font-medium text-primary hover:underline">
                   {d.ten_hien_thi}
                 </Link>
-                {d.thang_quan_ly && <span className="ml-2 text-xs text-muted-foreground">Không qua đơn hàng</span>}
                 {d.trang_thai === "Đã hủy" && <span className="ml-2 text-xs text-muted-foreground">Đã hủy</span>}
               </TableCell>
               <TableCell className="text-right tabular-nums">{formatVND(thu)}</TableCell>
@@ -155,14 +150,14 @@ export default async function TrangBaoCao({ searchParams }: {
     </section>
 
     <section className="space-y-3" aria-labelledby="bao-cao-thang">
-      <div className="flex flex-wrap items-center justify-between gap-3"><div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 id="bao-cao-thang" className="text-xl font-semibold">Theo tháng</h2>
-        <p className="text-sm text-muted-foreground">“Báo Cáo Dòng Tiền” gồm tất cả thu chi theo ngày phát sinh tại Việt Nam, kể cả khoản ngoài đơn hàng.</p>
-      </div><div className="flex items-center gap-3 text-sm">
+        <div className="flex items-center gap-3 text-sm">
         <Link href={duongDan({ nam: nam - 1, tim })} className="rounded-md border px-3 py-2 hover:bg-muted">← Năm trước</Link>
         <span className="font-semibold">{nam}</span>
         <Link href={duongDan({ nam: nam + 1, tim })} className="rounded-md border px-3 py-2 hover:bg-muted">Năm sau →</Link>
-      </div></div>
+        </div>
+      </div>
       <Card><CardContent className="p-0">
         {thangResult.error ? <p className="p-4 text-sm text-destructive">Không tải được báo cáo tháng: {thangResult.error.message}</p> :
         <Table><TableHeader><TableRow><TableHead>Báo cáo tháng</TableHead><TableHead className="text-right">Tổng thu</TableHead><TableHead className="text-right">Tổng chi</TableHead><TableHead className="text-right">Thu ngoài đơn</TableHead><TableHead className="text-right">Chi ngoài đơn</TableHead><TableHead className="text-right">Chênh lệch</TableHead><TableHead className="text-right">Tỷ lệ %</TableHead></TableRow></TableHeader>
