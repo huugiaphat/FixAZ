@@ -6,7 +6,6 @@ import { BieuDoCotNhom } from "@/components/dashboard/bieu-do-cot-nhom";
 import { BieuDoDongTien } from "@/components/dashboard/bieu-do-dong-tien";
 import { DanhSachGiaTri } from "@/components/dashboard/danh-sach-gia-tri";
 import { Card, CardContent } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatVND } from "@/lib/format";
 import {
   congTrinhTheoThang,
@@ -14,7 +13,6 @@ import {
   demTheoUuTien,
   chiTietTheoNoiDungChi,
   chiTietTheoNoiDungThu,
-  thuChiTheoCongTrinh,
 } from "@/lib/dashboard-analytics";
 import type { DonHangTinhToan, ThuChi } from "@/types/database";
 
@@ -45,12 +43,12 @@ export default async function TrangDashboard() {
   const dauThangSau = `${doiThang(thangNay, 1)}-01T00:00:00+07:00`;
   const baThangTruoc = `${doiThang(thangNay, -2)}-01T00:00:00+07:00`;
 
-  type ThuChiThang = Pick<ThuChi, "loai" | "noi_dung_thu" | "noi_dung_chi" | "so_tien" | "ten_cong_trinh"> & { don_hang: { mo_ta_su_co: string } | null };
+  type ThuChiThang = Pick<ThuChi, "loai" | "noi_dung_thu" | "noi_dung_chi" | "so_tien">;
   async function docThuChiThang(): Promise<{ rows: ThuChiThang[]; error: string | null }> {
     const rows: ThuChiThang[] = [];
     for (let batDau = 0; ; batDau += 1000) {
       const { data, error } = await supabase.from("thu_chi")
-        .select("loai, noi_dung_thu, noi_dung_chi, so_tien, ten_cong_trinh, don_hang(mo_ta_su_co)")
+        .select("loai, noi_dung_thu, noi_dung_chi, so_tien")
         .gte("ngay", dauThang).lt("ngay", dauThangSau)
         .or("da_duyet.eq.true,ma_thu.not.is.null")
         .order("ngay", { ascending: false }).order("ma_tc", { ascending: false })
@@ -88,7 +86,6 @@ export default async function TrangDashboard() {
   const theoUuTien = demTheoUuTien(donList);
   const chiTietChi = chiTietTheoNoiDungChi(thuChiThangList);
   const chiTietThu = chiTietTheoNoiDungThu(thuChiThangList);
-  const thuChiCongTrinh = thuChiTheoCongTrinh(thuChiThangList);
 
   return (
     <div className={styles.dashboard}>
@@ -171,40 +168,6 @@ export default async function TrangDashboard() {
             </CardContent>
           </Card>
         </div>}
-      </section>
-
-      <section className="space-y-3">
-        <div className="flex flex-wrap items-end justify-between gap-2"><h2 className="text-lg font-semibold tracking-tight">Thu chi công trình</h2><span className="text-xs text-muted-foreground">Tháng này · {thuChiCongTrinh.length} công trình</span></div>
-        {thuChiThangResult.error ? <p className="text-sm text-destructive">Không tải được thu chi công trình: {thuChiThangResult.error}</p> : thuChiCongTrinh.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Chưa có khoản thu chi nào trong tháng.</p>
-        ) : (
-          <Card className="overflow-hidden py-0">
-            <CardContent className="overflow-x-auto p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Tên công trình</TableHead>
-                    <TableHead className="text-right">Tổng thu</TableHead>
-                    <TableHead className="text-right">Tổng chi</TableHead>
-                    <TableHead className="text-right">Chênh lệch</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {thuChiCongTrinh.map((ct) => (
-                    <TableRow key={ct.tenCongTrinh}>
-                      <TableCell className="min-w-48 max-w-96 whitespace-normal font-medium">{ct.tenCongTrinh}</TableCell>
-                      <TableCell className="text-right tabular-nums text-emerald-600">{formatVND(ct.tongThu)}</TableCell>
-                      <TableCell className="text-right tabular-nums text-destructive">{formatVND(ct.tongChi)}</TableCell>
-                      <TableCell className={`text-right tabular-nums font-semibold ${ct.loiNhuan >= 0 ? "text-emerald-600" : "text-destructive"}`}>
-                        {formatVND(ct.loiNhuan)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        )}
       </section>
 
       <section className="space-y-3">
