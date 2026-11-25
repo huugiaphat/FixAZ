@@ -48,3 +48,31 @@ export const thuChiSchema = z
   });
 
 export type ThuChiFormValues = z.infer<typeof thuChiSchema>;
+
+export const dongThuChiSchema = z.object({
+  ten_hh_dv: z.string().trim().min(1, "Nhập tên HH/DV"),
+  don_gia: z.number().positive("Đơn giá phải lớn hơn 0"),
+  so_luong: z.number().positive("Số lượng phải lớn hơn 0"),
+});
+
+export const thuChiNhieuDongSchema = z.object({
+  loai: z.enum(["Thu", "Chi"]),
+  ma_don: z.string().optional(),
+  ten_cong_trinh: z.string().trim().optional(),
+  noi_dung_thu: z.enum(NOI_DUNG_THU).optional(),
+  noi_dung_chi: z.enum(NOI_DUNG_CHI).optional(),
+  phuong_thuc: z.enum(["Tiền mặt", "Chuyển khoản"]),
+  nguoi_tao: z.string().min(1, "Chọn người thu chi"),
+  ngay: z.string().min(1, "Chọn ngày thu chi"),
+  ghi_chu: z.string().trim().optional(),
+  dong: z.array(dongThuChiSchema).min(1, "Cần ít nhất một dòng HH/DV").max(50, "Tối đa 50 dòng"),
+}).superRefine((v, ctx) => {
+  if (v.loai === "Thu" && (!v.noi_dung_thu || v.noi_dung_thu === "Thanh toán")) {
+    ctx.addIssue({ code: "custom", message: "Chọn danh mục thu hợp lệ", path: ["noi_dung_thu"] });
+  }
+  if (v.loai === "Chi" && !v.noi_dung_chi) {
+    ctx.addIssue({ code: "custom", message: "Chọn danh mục chi", path: ["noi_dung_chi"] });
+  }
+});
+
+export type ThuChiNhieuDongValues = z.infer<typeof thuChiNhieuDongSchema>;

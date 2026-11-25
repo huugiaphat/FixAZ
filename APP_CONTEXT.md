@@ -21,7 +21,7 @@
 | PWA và ngoại tuyến | `public/manifest.json`, `public/sw.js`, Dexie/IndexedDB, hàng đợi ở `src/lib/offline/` |
 | Thông báo | Bảng `thong_bao`, Web Push/VAPID, API cron, GitHub Actions |
 | Mã nguồn giao diện | `src/app/` (route), `src/components/`, `src/lib/`, `src/types/database.ts` |
-| Database | `supabase/migrations/0001`–`0037`, file gộp `supabase/chay_toan_bo_migrations.sql` chỉ dành cho DB trống |
+| Database | `supabase/migrations/0001`–`0038`, file gộp `supabase/chay_toan_bo_migrations.sql` chỉ dành cho DB trống |
 | Cấu hình | `.env.local.example`, `next.config.ts`, `vercel.json`, `.github/workflows/` |
 
 Chạy local: `npm ci` → tạo `.env.local` từ `.env.local.example` và điền biến thật → `npm run dev`. Kiểm tra kiểu: `npx tsc --noEmit`; build: `npm run build`. **Trước khi sửa mã Next.js**, đọc hướng dẫn tương ứng trong `node_modules/next/dist/docs/` theo `AGENTS.md`.
@@ -74,11 +74,11 @@ Chi tiết đơn phân biệt **Sửa nhanh** và **Công trình** (`qui_mo`). G
 
 ## 6. Dữ liệu và phân quyền database
 
-Các migration định nghĩa **25 bảng public** (bao gồm bảng kỹ thuật `bo_dem_ma`, `audit_log`, `push_subscriptions`):
+Đến migration `0037`, ứng dụng có **25 bảng public** (bao gồm bảng kỹ thuật `bo_dem_ma`, `audit_log`, `push_subscriptions`); migration `0038` bổ sung bảng `thu_chi_dong`:
 
 - Lõi: `nhan_vien`, `khach_hang`, `danh_muc`, `cau_hinh_he_thong`, `bo_dem_ma`.
 - Đơn: `don_hang`, `chi_tiet_don`, `bao_gia`, `phat_sinh`, `dieu_phoi`, `nghiem_thu`, `thu_tien`, `mau_bao_gia`, `mau_bao_gia_dong`.
-- Tài chính/kho: `thu_chi`, `vat_tu`, `xuat_nhap_kho`, `bang_gia_dich_vu`.
+- Tài chính/kho: `thu_chi`, `thu_chi_dong` (từ `0038`), `vat_tu`, `xuat_nhap_kho`, `bang_gia_dich_vu`.
 - Hậu mãi/vận hành: `yeu_cau_dich_vu`, `bao_hanh`, `khieu_nai`, `kpi_nhan_vien`, `thong_bao`, `push_subscriptions`, `audit_log`.
 
 Các view tính toán gồm `v_don_hang`, `v_chi_tiet_don`, `v_vat_tu`, `v_kpi_nhan_vien`, `v_tong_hop_dashboard`, `v_thu_chi_tong_hop`, `v_mau_bao_gia`, `v_mau_bao_gia_dong`. **View mới phải bật `security_invoker = true`** để không vô tình vượt RLS (migration `0014`).
@@ -145,4 +145,8 @@ Theo xác nhận của người dùng, migration `0036_duyet_phieu_thu_chi.sql` 
 
 ## 13. Đang chuẩn bị: sổ thu chi theo tháng và phân trang
 
-Migration `0037_so_thu_chi_phan_trang.sql` và giao diện mới **chưa xác nhận đã áp dụng trên Supabase/Hostinger**. Khi chạy migration, mọi phiếu nhập tay còn chờ duyệt tại thời điểm đó được đánh dấu là dữ liệu cũ đã duyệt (`duyet_du_lieu_cu = true`) và ghi nhận thời điểm chuyển đổi, không gán cho Admin cụ thể; phiếu tạo sau migration vẫn chờ Admin duyệt. Sổ mặc định tháng hiện tại, 25 phiếu/trang, lọc/tìm kiếm ở database, tổng hợp toàn bộ kết quả lọc bằng RPC. Phiếu chờ duyệt không vào tổng thu/chi chính thức và Dashboard; dòng tự đồng bộ vẫn được tính. Chỉ chạy file migration riêng sau `0036`, không chạy lại file gộp.
+Theo xác nhận của người dùng, migration `0037_so_thu_chi_phan_trang.sql` đã chạy thành công trên Supabase; giao diện đã được đẩy lên GitHub tại commit `a6bfcf6` nhưng chưa xác nhận Hostinger đã triển khai. Khi chạy migration, mọi phiếu nhập tay còn chờ duyệt tại thời điểm đó được đánh dấu là dữ liệu cũ đã duyệt (`duyet_du_lieu_cu = true`) và ghi nhận thời điểm chuyển đổi, không gán cho Admin cụ thể; phiếu tạo sau migration vẫn chờ Admin duyệt. Sổ mặc định tháng hiện tại, 25 phiếu/trang, lọc/tìm kiếm ở database, tổng hợp toàn bộ kết quả lọc bằng RPC. Phiếu chờ duyệt không vào tổng thu/chi chính thức và Dashboard; dòng tự đồng bộ vẫn được tính. Chỉ chạy file migration riêng sau `0036`, không chạy lại file gộp.
+
+## 14. Đang chuẩn bị: phiếu thu chi có nhiều dòng HH/DV
+
+Migration `0038_thu_chi_nhieu_dong.sql` và form mới **chưa xác nhận đã áp dụng trên Supabase/Hostinger**. Một phiếu `thu_chi` có nhiều `thu_chi_dong` gồm tên HH/DV, đơn giá, số lượng, thành tiền tự tính; tổng phiếu là tổng các dòng và chỉ hạch toán/duyệt một lần. Loại, công trình, danh mục, phương thức, người thu chi, ngày và mô tả dùng chung cho cả phiếu. RPC `f_luu_phieu_thu_chi_nhieu_dong` tạo/sửa cả phiếu và chi tiết trong cùng transaction, kiểm tra vai trò và trạng thái duyệt; trigger kiểm tra tổng ở cuối transaction. Phiếu cũ không có chi tiết giữ form sửa cũ. Chỉ chạy file migration `0038` riêng sau `0037`.

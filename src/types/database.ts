@@ -245,6 +245,16 @@ export interface ThuChi {
   duyet_du_lieu_cu: boolean;
 }
 
+export interface ThuChiDong {
+  id: number;
+  ma_tc: string;
+  thu_tu: number;
+  ten_hh_dv: string;
+  don_gia: number;
+  so_luong: number;
+  thanh_tien: number;
+}
+
 export interface VatTu {
   ma_vt: string;
   ten: string;
