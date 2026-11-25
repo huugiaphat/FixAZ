@@ -26,7 +26,9 @@ interface TaoNhanVienInput {
 // lần hiển thị cho Quản lý tự gửi cho nhân viên).
 export async function taoNhanVien(input: TaoNhanVienInput): Promise<{ ok: boolean; matKhauTam?: string; loi?: string }> {
   const nv = await requireNhanVien(["Quản lý", "Admin"]);
-  void nv;
+  if (input.vai_tro_app === "Admin" && nv.vai_tro_app !== "Admin") {
+    return { ok: false, loi: "Chỉ Admin được gán vai trò Admin." };
+  }
 
   const admin = createAdminClient();
   const matKhauTam = sinhMatKhauTam();
@@ -83,11 +85,18 @@ function loiRangBuocDuyNhat(message: string): string | null {
 // tài khoản Supabase Auth nên khi đổi email phải đồng bộ sang cả
 // auth.users, không chỉ bảng nhan_vien.
 export async function suaNhanVien(maNv: string, input: SuaNhanVienInput): Promise<{ ok: boolean; loi?: string }> {
-  await requireNhanVien(["Quản lý", "Admin"]);
+  const nguoiThaoTac = await requireNhanVien(["Quản lý", "Admin"]);
 
   const admin = createAdminClient();
-  const { data: nvHienTai } = await admin.from("nhan_vien").select("auth_user_id, email").eq("ma_nv", maNv).single();
+  const { data: nvHienTai } = await admin.from("nhan_vien").select("auth_user_id, email, vai_tro_app").eq("ma_nv", maNv).single();
   if (!nvHienTai) return { ok: false, loi: "Không tìm thấy nhân viên." };
+  if (nguoiThaoTac.vai_tro_app !== "Admin" &&
+      (input.vai_tro_app === "Admin" || nvHienTai.vai_tro_app === "Admin")) {
+    return { ok: false, loi: "Chỉ Admin được gán hoặc sửa tài khoản Admin." };
+  }
+  if (nguoiThaoTac.ma_nv === maNv && nvHienTai.vai_tro_app === "Admin" && input.vai_tro_app !== "Admin") {
+    return { ok: false, loi: "Admin không thể tự bỏ vai trò Admin của mình." };
+  }
 
   if (nvHienTai.auth_user_id && input.email !== nvHienTai.email) {
     const { error: errAuth } = await admin.auth.admin.updateUserById(nvHienTai.auth_user_id, { email: input.email });
@@ -127,8 +136,11 @@ export async function xoaNhanVien(maNv: string): Promise<{ ok: boolean; loi?: st
   }
 
   const admin = createAdminClient();
-  const { data: nv } = await admin.from("nhan_vien").select("auth_user_id").eq("ma_nv", maNv).single();
+  const { data: nv } = await admin.from("nhan_vien").select("auth_user_id, vai_tro_app").eq("ma_nv", maNv).single();
   if (!nv) return { ok: false, loi: "Không tìm thấy nhân viên." };
+  if (nvHienTai.vai_tro_app !== "Admin" && nv.vai_tro_app === "Admin") {
+    return { ok: false, loi: "Chỉ Admin được quản lý tài khoản Admin." };
+  }
 
   const { error: errXoa } = await admin.from("nhan_vien").delete().eq("ma_nv", maNv);
   if (errXoa) {
@@ -148,15 +160,56 @@ export async function xoaNhanVien(maNv: string): Promise<{ ok: boolean; loi?: st
 // đăng nhập bằng SĐT), nên đây là cách duy nhất để lấy lại quyền
 // truy cập, cùng cơ chế với lúc tạo tài khoản mới.
 export async function datLaiMatKhau(maNv: string): Promise<{ ok: boolean; matKhauTam?: string; loi?: string }> {
-  await requireNhanVien(["Quản lý", "Admin"]);
+  const nguoiThaoTac = await requireNhanVien(["Quản lý", "Admin"]);
 
   const admin = createAdminClient();
-  const { data: nv } = await admin.from("nhan_vien").select("auth_user_id").eq("ma_nv", maNv).single();
+  const { data: nv } = await admin.from("nhan_vien").select("auth_user_id, vai_tro_app").eq("ma_nv", maNv).single();
   if (!nv?.auth_user_id) return { ok: false, loi: "Không tìm thấy tài khoản đăng nhập của nhân viên này." };
+  if (nguoiThaoTac.vai_tro_app !== "Admin" && nv.vai_tro_app === "Admin") {
+    return { ok: false, loi: "Chỉ Admin được quản lý tài khoản Admin." };
+  }
 
   const matKhauTam = sinhMatKhauTam();
   const { error } = await admin.auth.admin.updateUserById(nv.auth_user_id, { password: matKhauTam });
   if (error) return { ok: false, loi: error.message };
 
   return { ok: true, matKhauTam };
+}
+
+// Nghỉ việc phải khóa cả quyền dữ liệu lẫn đăng nhập. Server Action kiểm tra
+// vai trò trước khi dùng service_role; nếu bước khóa Auth lỗi thì khôi phục
+// trạng thái hồ sơ để hai nguồn không âm thầm lệch nhau.
+export async function doiTrangThaiNhanVien(maNv: string): Promise<{ ok: boolean; loi?: string }> {
+  const nguoiThaoTac = await requireNhanVien(["Quản lý", "Admin"]);
+  if (nguoiThaoTac.ma_nv === maNv) {
+    return { ok: false, loi: "Không thể tự khóa tài khoản của chính mình." };
+  }
+
+  const admin = createAdminClient();
+  const { data: nv, error: loiDoc } = await admin.from("nhan_vien")
+    .select("auth_user_id, vai_tro_app, trang_thai").eq("ma_nv", maNv).single();
+  if (loiDoc || !nv) return { ok: false, loi: "Không tìm thấy nhân viên." };
+  if (!nv.auth_user_id) return { ok: false, loi: "Nhân viên chưa có tài khoản đăng nhập để khóa/mở khóa." };
+  if (nguoiThaoTac.vai_tro_app !== "Admin" && nv.vai_tro_app === "Admin") {
+    return { ok: false, loi: "Chỉ Admin được quản lý tài khoản Admin." };
+  }
+
+  const trangThaiMoi: TrangThaiNhanVien = nv.trang_thai === "Đã nghỉ việc" ? "Đang làm" : "Đã nghỉ việc";
+  const { error: loiLuu } = await admin.from("nhan_vien")
+    .update({ trang_thai: trangThaiMoi }).eq("ma_nv", maNv).eq("trang_thai", nv.trang_thai)
+    .select("ma_nv").single();
+  if (loiLuu) return { ok: false, loi: "Trạng thái nhân viên đã thay đổi hoặc không thể lưu. Hãy tải lại trang." };
+
+  const { error: loiAuth } = await admin.auth.admin.updateUserById(nv.auth_user_id, {
+    ban_duration: trangThaiMoi === "Đã nghỉ việc" ? "876000h" : "none",
+  });
+  if (loiAuth) {
+    const { error: loiKhoiPhuc } = await admin.from("nhan_vien")
+      .update({ trang_thai: nv.trang_thai }).eq("ma_nv", maNv).eq("trang_thai", trangThaiMoi)
+      .select("ma_nv").single();
+    return { ok: false, loi: loiKhoiPhuc
+      ? "Khóa đăng nhập thất bại và không khôi phục được trạng thái nhân viên. Cần Admin kiểm tra ngay."
+      : `Không cập nhật được trạng thái đăng nhập: ${loiAuth.message}` };
+  }
+  return { ok: true };
 }

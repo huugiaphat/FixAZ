@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import type { NhanVien } from "@/types/database";
 
-export function FormSuaNhanVien({ nhanVien }: { nhanVien: NhanVien }) {
+export function FormSuaNhanVien({ nhanVien, coTheGanAdmin }: { nhanVien: NhanVien; coTheGanAdmin: boolean }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const {
@@ -80,7 +80,7 @@ export function FormSuaNhanVien({ nhanVien }: { nhanVien: NhanVien }) {
               <Select value={watch("vai_tro_app")} onValueChange={(v) => setValue("vai_tro_app", v as NhanVienFormValues["vai_tro_app"])}>
                 <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {VAI_TRO.map((v) => (
+                      {VAI_TRO.filter((v) => coTheGanAdmin || v !== "Admin").map((v) => (
                     <SelectItem key={v} value={v}>{v}</SelectItem>
                   ))}
                 </SelectContent>

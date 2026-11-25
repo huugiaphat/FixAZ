@@ -18,11 +18,14 @@ export async function dangNhapBangSdt(sdt: string, matKhau: string): Promise<{ o
   const admin = createAdminClient();
   const { data: nv } = await admin
     .from("nhan_vien")
-    .select("email")
+    .select("email, trang_thai")
     .eq("sdt", sdtChuanHoa)
     .maybeSingle();
 
   if (!nv) return { ok: false, loi: LOI_CHUNG };
+  if (nv.trang_thai === "Đã nghỉ việc") {
+    return { ok: false, loi: "Tài khoản đã bị khóa. Vui lòng liên hệ Quản lý hoặc Admin." };
+  }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email: nv.email, password: matKhau });

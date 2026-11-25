@@ -3,33 +3,29 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { createClient } from "@/lib/supabase/client";
+import { doiTrangThaiNhanVien } from "@/app/(app)/quan-tri/actions";
 import { Button } from "@/components/ui/button";
 import type { TrangThaiNhanVien } from "@/types/database";
 
 export function NutDoiTrangThaiNv({ maNv, trangThai }: { maNv: string; trangThai: TrangThaiNhanVien }) {
   const router = useRouter();
   const [dangXuLy, setDangXuLy] = useState(false);
-  const dangLam = trangThai === "Đang làm";
+  const daNghiViec = trangThai === "Đã nghỉ việc";
 
   async function doi() {
     setDangXuLy(true);
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("nhan_vien")
-      .update({ trang_thai: dangLam ? "Đã nghỉ việc" : "Đang làm" })
-      .eq("ma_nv", maNv);
+    const ketQua = await doiTrangThaiNhanVien(maNv);
     setDangXuLy(false);
-    if (error) toast.error(error.message);
+    if (!ketQua.ok) toast.error(ketQua.loi);
     else {
-      toast.success("Đã cập nhật trạng thái nhân viên");
+      toast.success(daNghiViec ? "Đã mở khóa tài khoản" : "Đã khóa tài khoản nhân viên");
       router.refresh();
     }
   }
 
   return (
-    <Button size="sm" variant={dangLam ? "outline" : "secondary"} disabled={dangXuLy} onClick={doi}>
-      {dangLam ? "Đánh dấu nghỉ việc" : "Kích hoạt lại"}
+    <Button size="sm" variant={daNghiViec ? "secondary" : "outline"} disabled={dangXuLy} onClick={doi}>
+      {daNghiViec ? "Kích hoạt lại" : "Đánh dấu nghỉ việc và khóa"}
     </Button>
   );
 }

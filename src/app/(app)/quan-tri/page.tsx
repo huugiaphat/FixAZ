@@ -52,7 +52,7 @@ export default async function TrangQuanTri() {
         <TabsContent value="nhan-vien" className="space-y-4 pt-4">
           {duocSua ? (
             <div className="flex justify-end">
-              <FormNhanVienMoi />
+              <FormNhanVienMoi coTheGanAdmin={nv.vai_tro_app === "Admin"} />
             </div>
           ) : null}
           <Card className="overflow-hidden py-0">
@@ -80,16 +80,16 @@ export default async function TrangQuanTri() {
                       <TableCell>
                         <Badge variant={n.trang_thai === "Đang làm" ? "secondary" : "outline"}>{n.trang_thai}</Badge>
                       </TableCell>
-                      {duocSua ? (
+                      {duocSua && (nv.vai_tro_app === "Admin" || n.vai_tro_app !== "Admin") ? (
                         <TableCell>
                           <div className="flex items-center gap-1">
-                            <FormSuaNhanVien nhanVien={n} />
+                            <FormSuaNhanVien nhanVien={n} coTheGanAdmin={nv.vai_tro_app === "Admin"} />
                             <NutDatLaiMatKhau maNv={n.ma_nv} hoTen={n.ho_ten} sdt={n.sdt} />
-                            <NutDoiTrangThaiNv maNv={n.ma_nv} trangThai={n.trang_thai} />
+                            {n.ma_nv !== nv.ma_nv ? <NutDoiTrangThaiNv maNv={n.ma_nv} trangThai={n.trang_thai} /> : null}
                             <NutXoaNhanVien maNv={n.ma_nv} hoTen={n.ho_ten} />
                           </div>
                         </TableCell>
-                      ) : null}
+                      ) : duocSua ? <TableCell /> : null}
                     </TableRow>
                   ))}
                 </TableBody>

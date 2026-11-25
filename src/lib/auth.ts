@@ -28,6 +28,9 @@ export async function requireNhanVien(allowedRoles?: VaiTro[]): Promise<NhanVien
   if (!nv) {
     redirect("/login?loi=chua-lien-ket-tai-khoan");
   }
+  if (nv.trang_thai === "Đã nghỉ việc") {
+    redirect("/tai-khoan-bi-khoa");
+  }
   if (allowedRoles && !allowedRoles.includes(nv.vai_tro_app)) {
     redirect("/khong-co-quyen");
   }

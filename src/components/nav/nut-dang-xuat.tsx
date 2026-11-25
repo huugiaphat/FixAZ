@@ -8,14 +8,14 @@ import { Button } from "@/components/ui/button";
 
 // Đăng xuất phía client (không dùng Server Action) — nút này nằm
 // trên MỌI trang trong AppShell nên cần đường gọi đơn giản, ổn định.
-export function NutDangXuat({ className }: { className?: string }) {
+export function NutDangXuat({ className, chiMayNay = false }: { className?: string; chiMayNay?: boolean }) {
   const router = useRouter();
   const [dangXuLy, setDangXuLy] = useState(false);
 
   async function dangXuat() {
     setDangXuLy(true);
     const supabase = createClient();
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: chiMayNay ? "local" : "global" });
     router.push("/login");
     router.refresh();
   }

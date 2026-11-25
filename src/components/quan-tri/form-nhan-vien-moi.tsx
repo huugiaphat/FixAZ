@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 
-export function FormNhanVienMoi() {
+export function FormNhanVienMoi({ coTheGanAdmin }: { coTheGanAdmin: boolean }) {
   const [open, setOpen] = useState(false);
   const [ketQua, setKetQua] = useState<{ sdt: string; matKhau: string } | null>(null);
   const router = useRouter();
@@ -101,7 +101,7 @@ export function FormNhanVienMoi() {
                   <Select value={watch("vai_tro_app")} onValueChange={(v) => setValue("vai_tro_app", v as NhanVienFormValues["vai_tro_app"])}>
                     <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {VAI_TRO.map((v) => (
+                      {VAI_TRO.filter((v) => coTheGanAdmin || v !== "Admin").map((v) => (
                         <SelectItem key={v} value={v}>{v}</SelectItem>
                       ))}
                     </SelectContent>
