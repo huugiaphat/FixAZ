@@ -11,6 +11,7 @@ import {
   Inbox,
   Receipt,
   FileText,
+  ChartNoAxesCombined,
   type LucideIcon,
 } from "lucide-react";
 
@@ -26,6 +27,7 @@ export const DANH_SACH_DIEU_HUONG: MucDieuHuong[] = [
   { href: "/", nhan: "Trang chủ", icon: LayoutDashboard, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Thợ", "Kế toán", "Kho", "Kiểm soát"], uuTienMobile: true },
   { href: "/dashboard", nhan: "Dashboard", icon: LayoutDashboard, vaiTro: ["Quản lý", "Admin", "Kiểm soát"] },
   { href: "/thu-chi", nhan: "Sổ thu chi", icon: Receipt, vaiTro: ["Quản lý", "Admin", "Kế toán", "Kiểm soát"] },
+  { href: "/bao-cao", nhan: "Báo Cáo", icon: ChartNoAxesCombined, vaiTro: ["Quản lý", "Admin", "Kế toán", "Kiểm soát"] },
   { href: "/de-xuat-thanh-toan", nhan: "Đề xuất thanh toán", icon: FileText, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Thợ", "Kế toán", "Kho", "Kiểm soát"] },
   { href: "/don-hang", nhan: "Đơn hàng", icon: ClipboardList, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Thợ", "Kế toán", "Kiểm soát"], uuTienMobile: true },
   { href: "/yeu-cau-dich-vu", nhan: "Yêu cầu dịch vụ", icon: Inbox, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Kiểm soát"] },
@@ -56,6 +58,7 @@ export const MO_TA_MODULE: Record<string, string> = {
   "/mau-bao-gia": "Lập, in báo giá tham khảo và liên kết đơn hàng.",
   "/don-hang": "Theo dõi công việc từ tiếp nhận đến hoàn thành.",
   "/thu-chi": "Ghi nhận dòng tiền và theo dõi thu chi công trình.",
+  "/bao-cao": "Tổng hợp thu chi theo công trình và theo tháng.",
   "/de-xuat-thanh-toan": "Lập và theo dõi đề xuất thanh toán.",
   "/kho-vat-tu": "Quản lý vật tư, nhập xuất và số lượng tồn kho.",
   "/bao-hanh": "Theo dõi và xử lý bảo hành sau sửa chữa.",
