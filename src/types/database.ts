@@ -245,9 +245,26 @@ export interface ThuChi {
   duyet_du_lieu_cu: boolean;
 }
 
-export interface ThuChiDong {
+export interface DeXuatThanhToan {
+  ma_dx: string;
+  ma_don: string | null;
+  ten_cong_trinh: string | null;
+  noi_dung_chi: NoiDungChi;
+  phuong_thuc: PhuongThucThu;
+  ghi_chu: string | null;
+  tong_tien: number;
+  trang_thai: "Chờ duyệt" | "Đã duyệt" | "Từ chối" | "Đã rút";
+  nguoi_de_xuat: string;
+  nguoi_duyet: string | null;
+  duyet_luc: string | null;
+  ma_tc: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DeXuatThanhToanDong {
   id: number;
-  ma_tc: string;
+  ma_dx: string;
   thu_tu: number;
   ten_hh_dv: string;
   don_gia: number;

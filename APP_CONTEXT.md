@@ -74,11 +74,11 @@ Chi tiết đơn phân biệt **Sửa nhanh** và **Công trình** (`qui_mo`). G
 
 ## 6. Dữ liệu và phân quyền database
 
-Đến migration `0037`, ứng dụng có **25 bảng public** (bao gồm bảng kỹ thuật `bo_dem_ma`, `audit_log`, `push_subscriptions`); migration `0038` bổ sung bảng `thu_chi_dong`:
+Đến migration `0037`, ứng dụng có **25 bảng public** (bao gồm bảng kỹ thuật `bo_dem_ma`, `audit_log`, `push_subscriptions`); migration `0038` dự kiến bổ sung hai bảng đề xuất thanh toán:
 
 - Lõi: `nhan_vien`, `khach_hang`, `danh_muc`, `cau_hinh_he_thong`, `bo_dem_ma`.
 - Đơn: `don_hang`, `chi_tiet_don`, `bao_gia`, `phat_sinh`, `dieu_phoi`, `nghiem_thu`, `thu_tien`, `mau_bao_gia`, `mau_bao_gia_dong`.
-- Tài chính/kho: `thu_chi`, `thu_chi_dong` (từ `0038`), `vat_tu`, `xuat_nhap_kho`, `bang_gia_dich_vu`.
+- Tài chính/kho: `thu_chi`, `de_xuat_thanh_toan` và `de_xuat_thanh_toan_dong` (từ `0038`), `vat_tu`, `xuat_nhap_kho`, `bang_gia_dich_vu`.
 - Hậu mãi/vận hành: `yeu_cau_dich_vu`, `bao_hanh`, `khieu_nai`, `kpi_nhan_vien`, `thong_bao`, `push_subscriptions`, `audit_log`.
 
 Các view tính toán gồm `v_don_hang`, `v_chi_tiet_don`, `v_vat_tu`, `v_kpi_nhan_vien`, `v_tong_hop_dashboard`, `v_thu_chi_tong_hop`, `v_mau_bao_gia`, `v_mau_bao_gia_dong`. **View mới phải bật `security_invoker = true`** để không vô tình vượt RLS (migration `0014`).
@@ -147,6 +147,6 @@ Theo xác nhận của người dùng, migration `0036_duyet_phieu_thu_chi.sql` 
 
 Theo xác nhận của người dùng, migration `0037_so_thu_chi_phan_trang.sql` đã chạy thành công trên Supabase; giao diện đã được đẩy lên GitHub tại commit `a6bfcf6` nhưng chưa xác nhận Hostinger đã triển khai. Khi chạy migration, mọi phiếu nhập tay còn chờ duyệt tại thời điểm đó được đánh dấu là dữ liệu cũ đã duyệt (`duyet_du_lieu_cu = true`) và ghi nhận thời điểm chuyển đổi, không gán cho Admin cụ thể; phiếu tạo sau migration vẫn chờ Admin duyệt. Sổ mặc định tháng hiện tại, 25 phiếu/trang, lọc/tìm kiếm ở database, tổng hợp toàn bộ kết quả lọc bằng RPC. Phiếu chờ duyệt không vào tổng thu/chi chính thức và Dashboard; dòng tự đồng bộ vẫn được tính. Chỉ chạy file migration riêng sau `0036`, không chạy lại file gộp.
 
-## 14. Đang chuẩn bị: phiếu thu chi có nhiều dòng HH/DV
+## 14. Đang chuẩn bị: đề xuất thanh toán cho phiếu CHI
 
-Migration `0038_thu_chi_nhieu_dong.sql` và form mới **chưa xác nhận đã áp dụng trên Supabase/Hostinger**. Một phiếu `thu_chi` có nhiều `thu_chi_dong` gồm tên HH/DV, đơn giá, số lượng, thành tiền tự tính; tổng phiếu là tổng các dòng và chỉ hạch toán/duyệt một lần. Loại, công trình, danh mục, phương thức, người thu chi, ngày và mô tả dùng chung cho cả phiếu. RPC `f_luu_phieu_thu_chi_nhieu_dong` tạo/sửa cả phiếu và chi tiết trong cùng transaction, kiểm tra vai trò và trạng thái duyệt; trigger kiểm tra tổng ở cuối transaction. Phiếu cũ không có chi tiết giữ form sửa cũ. Chỉ chạy file migration `0038` riêng sau `0037`.
+Migration `0038_de_xuat_thanh_toan.sql` và giao diện **chưa áp dụng trên Supabase/Hostinger**. Mọi nhân viên đăng nhập có thể tạo đề xuất thanh toán gồm nhiều dòng Tên HH/DV – Đơn giá – Số lượng – Thành tiền; phiếu lưu riêng trong `de_xuat_thanh_toan` và `de_xuat_thanh_toan_dong`. Người lập được sửa/rút khi chờ duyệt; Admin duyệt hoặc từ chối. Từ chối và rút giữ phiếu để tra cứu. Khi duyệt, RPC tạo đúng một dòng CHI `thu_chi` đã duyệt, hạch toán ngay, liên kết số đề xuất. Admin sửa đề xuất đã duyệt qua RPC để tổng chi tiết và khoản chi cập nhật đồng thời. THU nhập tay và khoản thu tự đồng bộ tiếp tục luồng cũ. Giao diện Sổ thu chi hiển thị đề xuất chờ duyệt riêng và số đề xuất liên kết trên khoản CHI đã duyệt. File `0038_thu_chi_nhieu_dong.sql` trước đây **chưa chạy và đã được thay thế**; chỉ chạy file migration mới riêng sau `0037`. Triển khai DB trước giao diện.

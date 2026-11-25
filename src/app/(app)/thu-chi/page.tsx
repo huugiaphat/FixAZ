@@ -2,9 +2,10 @@ import Link from "next/link";
 import { PageHeading } from "@/components/page-heading";
 import { requireNhanVien } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { FormThuChiMoi, FormSuaThuChiNhieuDong } from "@/components/thu-chi/form-thu-chi-moi";
+import { FormThuChiMoi } from "@/components/thu-chi/form-thu-chi-moi";
+import { FormDeXuatThanhToan } from "@/components/thu-chi/form-de-xuat-thanh-toan";
 import { FormSuaThuChi } from "@/components/thu-chi/form-sua-thu-chi";
-import { XemChiTietThuChi } from "@/components/thu-chi/xem-chi-tiet-thu-chi";
+import { ThaoTacDeXuat } from "@/components/thu-chi/thao-tac-de-xuat";
 import { NutDuyetThuChi } from "@/components/thu-chi/nut-duyet-thu-chi";
 import { BoLocThuChi } from "@/components/thu-chi/bo-loc-thu-chi";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,13 +13,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { formatVND, formatDateTime } from "@/lib/format";
 import { NOI_DUNG_THU, NOI_DUNG_CHI } from "@/lib/schemas/thu-chi";
-import type { NhanVien, ThuChi } from "@/types/database";
+import type { DeXuatThanhToan, NhanVien, ThuChi } from "@/types/database";
 
 type ThuChiDanhSach = ThuChi & {
   ten_cong_trinh_hien_thi: string | null;
   ho_ten_nguoi_thu_chi: string | null;
   duyet_du_lieu_cu: boolean;
-  so_dong: number;
+  ma_dx: string | null;
 };
 
 type TongHopThuChi = {
@@ -89,7 +90,7 @@ export default async function TrangThuChi({
   if (trangThaiLoc === "tu-dong-bo") query = query.not("ma_thu", "is", null);
   query = query.range((trang - 1) * SO_PHIEU_MOI_TRANG, trang * SO_PHIEU_MOI_TRANG - 1);
 
-  const [{ data, count, error }, { data: tongData, error: tongError }] = await Promise.all([
+  const [{ data, count, error }, { data: tongData, error: tongError }, { data: dxData, error: dxError }] = await Promise.all([
     query,
     supabase.rpc("f_tong_hop_thu_chi_loc", {
       p_tu: tuThoiDiem,
@@ -99,8 +100,11 @@ export default async function TrangThuChi({
       p_cong_trinh: congTrinhLoc ?? null,
       p_trang_thai: trangThaiLoc ?? null,
     }).single(),
+    supabase.from("de_xuat_thanh_toan").select("*")
+      .eq("trang_thai", "Chờ duyệt").order("created_at", { ascending: false }).limit(50),
   ]);
   const danhSach = (data as ThuChiDanhSach[]) ?? [];
+  const deXuatChoDuyet = (dxData as DeXuatThanhToan[]) ?? [];
   const tong = tongData as TongHopThuChi | null;
   const soTrang = Math.max(1, Math.ceil((count ?? 0) / SO_PHIEU_MOI_TRANG));
 
@@ -122,8 +126,8 @@ export default async function TrangThuChi({
   const soDuTaiKhoan = tongThuTaiKhoan - tongChiTaiKhoan;
 
   const coTheSua = (tc: ThuChiDanhSach) =>
-    coTheThaoTac && !tc.ma_thu && (laAdmin || (!tc.da_duyet && tc.nguoi_lap === nv.ma_nv));
-  const coTheDuyet = (tc: ThuChiDanhSach) => laAdmin && !tc.ma_thu;
+    coTheThaoTac && !tc.ma_thu && !tc.ma_dx && (laAdmin || (!tc.da_duyet && tc.nguoi_lap === nv.ma_nv));
+  const coTheDuyet = (tc: ThuChiDanhSach) => laAdmin && !tc.ma_thu && !tc.ma_dx;
   const trangThaiDuyet = (tc: ThuChiDanhSach) => tc.ma_thu ? "Tự đồng bộ" : tc.duyet_du_lieu_cu ? "Đã duyệt · dữ liệu cũ" : tc.da_duyet ? "Đã duyệt" : "Chờ duyệt";
   const paramsLoc = { thang, tu: tuNgay, den: denNgay, loai: loaiLoc, ten_cong_trinh: congTrinhLoc, noi_dung: noiDungLoc, trang_thai: trangThaiLoc };
 
@@ -131,6 +135,7 @@ export default async function TrangThuChi({
     <div className="space-y-4">
       <PageHeading title="Sổ thu chi" description="Ghi nhận thu chi và theo dõi dòng tiền theo công trình.">
         {nv.vai_tro_app !== "Kiểm soát" ? <FormThuChiMoi maNvHienTai={nv.ma_nv} /> : null}
+        <FormDeXuatThanhToan />
       </PageHeading>
 
       <div className="flex flex-wrap items-center gap-3 text-sm">
@@ -171,7 +176,7 @@ export default async function TrangThuChi({
         </Card>
         <Card>
           <CardContent className="py-4">
-            <p className="text-sm text-muted-foreground">Chờ duyệt · {Number(tong?.so_phieu_cho_duyet ?? 0)} phiếu</p>
+            <p className="text-sm text-muted-foreground">Phiếu thu chi chờ duyệt · {Number(tong?.so_phieu_cho_duyet ?? 0)} phiếu</p>
             <p className="text-sm font-medium">Thu {formatVND(Number(tong?.cho_duyet_thu ?? 0))}</p>
             <p className="text-sm font-medium">Chi {formatVND(Number(tong?.cho_duyet_chi ?? 0))}</p>
           </CardContent>
@@ -179,6 +184,21 @@ export default async function TrangThuChi({
       </div> : null}
 
       <BoLocThuChi thang={thang} tu={tuNgay} den={denNgay} loai={loaiLoc} tenCongTrinh={congTrinhLoc} noiDung={noiDungLoc} trangThai={trangThaiLoc} />
+
+      <section className="space-y-3" aria-label="Đề xuất thanh toán chờ duyệt">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-lg font-semibold">Đề xuất thanh toán chờ duyệt</h2>
+          <Link href="/de-xuat-thanh-toan" className="text-sm text-primary hover:underline">Xem tất cả đề xuất →</Link>
+        </div>
+        {dxError && <p className="text-sm text-destructive">Không tải được đề xuất: {dxError.message}</p>}
+        {!dxError && deXuatChoDuyet.length === 0 && <p className="text-sm text-muted-foreground">Không có đề xuất chờ duyệt.</p>}
+        {deXuatChoDuyet.map(dx => <Card key={dx.ma_dx}><CardContent className="flex flex-wrap items-center justify-between gap-3 py-3">
+          <div><Link href={`/de-xuat-thanh-toan/${encodeURIComponent(dx.ma_dx)}`} className="font-semibold text-primary hover:underline">{dx.ma_dx}</Link>
+            <p className="text-xs text-muted-foreground">Chi · {dx.noi_dung_chi} · {dx.ten_cong_trinh ?? dx.ma_don ?? "Không gắn công trình"}</p></div>
+          <div className="flex flex-wrap items-center gap-3"><strong className="tabular-nums text-destructive">{formatVND(dx.tong_tien)}</strong>
+            {laAdmin && <ThaoTacDeXuat maDx={dx.ma_dx} laAdmin nguoiLap={false} />}</div>
+        </CardContent></Card>)}
+      </section>
 
       {tongError ? <p className="text-sm text-destructive">Lỗi tính tổng thu chi: {tongError.message}</p> : null}
       {!error ? <p className="text-sm text-muted-foreground">{count ?? 0} phiếu phù hợp · Trang {Math.min(trang, soTrang)}/{soTrang}. Số tiền phía trên tính trên toàn bộ kết quả đang lọc.</p> : null}
@@ -193,9 +213,9 @@ export default async function TrangThuChi({
           {danhSach.map(tc => <article key={tc.ma_tc} className="rounded-xl border bg-card p-4">
             <div className="flex flex-wrap items-center justify-between gap-2"><Badge variant="secondary">{tc.loai} · {tc.noi_dung_thu ?? tc.noi_dung_chi}</Badge><span className={tc.loai === "Thu" ? "font-semibold tabular-nums text-emerald-600" : "font-semibold tabular-nums text-destructive"}>{tc.loai === "Thu" ? "+" : "−"}{formatVND(tc.so_tien)}</span></div>
             <h2 className="mt-3 font-semibold">{tc.ten_cong_trinh_hien_thi ?? "Chưa gắn công trình"}</h2>
-            <div className="mt-2 flex flex-wrap items-center gap-2"><Badge variant="secondary" title={tc.duyet_luc ? `${tc.duyet_du_lieu_cu ? "Chuyển dữ liệu cũ lúc" : "Duyệt lúc"} ${formatDateTime(tc.duyet_luc)}` : undefined}>{trangThaiDuyet(tc)}</Badge>{tc.so_dong > 0 ? <XemChiTietThuChi maTc={tc.ma_tc} tongTien={tc.so_tien} soDong={tc.so_dong} /> : null}</div>
+            <div className="mt-2 flex flex-wrap items-center gap-2"><Badge variant="secondary" title={tc.duyet_luc ? `${tc.duyet_du_lieu_cu ? "Chuyển dữ liệu cũ lúc" : "Duyệt lúc"} ${formatDateTime(tc.duyet_luc)}` : undefined}>{trangThaiDuyet(tc)}</Badge>{tc.ma_dx && <Link href={`/de-xuat-thanh-toan/${encodeURIComponent(tc.ma_dx)}`} className="text-sm text-primary hover:underline">{tc.ma_dx}</Link>}</div>
             {tc.ghi_chu && <p className="mt-1 whitespace-pre-wrap break-words text-sm text-muted-foreground">{tc.ghi_chu}</p>}
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-3"><div className="space-y-1 text-xs text-muted-foreground"><p>{tc.ho_ten_nguoi_thu_chi ?? tc.nguoi_tao} · {tc.phuong_thuc}</p><p>{formatDateTime(tc.ngay)}</p></div><div className="flex items-center gap-1">{coTheSua(tc) ? tc.so_dong > 0 ? <FormSuaThuChiNhieuDong phieu={tc} maNvHienTai={nv.ma_nv} nhanVienList={nhanVienList} /> : <FormSuaThuChi phieu={tc} nhanVienList={nhanVienList} /> : null}{coTheDuyet(tc) ? <NutDuyetThuChi maTc={tc.ma_tc} daDuyet={tc.da_duyet} /> : null}</div></div>
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-3"><div className="space-y-1 text-xs text-muted-foreground"><p>{tc.ho_ten_nguoi_thu_chi ?? tc.nguoi_tao} · {tc.phuong_thuc}</p><p>{formatDateTime(tc.ngay)}</p></div><div className="flex items-center gap-1">{coTheSua(tc) ? <FormSuaThuChi phieu={tc} nhanVienList={nhanVienList} /> : null}{coTheDuyet(tc) ? <NutDuyetThuChi maTc={tc.ma_tc} daDuyet={tc.da_duyet} /> : null}</div></div>
           </article>)}
         </div>
         <Card className="hidden overflow-hidden py-0 lg:flex">
@@ -237,11 +257,11 @@ export default async function TrangThuChi({
                     <TableCell className="text-muted-foreground">{tc.phuong_thuc}</TableCell>
                     <TableCell className="text-muted-foreground">{tc.ho_ten_nguoi_thu_chi ?? tc.nguoi_tao}</TableCell>
                     <TableCell className="text-muted-foreground">{formatDateTime(tc.ngay)}</TableCell>
-                    <TableCell><div className="flex flex-wrap items-center gap-2"><Badge variant="secondary" title={tc.duyet_luc ? `${tc.duyet_du_lieu_cu ? "Chuyển dữ liệu cũ lúc" : "Duyệt lúc"} ${formatDateTime(tc.duyet_luc)}` : undefined}>{trangThaiDuyet(tc)}</Badge>{tc.so_dong > 0 ? <XemChiTietThuChi maTc={tc.ma_tc} tongTien={tc.so_tien} soDong={tc.so_dong} /> : null}</div></TableCell>
+                    <TableCell><div className="flex flex-wrap items-center gap-2"><Badge variant="secondary" title={tc.duyet_luc ? `${tc.duyet_du_lieu_cu ? "Chuyển dữ liệu cũ lúc" : "Duyệt lúc"} ${formatDateTime(tc.duyet_luc)}` : undefined}>{trangThaiDuyet(tc)}</Badge>{tc.ma_dx && <Link href={`/de-xuat-thanh-toan/${encodeURIComponent(tc.ma_dx)}`} className="text-sm text-primary hover:underline">{tc.ma_dx}</Link>}</div></TableCell>
                     {coTheThaoTac ? (
                       <TableCell>
                         <div className="flex items-center gap-1">
-                          {coTheSua(tc) ? tc.so_dong > 0 ? <FormSuaThuChiNhieuDong phieu={tc} maNvHienTai={nv.ma_nv} nhanVienList={nhanVienList} /> : <FormSuaThuChi phieu={tc} nhanVienList={nhanVienList} /> : null}
+                          {coTheSua(tc) ? <FormSuaThuChi phieu={tc} nhanVienList={nhanVienList} /> : null}
                           {coTheDuyet(tc) ? <NutDuyetThuChi maTc={tc.ma_tc} daDuyet={tc.da_duyet} /> : null}
                         </div>
                       </TableCell>

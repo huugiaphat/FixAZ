@@ -26,6 +26,7 @@ export const DANH_SACH_DIEU_HUONG: MucDieuHuong[] = [
   { href: "/", nhan: "Trang chủ", icon: LayoutDashboard, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Thợ", "Kế toán", "Kho", "Kiểm soát"], uuTienMobile: true },
   { href: "/dashboard", nhan: "Dashboard", icon: LayoutDashboard, vaiTro: ["Quản lý", "Admin", "Kiểm soát"] },
   { href: "/thu-chi", nhan: "Sổ thu chi", icon: Receipt, vaiTro: ["Quản lý", "Admin", "Kế toán", "Kiểm soát"] },
+  { href: "/de-xuat-thanh-toan", nhan: "Đề xuất thanh toán", icon: FileText, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Thợ", "Kế toán", "Kho", "Kiểm soát"] },
   { href: "/don-hang", nhan: "Đơn hàng", icon: ClipboardList, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Thợ", "Kế toán", "Kiểm soát"], uuTienMobile: true },
   { href: "/yeu-cau-dich-vu", nhan: "Yêu cầu dịch vụ", icon: Inbox, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Kiểm soát"] },
   { href: "/khach-hang", nhan: "Khách hàng", icon: Users, vaiTro: ["Quản lý", "Admin", "CSKH-Điều phối", "Kế toán", "Kiểm soát"] },
@@ -55,6 +56,7 @@ export const MO_TA_MODULE: Record<string, string> = {
   "/mau-bao-gia": "Lập, in báo giá tham khảo và liên kết đơn hàng.",
   "/don-hang": "Theo dõi công việc từ tiếp nhận đến hoàn thành.",
   "/thu-chi": "Ghi nhận dòng tiền và theo dõi thu chi công trình.",
+  "/de-xuat-thanh-toan": "Lập và theo dõi đề xuất thanh toán.",
   "/kho-vat-tu": "Quản lý vật tư, nhập xuất và số lượng tồn kho.",
   "/bao-hanh": "Theo dõi và xử lý bảo hành sau sửa chữa.",
   "/khieu-nai": "Tiếp nhận phản hồi và theo dõi việc giải quyết.",
@@ -68,9 +70,9 @@ export function dieuHuongMobile(vaiTro: VaiTro) {
     "Admin": ["/", "/dashboard", "/don-hang", "/thu-chi"],
     "Kiểm soát": ["/", "/dashboard", "/don-hang", "/thu-chi"],
     "CSKH-Điều phối": ["/", "/yeu-cau-dich-vu", "/don-hang", "/khach-hang"],
-    "Thợ": ["/", "/don-hang", "/kpi"],
+    "Thợ": ["/", "/don-hang", "/de-xuat-thanh-toan", "/kpi"],
     "Kế toán": ["/", "/thu-chi", "/don-hang", "/mau-bao-gia"],
-    "Kho": ["/", "/kho-vat-tu", "/kpi"],
+    "Kho": ["/", "/kho-vat-tu", "/de-xuat-thanh-toan", "/kpi"],
   };
   const choPhep = dieuHuongTheoVaiTro(vaiTro);
   return uuTien[vaiTro].flatMap(href => choPhep.filter(m => m.href === href));
