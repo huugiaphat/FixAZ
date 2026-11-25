@@ -55,7 +55,7 @@ export function FormSuaThuChi({ phieu, nhanVienList }: { phieu: ThuChi; nhanVien
     const [nam, thang, ngay] = values.ngay.split("-").map(Number);
     const ngayThucTe = new Date(nam, thang - 1, ngay, gioGoc.getHours(), gioGoc.getMinutes(), gioGoc.getSeconds());
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("thu_chi")
       .update({
         loai: values.loai,
@@ -69,9 +69,16 @@ export function FormSuaThuChi({ phieu, nhanVienList }: { phieu: ThuChi; nhanVien
         ngay: ngayThucTe.toISOString(),
         ghi_chu: values.ghi_chu || null,
       })
-      .eq("ma_tc", phieu.ma_tc);
+      .eq("ma_tc", phieu.ma_tc)
+      .eq("da_duyet", phieu.da_duyet)
+      .select("ma_tc");
     if (error) {
       toast.error(`Không cập nhật được: ${error.message}`);
+      return;
+    }
+    if (!data?.length) {
+      toast.error("Phiếu đã thay đổi hoặc bạn không có quyền sửa. Vui lòng tải lại trang.");
+      router.refresh();
       return;
     }
     toast.success("Đã cập nhật phiếu thu chi");

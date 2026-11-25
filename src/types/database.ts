@@ -238,6 +238,10 @@ export interface ThuChi {
   nguoi_tao: string;
   created_at: string;
   ma_thu: string | null;
+  nguoi_lap: string | null;
+  da_duyet: boolean;
+  nguoi_duyet: string | null;
+  duyet_luc: string | null;
 }
 
 export interface VatTu {

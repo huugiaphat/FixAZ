@@ -3,7 +3,7 @@ import { requireNhanVien } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { FormThuChiMoi } from "@/components/thu-chi/form-thu-chi-moi";
 import { FormSuaThuChi } from "@/components/thu-chi/form-sua-thu-chi";
-import { NutXoaThuChi } from "@/components/thu-chi/nut-xoa-thu-chi";
+import { NutDuyetThuChi } from "@/components/thu-chi/nut-duyet-thu-chi";
 import { BoLocThuChi } from "@/components/thu-chi/bo-loc-thu-chi";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -25,7 +25,7 @@ export default async function TrangThuChi({
 
   let query = supabase
     .from("thu_chi")
-    .select("*, don_hang(mo_ta_su_co), nhan_vien(ho_ten)")
+    .select("*, don_hang(mo_ta_su_co), nhan_vien!thu_chi_nguoi_tao_fkey(ho_ten)")
     .order("ngay", { ascending: false })
     .limit(1000);
   if (tu) query = query.gte("ngay", tu);
@@ -43,10 +43,10 @@ export default async function TrangThuChi({
   const { data, error } = await query;
   let danhSach = (data as ThuChiVoiDon[]) ?? [];
 
-  const laQuanLy = (nv.vai_tro_app === "Quản lý" || nv.vai_tro_app === "Admin");
   const laAdmin = nv.vai_tro_app === "Admin";
+  const coTheThaoTac = ["Quản lý", "Admin", "Kế toán"].includes(nv.vai_tro_app);
   let nhanVienList: NhanVien[] = [];
-  if (laQuanLy) {
+  if (coTheThaoTac) {
     const { data: nvData } = await supabase.from("nhan_vien").select("*").eq("trang_thai", "Đang làm").order("ho_ten");
     nhanVienList = (nvData as NhanVien[]) ?? [];
   }
@@ -67,6 +67,11 @@ export default async function TrangThuChi({
   const tongChiTaiKhoan = tongChi - tongChiTienMat;
   const soDuTienMat = tongThuTienMat - tongChiTienMat;
   const soDuTaiKhoan = tongThuTaiKhoan - tongChiTaiKhoan;
+
+  const coTheSua = (tc: ThuChiVoiDon) =>
+    coTheThaoTac && !tc.ma_thu && (laAdmin || (!tc.da_duyet && tc.nguoi_lap === nv.ma_nv));
+  const coTheDuyet = (tc: ThuChiVoiDon) => laAdmin && !tc.ma_thu;
+  const trangThaiDuyet = (tc: ThuChiVoiDon) => tc.ma_thu ? "Tự đồng bộ" : tc.da_duyet ? "Đã duyệt" : "Chờ duyệt";
 
   return (
     <div className="space-y-4">
@@ -118,8 +123,9 @@ export default async function TrangThuChi({
           {danhSach.map(tc => <article key={tc.ma_tc} className="rounded-xl border bg-card p-4">
             <div className="flex flex-wrap items-center justify-between gap-2"><Badge variant="secondary">{tc.loai} · {tc.noi_dung_thu ?? tc.noi_dung_chi}</Badge><span className={tc.loai === "Thu" ? "font-semibold tabular-nums text-emerald-600" : "font-semibold tabular-nums text-destructive"}>{tc.loai === "Thu" ? "+" : "−"}{formatVND(tc.so_tien)}</span></div>
             <h2 className="mt-3 font-semibold">{tc.don_hang?.mo_ta_su_co ?? tc.ten_cong_trinh ?? "Chưa gắn công trình"}</h2>
+            <Badge variant="secondary" className="mt-2" title={tc.duyet_luc ? `Duyệt lúc ${formatDateTime(tc.duyet_luc)}` : undefined}>{trangThaiDuyet(tc)}</Badge>
             {tc.ghi_chu && <p className="mt-1 whitespace-pre-wrap break-words text-sm text-muted-foreground">{tc.ghi_chu}</p>}
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-3"><div className="space-y-1 text-xs text-muted-foreground"><p>{tc.nhan_vien?.ho_ten ?? tc.nguoi_tao} · {tc.phuong_thuc}</p><p>{formatDateTime(tc.ngay)}</p></div><div className="flex items-center gap-1">{laQuanLy && !tc.ma_thu ? <FormSuaThuChi phieu={tc} nhanVienList={nhanVienList} /> : null}{laAdmin && !tc.ma_thu ? <NutXoaThuChi maTc={tc.ma_tc} /> : null}</div></div>
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-3"><div className="space-y-1 text-xs text-muted-foreground"><p>{tc.nhan_vien?.ho_ten ?? tc.nguoi_tao} · {tc.phuong_thuc}</p><p>{formatDateTime(tc.ngay)}</p></div><div className="flex items-center gap-1">{coTheSua(tc) ? <FormSuaThuChi phieu={tc} nhanVienList={nhanVienList} /> : null}{coTheDuyet(tc) ? <NutDuyetThuChi maTc={tc.ma_tc} daDuyet={tc.da_duyet} /> : null}</div></div>
           </article>)}
         </div>
         <Card className="hidden overflow-hidden py-0 lg:flex">
@@ -135,7 +141,8 @@ export default async function TrangThuChi({
                   <TableHead>Phương thức</TableHead>
                   <TableHead>Người thu chi</TableHead>
                   <TableHead>Ngày</TableHead>
-                  {laQuanLy ? <TableHead className="w-10" /> : null}
+                  <TableHead>Duyệt phiếu</TableHead>
+                  {coTheThaoTac ? <TableHead>Thao tác</TableHead> : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -160,11 +167,12 @@ export default async function TrangThuChi({
                     <TableCell className="text-muted-foreground">{tc.phuong_thuc}</TableCell>
                     <TableCell className="text-muted-foreground">{tc.nhan_vien?.ho_ten ?? tc.nguoi_tao}</TableCell>
                     <TableCell className="text-muted-foreground">{formatDateTime(tc.ngay)}</TableCell>
-                    {laQuanLy ? (
+                    <TableCell><Badge variant="secondary" title={tc.duyet_luc ? `Duyệt lúc ${formatDateTime(tc.duyet_luc)}` : undefined}>{trangThaiDuyet(tc)}</Badge></TableCell>
+                    {coTheThaoTac ? (
                       <TableCell>
                         <div className="flex items-center gap-1">
-                          {tc.ma_thu ? null : <FormSuaThuChi phieu={tc} nhanVienList={nhanVienList} />}
-                          {laAdmin && !tc.ma_thu ? <NutXoaThuChi maTc={tc.ma_tc} /> : null}
+                          {coTheSua(tc) ? <FormSuaThuChi phieu={tc} nhanVienList={nhanVienList} /> : null}
+                          {coTheDuyet(tc) ? <NutDuyetThuChi maTc={tc.ma_tc} daDuyet={tc.da_duyet} /> : null}
                         </div>
                       </TableCell>
                     ) : null}
