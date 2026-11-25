@@ -12,12 +12,12 @@ export function NutDuyetThuChi({ maTc, daDuyet }: { maTc: string; daDuyet: boole
   const router = useRouter();
 
   async function xuLy(duyet: boolean) {
-    const cauHoi = duyet
-      ? `Duyệt phiếu ${maTc}? Sau khi duyệt, chỉ Admin được sửa hoặc xóa phiếu.`
-      : daDuyet
+    if (!duyet) {
+      const cauHoi = daDuyet
         ? `Xóa vĩnh viễn phiếu đã duyệt ${maTc}? Không thể khôi phục.`
         : `Không duyệt và xóa vĩnh viễn phiếu ${maTc}? Không thể khôi phục.`;
-    if (!confirm(cauHoi)) return;
+      if (!confirm(cauHoi)) return;
+    }
     setDangXuLy(true);
     const supabase = createClient();
     const { data, error } = duyet
